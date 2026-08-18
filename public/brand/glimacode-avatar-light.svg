@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="GlimaCode">
+  <rect width="512" height="512" fill="#F7F8FA"/>
+  <g stroke="#DDE3EC" stroke-width="2">
+    <path d="M128 0v512M256 0v512M384 0v512M0 128h512M0 256h512M0 384h512"/>
+  </g>
+  <path d="M168 152 96 256l72 104" fill="none" stroke="#2547F4" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M344 152l72 104-72 104" fill="none" stroke="#2547F4" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M296 226c-9-15-26-24-45-24-29 0-51 21-51 51s22 51 51 51c21 0 39-11 46-30h-46v-26h73v14c0 40-30 68-73 68-44 0-77-32-77-77s33-77 77-77c30 0 55 15 68 39z" fill="#16233B"/>
+</svg>
