@@ -30,6 +30,15 @@ export type SiteConfig = {
   availability: string;
   /** Working location and offset, shown in the hero meta row. */
   location: string;
+  /**
+   * Switches for routes that do not exist yet. The site is live, so a link
+   * to an unbuilt page is a 404 in front of a visitor — the link appears
+   * only once the route behind it does.
+   */
+  features: {
+    /** Turn on with the dashboard in phase 4. */
+    dashboard: boolean;
+  };
 };
 
 export const siteConfig: SiteConfig = {
@@ -47,6 +56,9 @@ export const siteConfig: SiteConfig = {
   },
   availability: "Taking new projects",
   location: "Remote · UTC+3:30",
+  features: {
+    dashboard: false,
+  },
 };
 
 /** Builds a mailto: link, optionally pre-filling subject and body. */
