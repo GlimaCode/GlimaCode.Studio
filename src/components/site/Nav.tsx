@@ -1,12 +1,10 @@
-import { siteConfig } from "@/config/site";
+import { Logo } from "./Logo";
 
 export function Nav() {
   return (
     <nav id="nav">
       <div className="nav-inner">
-        <a className="logo" href="#top">
-          &lt;<b>{siteConfig.brand}</b>/&gt;
-        </a>
+        <Logo />
         <div className="nav-links">
           <a href="#work">Work</a>
           <a href="#services">Services</a>

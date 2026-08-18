@@ -615,3 +615,28 @@
     .crosshair{display:none}
   }
   @media(max-width:560px){.process{grid-template-columns:1fr}}
+
+/* =====================================================================
+   Additions beyond the prototype.
+   Everything above this line is the ported design system, unchanged.
+   New rules go here so the boundary stays auditable.
+===================================================================== */
+
+/* ---------- Header lockup (replaces the prototype's text logo) ---------- */
+.logo-lockup{
+  display:inline-flex;align-items:center;gap:9px;
+  text-decoration:none;color:var(--ink);
+}
+.logo-mark{width:26px;height:26px;display:block;flex:none}
+.logo-mark .bracket{stroke:var(--cobalt);transition:stroke var(--fast) ease}
+.logo-mark .glyph{fill:var(--ink);transition:fill var(--fast) ease}
+.logo-word{
+  font-family:var(--font-sora),sans-serif;font-weight:800;
+  font-size:16.5px;letter-spacing:-.02em;line-height:1;
+}
+.logo-word .accent{color:var(--cobalt);transition:color var(--fast) ease}
+.logo-lockup:hover .bracket{stroke:var(--signal)}
+.logo-lockup:hover .accent{color:var(--signal)}
+.logo-lockup:focus-visible{
+  outline:2px solid var(--cobalt);outline-offset:4px;border-radius:6px;
+}
