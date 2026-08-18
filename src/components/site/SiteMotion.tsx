@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { KEY_MAP, SPY_SECTIONS, type KeyAction } from "@/components/keyboard/keys";
+import {
+  KEY_CODE_MAP,
+  KEY_MAP,
+  SPY_SECTIONS,
+  type KeyAction,
+} from "@/components/keyboard/keys";
 
 const GREETINGS = ["Hello", "Hallo", "سلام"];
 
@@ -195,10 +200,13 @@ export function SiteMotion() {
           return;
         }
         if (event.metaKey || event.ctrlKey || event.altKey) return;
-        const key = event.key.toLowerCase();
-        if (!isKeyAction(key)) return;
+        // Match the character produced or the physical key position, so the
+        // shortcuts survive a non-Latin input method. See KEY_CODE_MAP.
+        const typed = event.key.toLowerCase();
+        const action = isKeyAction(typed) ? typed : KEY_CODE_MAP[event.code];
+        if (!action) return;
         event.preventDefault();
-        pressAndGo(key);
+        pressAndGo(action);
       };
       window.addEventListener("keydown", onKeyDown);
       cleanups.push(() => window.removeEventListener("keydown", onKeyDown));

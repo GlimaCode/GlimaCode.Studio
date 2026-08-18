@@ -18,6 +18,29 @@ export const KEY_MAP: Record<KeyAction, string> = {
   escape: "#top",
 };
 
+/**
+ * Physical key positions for the same actions.
+ *
+ * `event.key` reports the character produced, not the key pressed. With a
+ * Persian input method the physical W key emits "ص", so matching on the
+ * character alone silently breaks every shortcut for the visitors the
+ * Persian site exists to serve. `event.code` reports position and is
+ * independent of the active layout.
+ *
+ * The handler accepts either: a Dvorak user pressing the key that types "w"
+ * matches on the character, and a Persian-layout user pressing the physical
+ * W matches on the position.
+ */
+export const KEY_CODE_MAP: Record<string, KeyAction> = {
+  KeyW: "w",
+  KeyS: "s",
+  KeyP: "p",
+  KeyT: "t",
+  Enter: "enter",
+  NumpadEnter: "enter",
+  Escape: "escape",
+};
+
 /** Sections observed by the scroll-spy, in document order. */
 export const SPY_SECTIONS = ["work", "services", "process", "team", "start"];
 
