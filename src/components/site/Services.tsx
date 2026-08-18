@@ -1,16 +1,22 @@
 import type { CSSProperties } from "react";
 
 /**
- * Prices are floors, not fixed quotes — the copy says "from" throughout,
- * and the figures match the studio service catalogue exactly.
+ * No prices on the public site. Every project is scoped and quoted from a
+ * brief, so publishing a floor would anchor the conversation before there is
+ * anything to price. Timelines stay — they set expectations honestly without
+ * closing the discussion — and the budget field on the order form is where
+ * we learn what the visitor has in mind.
+ *
+ * The timeline takes the slot the price used to occupy so the card keeps its
+ * visual rhythm instead of leaving a hole where a figure was.
  */
 const SERVICES = [
   {
     key: "landing",
     title: "Landing page",
     body: "A fast, responsive React landing page — up to five sections, contact form, SEO basics, and deployment included. Designed to convert, built to last.",
-    price: "$300",
-    time: "~5 days",
+    timeline: "~5 days",
+    pricingNote: "quoted per project",
     requestValue: "Landing page",
     icon: (
       <svg
@@ -31,8 +37,8 @@ const SERVICES = [
     key: "dashboard",
     title: "Admin dashboard",
     body: "A full admin panel on React + Supabase: authentication, CRUD, data tables, charts, and row-level security — the tool your team opens every morning.",
-    price: "$700",
-    time: "~14 days",
+    timeline: "~14 days",
+    pricingNote: "quoted per project",
     requestValue: "Admin dashboard",
     icon: (
       <svg
@@ -53,8 +59,8 @@ const SERVICES = [
     key: "whitelabel",
     title: "White-label development",
     body: "For agencies: we build under your brand — hourly or monthly capacity, direct async communication, and a second-developer review on everything we hand you.",
-    price: "$15/h",
-    time: "flexible",
+    timeline: "flexible",
+    pricingNote: "quoted per engagement",
     requestValue: "White-label / agency capacity",
     icon: (
       <svg
@@ -82,7 +88,9 @@ export function Services() {
         <div className="sec-head reveal">
           <span className="sec-coord">SEC 02 / GRID 48</span>
           <p className="sec-label">Services</p>
-          <h2>Fixed scope. Clear price. Staged delivery.</h2>
+          {/* Was "Clear price" — kept the three-beat rhythm but the claim
+              had to change, since the site no longer publishes figures. */}
+          <h2>Fixed scope. Clear timeline. Staged delivery.</h2>
           <p className="sec-desc">
             Three packaged services — or tell us what you need and we&apos;ll
             scope it as a custom ticket.
@@ -100,10 +108,13 @@ export function Services() {
               </div>
               <h3>{service.title}</h3>
               <p>{service.body}</p>
+              {/* Two children, not three: the replacement text is longer
+                  than the figures it replaces, and a third item collided
+                  with it. The tilde makes the timeline read as a timeline
+                  without needing its own label. */}
               <div className="price-row">
-                <span className="from">from</span>
-                <span className="price">{service.price}</span>
-                <span className="time">{service.time}</span>
+                <span className="price">{service.timeline}</span>
+                <span className="time">{service.pricingNote}</span>
               </div>
               <a
                 className="btn btn-ghost btn-sm"
