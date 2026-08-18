@@ -58,8 +58,10 @@ export function WorkBoard() {
               >
                 <div className="col-head">
                   {column.label}{" "}
+                  {/* The real figure is rendered here so it survives with
+                      scripting unavailable; the count-up overwrites it. */}
                   <span className="count" data-count={items.length}>
-                    0
+                    {items.length}
                   </span>
                 </div>
                 {items.map((project) => (

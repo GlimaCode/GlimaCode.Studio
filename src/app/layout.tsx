@@ -29,6 +29,28 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/**
+ * The hero starts hidden and is revealed by the `ready` class. In the
+ * prototype that class was added by an inline script at the end of the
+ * document, so it landed on the first frames after parse. Running it from a
+ * React effect instead would delay it until hydration, leaving the hero
+ * blank on a slow connection or a backgrounded tab — so it stays inline,
+ * with the same two-frame wait that lets the initial styles paint first.
+ */
+const REVEAL_HERO = `requestAnimationFrame(function(){requestAnimationFrame(function(){document.body.classList.add("ready")})})`;
+
+/**
+ * With scripting unavailable the reveal classes never arrive, which would
+ * leave the whole page blank. This puts everything in its final state so the
+ * site is still readable. It costs the entrance choreography and nothing else.
+ */
+const NO_SCRIPT_FALLBACK = `
+  .fade-up,.reveal{opacity:1;transform:none}
+  .mask > span{transform:none}
+  .eyebrow::before,.sec-label::after,.col-head::before{transform:scaleX(1)}
+  .step:not(:last-child)::after{transform:scaleX(1)}
+`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
@@ -50,7 +72,15 @@ export default function RootLayout({
       lang="en"
       className={`${sora.variable} ${plexSans.variable} ${plexMono.variable}`}
     >
-      <body>{children}</body>
+      <head>
+        <noscript>
+          <style dangerouslySetInnerHTML={{ __html: NO_SCRIPT_FALLBACK }} />
+        </noscript>
+      </head>
+      <body>
+        {children}
+        <script dangerouslySetInnerHTML={{ __html: REVEAL_HERO }} />
+      </body>
     </html>
   );
 }

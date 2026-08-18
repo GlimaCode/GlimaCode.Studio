@@ -30,18 +30,9 @@ export function SiteMotion() {
     const cleanups: Array<() => void> = [];
     let disposed = false;
 
-    // 1) Hero load sequence — two frames so the initial styles are painted
-    //    before the transition to the ready state begins.
-    let secondFrame = 0;
-    const firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(() =>
-        document.body.classList.add("ready"),
-      );
-    });
-    cleanups.push(() => {
-      cancelAnimationFrame(firstFrame);
-      cancelAnimationFrame(secondFrame);
-    });
+    // 1) The hero load sequence is triggered by an inline script in the
+    //    document rather than from here, so it does not wait on hydration.
+    //    See REVEAL_HERO in src/app/layout.tsx.
 
     // 2) Cycling multilingual greeting
     const greetingEl = document.getElementById("greeting");
