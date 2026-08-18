@@ -640,3 +640,13 @@
 .logo-lockup:focus-visible{
   outline:2px solid var(--cobalt);outline-offset:4px;border-radius:6px;
 }
+
+/* ---------- Fixes to the ported system ---------- */
+/* The hint telling visitors to press W/S/P/T is meant to disappear below
+   960px, where the tap bar replaces it. The original rule never applied:
+   `.hero-meta span` (0,1,1) outranks `.kbd-hint` (0,1,0), so display:flex
+   won. Raising the specificity here rather than editing the block above
+   keeps the ported stylesheet straightforward to audit. */
+@media(max-width:960px){
+  .hero-meta span.kbd-hint{display:none}
+}

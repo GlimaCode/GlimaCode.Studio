@@ -33,7 +33,7 @@ export type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  brand: "Glimacode",
+  brand: "GlimaCode",
   tagline: "Two-developer web studio",
   description:
     "Glimacode is a two-developer React and Supabase studio. Scoped plans, staged delivery, and a second developer reviewing every line before it ships.",

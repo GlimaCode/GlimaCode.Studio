@@ -1,4 +1,4 @@
-# website
+# GlimaCode.Studio
 
 The GlimaCode studio site — [glimacode.com](https://glimacode.com).
 
