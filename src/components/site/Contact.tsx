@@ -1,20 +1,18 @@
 import { mailto, siteConfig } from "@/config/site";
+import type { Dictionary } from "@/i18n";
 
-export function Contact() {
+export function Contact({ t }: { t: Dictionary }) {
   const { linkedin, github } = siteConfig;
 
   return (
     <section id="contact">
       <div className="wrap">
         <div className="contact-card reveal">
-          <h2>Prefer a direct line?</h2>
-          <p>
-            Skip the form — email or message us and we&apos;ll take it from
-            there.
-          </p>
+          <h2>{t.contact.heading}</h2>
+          <p>{t.contact.body}</p>
           <div className="contact-links">
             <a className="btn btn-primary magnetic" href={mailto()}>
-              Email the studio
+              {t.contact.email}
             </a>
             {/* Profile buttons render only when the URL exists in config, so
                 the page never ships a button that goes nowhere. */}
@@ -25,7 +23,7 @@ export function Contact() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Ali on LinkedIn
+                {t.contact.linkedinAli}
               </a>
             ) : null}
             {linkedin.mostafa ? (
@@ -35,7 +33,7 @@ export function Contact() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Mostafa on LinkedIn
+                {t.contact.linkedinMostafa}
               </a>
             ) : null}
             <a
@@ -44,7 +42,7 @@ export function Contact() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              GitHub
+              {t.contact.github}
             </a>
           </div>
         </div>

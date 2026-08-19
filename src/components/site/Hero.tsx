@@ -1,7 +1,8 @@
-import { siteConfig } from "@/config/site";
+import type { Dictionary, Locale } from "@/i18n";
+import { renderRich } from "@/i18n/rich";
 import { Keyboard, KeyboardMini } from "@/components/keyboard/Keyboard";
 
-export function Hero() {
+export function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
     <header id="top">
       <span className="crosshair" style={{ top: "18%", right: "12%" }}>
@@ -27,47 +28,49 @@ export function Hero() {
                 className="fade-up d1"
                 style={{ display: "inline-flex", gap: "10px" }}
               >
-                <span id="greeting">Hello</span> — we&apos;re a two-developer
-                studio
+                <span id="greeting">Hello</span> — {t.hero.eyebrow}
               </span>
             </p>
             <h1>
               <span className="mask">
-                <span>Web apps, built like</span>
+                <span>{t.hero.headline}</span>
               </span>
               <span className="mask">
-                <span className="accent">tickets on a board.</span>
+                <span className="accent">{t.hero.headlineAccent}</span>
               </span>
             </h1>
-            <p className="hero-sub fade-up d1">
-              We&apos;re <strong>Ali</strong> and <strong>Mostafa</strong> — a
-              two-person React &amp; Supabase studio. Every project gets a
-              scoped plan, staged delivery, and a second developer reviewing
-              every line before it ships.
-            </p>
+            <p className="hero-sub fade-up d1">{renderRich(t.hero.sub)}</p>
             <div className="hero-actions fade-up d2">
               <a className="btn btn-primary magnetic" href="#start">
-                Start a project
+                {t.hero.ctaPrimary}
               </a>
               <a className="btn btn-ghost" href="#work">
-                See our work
+                {t.hero.ctaSecondary}
               </a>
             </div>
             <div className="hero-meta fade-up d3">
               <span>
                 <i className="dot"></i>
-                {siteConfig.availability}
+                {t.hero.availability}
               </span>
-              <span>{siteConfig.location}</span>
+              <span>{t.hero.location}</span>
+              {/* The key names stay Latin and left to right: they name the
+                  physical keys the visitor presses, in both locales. */}
               <span className="kbd-hint">
-                ⌨ press <b>W</b>·<b>S</b>·<b>P</b>·<b>T</b>·<b>↵</b>
+                ⌨ {t.hero.kbdHintPrefix}{" "}
+                <span dir="ltr">
+                  <b>W</b>·<b>S</b>·<b>P</b>·<b>T</b>·<b>↵</b>
+                </span>{" "}
+                {t.hero.kbdHintSuffix}
               </span>
             </div>
-            <KeyboardMini />
+            <KeyboardMini t={t} />
           </div>
-          <div className="kbd-scene fade-up d2">
+          {/* The keyboard is a physical object and stays left to right in
+              both locales; only its position in the grid flips. */}
+          <div className="kbd-scene fade-up d2" dir="ltr">
             <div className="kbd-float" id="kbdFloat">
-              <Keyboard />
+              <Keyboard t={t} locale={locale} />
             </div>
           </div>
         </div>

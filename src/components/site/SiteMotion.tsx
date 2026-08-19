@@ -7,6 +7,7 @@ import {
   SPY_SECTIONS,
   type KeyAction,
 } from "@/components/keyboard/keys";
+import { LOCALE_COOKIE, bcp47, type Locale } from "@/i18n/config";
 
 const GREETINGS = ["Hello", "Hallo", "سلام"];
 
@@ -29,11 +30,20 @@ function isKeyAction(value: string): value is KeyAction {
  * to the original and avoids re-rendering forty keycaps on every scroll
  * frame. Every listener and observer is torn down on unmount.
  */
-export function SiteMotion() {
+export function SiteMotion({ locale }: { locale: Locale }) {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const cleanups: Array<() => void> = [];
     let disposed = false;
+
+    // Remember the locale being read, so returning to the bare domain sends
+    // the visitor back where they were. Written from the page they actually
+    // landed on rather than guessed from browser headers.
+    document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=31536000;samesite=lax`;
+
+    // Counts are numbers on screen, so they follow the locale: Persian
+    // renders them with Persian-Indic digits.
+    const formatCount = new Intl.NumberFormat(bcp47(locale)).format;
 
     // 1) The hero load sequence is triggered by an inline script in the
     //    document rather than from here, so it does not wait on hydration.
@@ -65,7 +75,7 @@ export function SiteMotion() {
     function countUp(el: Element) {
       const target = Number((el as HTMLElement).dataset.count);
       if (reduced || !target) {
-        el.textContent = String(target || 0);
+        el.textContent = formatCount(target || 0);
         return;
       }
       const start = performance.now();
@@ -73,7 +83,7 @@ export function SiteMotion() {
       const tick = (now: number) => {
         if (disposed) return;
         const progress = Math.min(1, (now - start) / duration);
-        el.textContent = String(
+        el.textContent = formatCount(
           Math.round(target * (1 - Math.pow(1 - progress, 3))),
         );
         if (progress < 1) requestAnimationFrame(tick);
@@ -271,7 +281,7 @@ export function SiteMotion() {
       disposed = true;
       cleanups.forEach((fn) => fn());
     };
-  }, []);
+  }, [locale]);
 
   return null;
 }

@@ -1,6 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Dictionary, Locale } from "@/i18n";
+import {
+  BUDGETS,
+  DEFAULT_BUDGET,
+  DEFAULT_PROJECT_TYPE,
+  DEFAULT_TIMELINE,
+  PROJECT_TYPES,
+  TIMELINES,
+  type BudgetKey,
+  type ProjectTypeKey,
+  type TimelineKey,
+} from "@/content/formOptions";
 import {
   generateTicketId,
   submitProjectRequest,
@@ -9,7 +21,7 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function OrderForm() {
+export function OrderForm({ t, locale }: { t: Dictionary; locale: Locale }) {
   const formRef = useRef<HTMLFormElement>(null);
   const typeRef = useRef<HTMLSelectElement>(null);
   const nameFieldRef = useRef<HTMLDivElement>(null);
@@ -70,8 +82,7 @@ export function OrderForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
+    const data = new FormData(event.currentTarget);
 
     const name = String(data.get("name") ?? "").trim();
     const email = String(data.get("email") ?? "").trim();
@@ -92,10 +103,11 @@ export function OrderForm() {
       name,
       email,
       company: String(data.get("company") ?? "").trim(),
-      projectType: String(data.get("ptype") ?? ""),
-      budget: String(data.get("budget") ?? ""),
-      timeline: String(data.get("timeline") ?? ""),
+      projectType: String(data.get("ptype") ?? "") as ProjectTypeKey,
+      budget: String(data.get("budget") ?? "") as BudgetKey,
+      timeline: String(data.get("timeline") ?? "") as TimelineKey,
       description,
+      locale,
     };
 
     const result = await submitProjectRequest(id, input);
@@ -120,10 +132,10 @@ export function OrderForm() {
         style={confirmedId ? { display: "none" } : undefined}
       >
         <div className="order-head">
-          <h3>Project request</h3>
+          <h3>{t.start.cardTitle}</h3>
           <span className="req-id">
-            ID:{" "}
-            <span id="reqIdPreview" ref={previewRef}>
+            {t.start.idPrefix}{" "}
+            <span id="reqIdPreview" ref={previewRef} dir="ltr">
               REQ-····
             </span>
           </span>
@@ -131,80 +143,96 @@ export function OrderForm() {
         <div className="form-grid">
           <div className="field" id="f-name" ref={nameFieldRef}>
             <label htmlFor="name">
-              Your name <span className="req">*</span>
+              {t.start.fields.name} <span className="req">*</span>
             </label>
             <input id="name" name="name" type="text" autoComplete="name" />
-            <span className="error">Please enter your name.</span>
+            <span className="error">{t.start.errors.name}</span>
           </div>
           <div className="field" id="f-email" ref={emailFieldRef}>
             <label htmlFor="email">
-              Email <span className="req">*</span>
+              {t.start.fields.email} <span className="req">*</span>
             </label>
-            <input id="email" name="email" type="email" autoComplete="email" />
-            <span className="error">Please enter a valid email.</span>
+            {/* Email addresses are always Latin and left to right, even in
+                a right-to-left form. */}
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              dir="ltr"
+            />
+            <span className="error">{t.start.errors.email}</span>
           </div>
           <div className="field">
-            <label htmlFor="company">Company / agency</label>
+            <label htmlFor="company">{t.start.fields.company}</label>
             <input
               id="company"
               name="company"
               type="text"
               autoComplete="organization"
             />
-            <span className="hint">Optional</span>
+            <span className="hint">{t.start.fields.companyHint}</span>
           </div>
           <div className="field">
             <label htmlFor="ptype">
-              Project type <span className="req">*</span>
+              {t.start.fields.projectType} <span className="req">*</span>
             </label>
-            <select id="ptype" name="ptype" ref={typeRef} defaultValue="Landing page">
-              <option>Landing page</option>
-              <option>Admin dashboard</option>
-              <option>Full-stack MVP</option>
-              <option>White-label / agency capacity</option>
-              <option>Something else</option>
+            {/* Values are stable keys so submissions never arrive in mixed
+                languages; only the labels are translated. */}
+            <select
+              id="ptype"
+              name="ptype"
+              ref={typeRef}
+              defaultValue={DEFAULT_PROJECT_TYPE}
+            >
+              {PROJECT_TYPES.map((key) => (
+                <option value={key} key={key}>
+                  {t.start.projectTypes[key]}
+                </option>
+              ))}
             </select>
           </div>
           <div className="field">
-            <label htmlFor="budget">Budget range</label>
-            <select id="budget" name="budget" defaultValue="$300 – $700">
-              <option>Under $300</option>
-              <option>$300 – $700</option>
-              <option>$700 – $1,500</option>
-              <option>$1,500+</option>
-              <option>Not sure yet</option>
+            <label htmlFor="budget">{t.start.fields.budget}</label>
+            <select id="budget" name="budget" defaultValue={DEFAULT_BUDGET}>
+              {BUDGETS.map((key) => (
+                <option value={key} key={key}>
+                  {t.start.budgets[key]}
+                </option>
+              ))}
             </select>
           </div>
           <div className="field">
-            <label htmlFor="timeline">Timeline</label>
-            <select id="timeline" name="timeline" defaultValue="2–4 weeks">
-              <option>ASAP</option>
-              <option>2–4 weeks</option>
-              <option>1–2 months</option>
-              <option>Flexible</option>
+            <label htmlFor="timeline">{t.start.fields.timeline}</label>
+            <select
+              id="timeline"
+              name="timeline"
+              defaultValue={DEFAULT_TIMELINE}
+            >
+              {TIMELINES.map((key) => (
+                <option value={key} key={key}>
+                  {t.start.timelines[key]}
+                </option>
+              ))}
             </select>
           </div>
           <div className="field full" id="f-desc" ref={descFieldRef}>
             <label htmlFor="desc">
-              Project description <span className="req">*</span>
+              {t.start.fields.description} <span className="req">*</span>
             </label>
             <textarea
               id="desc"
               name="desc"
-              placeholder="What are you building? Who is it for? Anything already exists (designs, code, examples)?"
+              placeholder={t.start.fields.descriptionPlaceholder}
             ></textarea>
-            <span className="error">
-              A few sentences help us give you a useful reply.
-            </span>
+            <span className="error">{t.start.errors.description}</span>
           </div>
         </div>
         <div className="order-actions">
           <button type="submit" className="btn btn-primary magnetic">
-            Send request
+            {t.start.submit}
           </button>
-          <span className="order-note">
-            Sends via your email app — we reply within 24 hours.
-          </span>
+          <span className="order-note">{t.start.note}</span>
         </div>
       </form>
 
@@ -225,20 +253,20 @@ export function OrderForm() {
             </svg>
           </div>
           <p className="big">
-            Ticket <span id="doneId">{confirmedId}</span> opened
+            {t.start.success.openedBefore}{" "}
+            <span id="doneId" dir="ltr">
+              {confirmedId}
+            </span>{" "}
+            {t.start.success.openedAfter}
           </p>
-          <p>
-            Your email app should have opened with the request pre-filled —
-            just press send. If it didn&apos;t, email us directly and mention
-            the ticket ID.
-          </p>
+          <p>{t.start.success.body}</p>
           <div style={{ marginTop: "18px" }}>
             <button
               className="btn btn-ghost btn-sm"
               id="newRequest"
               onClick={startAnother}
             >
-              Open another ticket
+              {t.start.success.again}
             </button>
           </div>
         </div>

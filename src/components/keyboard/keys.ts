@@ -44,11 +44,14 @@ export const KEY_CODE_MAP: Record<string, KeyAction> = {
 /** Sections observed by the scroll-spy, in document order. */
 export const SPY_SECTIONS = ["work", "services", "process", "team", "start"];
 
+/** Sub-label keys, resolved against the dictionary at render time. */
+export type KeySubLabel = "work" | "services" | "process" | "team" | "start";
+
 export type KeyDef = {
   /** Legend printed on the keycap. */
   cap: string;
   /** Small label under the legend, and the section name in the aria-label. */
-  sub?: string;
+  sub?: KeySubLabel;
   /** Present on the five navigation keys plus escape. */
   action?: KeyAction;
   /** Relative width class from the stylesheet. */

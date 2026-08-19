@@ -1,4 +1,11 @@
 import { mailto } from "@/config/site";
+import { en } from "@/i18n/dictionaries/en";
+import type { Locale } from "@/i18n/config";
+import type {
+  BudgetKey,
+  ProjectTypeKey,
+  TimelineKey,
+} from "@/content/formOptions";
 
 /**
  * Project requests.
@@ -14,10 +21,17 @@ export type ProjectRequestInput = {
   name: string;
   email: string;
   company: string;
-  projectType: string;
-  budget: string;
-  timeline: string;
+  /** Stable keys, never translated labels. */
+  projectType: ProjectTypeKey;
+  budget: BudgetKey;
+  timeline: TimelineKey;
   description: string;
+  /**
+   * The language the visitor was reading. Stored with the request so we know
+   * which language to reply in, and surfaced in the notification subject so
+   * that is clear before anyone opens the dashboard.
+   */
+  locale: Locale;
   /**
    * Slug of the portfolio sample the visitor came from, when the request
    * started at a "Request something like this" button. Wired up in phase 2.
@@ -41,25 +55,44 @@ export function generateTicketId(): string {
   return "REQ-" + Date.now().toString(36).toUpperCase().slice(-5);
 }
 
+/**
+ * Notifications always read in English, whichever language the visitor used,
+ * so the two of us are never triaging a mix of scripts. The visitor's own
+ * language is stated explicitly instead.
+ */
+function englishLabels(input: ProjectRequestInput) {
+  return {
+    type: en.start.projectTypes[input.projectType],
+    budget: en.start.budgets[input.budget],
+    timeline: en.start.timelines[input.timeline],
+    language: input.locale === "fa" ? "Persian" : "English",
+  };
+}
+
 function composeEmail(ticketId: string, input: ProjectRequestInput): string {
+  const label = englishLabels(input);
+
   const body = [
     `Project request ${ticketId}`,
     "",
     `Name: ${input.name}`,
     `Email: ${input.email}`,
     `Company: ${input.company || "—"}`,
-    `Type: ${input.projectType}`,
-    `Budget: ${input.budget}`,
-    `Timeline: ${input.timeline}`,
+    `Type: ${label.type}`,
+    `Budget: ${label.budget}`,
+    `Timeline: ${label.timeline}`,
+    `Reply in: ${label.language}`,
     "",
     "Description:",
     input.description,
   ].join("\n");
 
-  return mailto(
-    `[${ticketId}] ${input.projectType} — ${input.name}`,
-    body,
-  );
+  const subject =
+    input.locale === "fa"
+      ? `[${ticketId}] [FA] ${label.type} — ${input.name}`
+      : `[${ticketId}] ${label.type} — ${input.name}`;
+
+  return mailto(subject, body);
 }
 
 export async function submitProjectRequest(

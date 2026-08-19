@@ -43,7 +43,8 @@ public/brand/       Logo, lockups, favicon, brand guide
 src/app/            Routes and the global stylesheet
 src/components/     UI, grouped by area
 src/config/         Studio-wide values: brand, contact, links
-src/content/        Static copy that is not yet database-backed
+src/content/        Locale-neutral content that is not yet database-backed
+src/i18n/           Locale config, dictionaries, Intl formatting
 src/lib/data/       Repositories — the only code that reads or writes data
 src/lib/db/         Database client factory, the only import of the provider SDK
 src/lib/env.ts      Every environment variable the app reads
@@ -59,6 +60,34 @@ project is built to make that a day of work rather than a rewrite:
 - Schema and migrations committed as plain SQL, standard Postgres only.
 - Nothing operationally important stored only in a provider dashboard.
 - Restore, redeploy and DNS procedures written down in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+
+## Languages
+
+The site is English and Persian, path-prefixed as `/en` and `/fa`, both
+statically generated. The bare domain redirects to whichever locale the
+visitor last read, English by default; browser headers are never used to
+guess, because that gets the diaspora case wrong.
+
+There is no translation library. `src/i18n/dictionaries/en.ts` is the source
+of truth and defines the type, so a key missing from another locale is a
+build error rather than a runtime `undefined`. Numbers and dates run through
+`Intl`, which renders Persian-Indic digits on its own.
+
+Marketing prose that has not been written by a native speaker is wrapped in
+`pending()` and falls back to English rather than shipping a translation of
+the English sentence structure. To see what is still outstanding:
+
+```bash
+npm run i18n:pending
+```
+
+Persian is right to left, and the layout mirrors with it — except the hero
+keyboard, which stays left to right in both locales. It represents a
+physical keyboard, and a mirrored QWERTY is not a Persian keyboard; only its
+position in the grid flips. Shortcuts match on physical key position as well
+as character, so they keep working under a Persian input method.
+
+Brand and technology names stay in Latin script inside Persian sentences.
 
 ## Conventions
 

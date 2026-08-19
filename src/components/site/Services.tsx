@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import type { Dictionary, Locale } from "@/i18n";
+import { formatApproxDays } from "@/i18n";
 
 /**
  * No prices on the public site. Every project is scoped and quoted from a
@@ -8,16 +10,21 @@ import type { CSSProperties } from "react";
  * we learn what the visitor has in mind.
  *
  * The timeline takes the slot the price used to occupy so the card keeps its
- * visual rhythm instead of leaving a hole where a figure was.
+ * visual rhythm instead of leaving a hole where a figure was. Day counts run
+ * through Intl, so Persian renders them as ~۵ روز rather than ~5 روز.
  */
-const SERVICES = [
+type ServiceKey = "landing" | "dashboard" | "whitelabel";
+
+const SERVICES: {
+  key: ServiceKey;
+  /** Null means the engagement has no fixed length. */
+  days: number | null;
+  perEngagement?: boolean;
+  icon: ReactNode;
+}[] = [
   {
     key: "landing",
-    title: "Landing page",
-    body: "A fast, responsive React landing page — up to five sections, contact form, SEO basics, and deployment included. Designed to convert, built to last.",
-    timeline: "~5 days",
-    pricingNote: "quoted per project",
-    requestValue: "Landing page",
+    days: 5,
     icon: (
       <svg
         width="22"
@@ -35,11 +42,7 @@ const SERVICES = [
   },
   {
     key: "dashboard",
-    title: "Admin dashboard",
-    body: "A full admin panel on React + Supabase: authentication, CRUD, data tables, charts, and row-level security — the tool your team opens every morning.",
-    timeline: "~14 days",
-    pricingNote: "quoted per project",
-    requestValue: "Admin dashboard",
+    days: 14,
     icon: (
       <svg
         width="22"
@@ -57,11 +60,8 @@ const SERVICES = [
   },
   {
     key: "whitelabel",
-    title: "White-label development",
-    body: "For agencies: we build under your brand — hourly or monthly capacity, direct async communication, and a second-developer review on everything we hand you.",
-    timeline: "flexible",
-    pricingNote: "quoted per engagement",
-    requestValue: "White-label / agency capacity",
+    days: null,
+    perEngagement: true,
     icon: (
       <svg
         width="22"
@@ -81,50 +81,57 @@ const SERVICES = [
   },
 ];
 
-export function Services() {
+export function Services({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
     <section id="services">
       <div className="wrap">
         <div className="sec-head reveal">
-          <span className="sec-coord">SEC 02 / GRID 48</span>
-          <p className="sec-label">Services</p>
-          {/* Was "Clear price" — kept the three-beat rhythm but the claim
-              had to change, since the site no longer publishes figures. */}
-          <h2>Fixed scope. Clear timeline. Staged delivery.</h2>
-          <p className="sec-desc">
-            Three packaged services — or tell us what you need and we&apos;ll
-            scope it as a custom ticket.
-          </p>
+          <span className="sec-coord" dir="ltr">
+            SEC 02 / GRID 48
+          </span>
+          <p className="sec-label">{t.services.label}</p>
+          <h2>{t.services.heading}</h2>
+          <p className="sec-desc">{t.services.desc}</p>
         </div>
         <div className="services">
-          {SERVICES.map((service, index) => (
-            <div
-              className="service reveal"
-              key={service.key}
-              style={index ? ({ "--i": index } as CSSProperties) : undefined}
-            >
-              <div className="icon" aria-hidden="true">
-                {service.icon}
-              </div>
-              <h3>{service.title}</h3>
-              <p>{service.body}</p>
-              {/* Two children, not three: the replacement text is longer
-                  than the figures it replaces, and a third item collided
-                  with it. The tilde makes the timeline read as a timeline
-                  without needing its own label. */}
-              <div className="price-row">
-                <span className="price">{service.timeline}</span>
-                <span className="time">{service.pricingNote}</span>
-              </div>
-              <a
-                className="btn btn-ghost btn-sm"
-                href="#start"
-                data-service={service.requestValue}
+          {SERVICES.map((service, index) => {
+            const copy = t.services.items[service.key];
+            const timeline =
+              service.days === null
+                ? t.services.flexible
+                : formatApproxDays(service.days, t.services.days, locale);
+            const note = service.perEngagement
+              ? t.services.quotedPerEngagement
+              : t.services.quotedPerProject;
+
+            return (
+              <div
+                className="service reveal"
+                key={service.key}
+                style={index ? ({ "--i": index } as CSSProperties) : undefined}
               >
-                Request this
-              </a>
-            </div>
-          ))}
+                <div className="icon" aria-hidden="true">
+                  {service.icon}
+                </div>
+                <h3>{copy.title}</h3>
+                <p>{copy.body}</p>
+                {/* Two children, not three: the replacement text is longer
+                    than the figures it replaces, and with three the row
+                    collided. */}
+                <div className="price-row">
+                  <span className="price">{timeline}</span>
+                  <span className="time">{note}</span>
+                </div>
+                <a
+                  className="btn btn-ghost btn-sm"
+                  href="#start"
+                  data-service={service.key}
+                >
+                  {t.services.requestThis}
+                </a>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

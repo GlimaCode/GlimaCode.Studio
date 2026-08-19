@@ -1,19 +1,19 @@
+import type { Dictionary, Locale } from "@/i18n";
 import { OrderForm } from "./OrderForm";
 
-export function Start() {
+export function Start({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
     <section id="start">
       <div className="wrap">
         <div className="sec-head reveal">
-          <span className="sec-coord">SEC 05 / GRID 48</span>
-          <p className="sec-label">Start a project</p>
-          <h2>Open a ticket</h2>
-          <p className="sec-desc">
-            Tell us what you&apos;re building. We reply within 24 hours with
-            honest thoughts on scope, timeline, and price.
-          </p>
+          <span className="sec-coord" dir="ltr">
+            SEC 05 / GRID 48
+          </span>
+          <p className="sec-label">{t.start.label}</p>
+          <h2>{t.start.heading}</h2>
+          <p className="sec-desc">{t.start.desc}</p>
         </div>
-        <OrderForm />
+        <OrderForm t={t} locale={locale} />
       </div>
     </section>
   );
