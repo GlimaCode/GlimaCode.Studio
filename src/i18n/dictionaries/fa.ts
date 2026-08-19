@@ -268,6 +268,29 @@ export const fa: Dictionary = {
     github: "گیت‌هاب",
   },
 
+  portfolio: {
+    label: "نمونه‌کارهای منتخب",
+    heading: pending("Work we have shipped"),
+    desc: pending(
+      "Pick something close to what you need and send us the brief — the form arrives with the sample already attached.",
+    ),
+    all: "همه",
+    empty: "هنوز چیزی منتشر نشده است.",
+    backToIndex: "همه‌ی نمونه‌کارها",
+    problemHeading: "مسئله",
+    approachHeading: "چه ساختیم",
+    stackHeading: "ساخته‌شده با",
+    viewRepo: "دیدن کد",
+    viewLive: "مشاهده‌ی زنده",
+    requestSimilar: "همین را می‌خواهم",
+    requestSimilarNote: "فرم با همین پروژه‌ی پیوست‌شده باز می‌شود.",
+    basedOn: "بر پایه‌ی",
+    clearBasedOn: "حذف",
+    seeAll: "دیدن همه‌ی نمونه‌کارها",
+    fallbackNotice:
+      "این پروژه هنوز ترجمه نشده و به انگلیسی نمایش داده می‌شود.",
+  },
+
   footer: {
     tagline: pending("designed & built by two developers"),
     teamAccess: "دسترسی تیم",

@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import type { Dictionary, Locale } from "@/i18n";
 import { formatNumber } from "@/i18n";
+import Link from "next/link";
+import { siteConfig } from "@/config/site";
 import {
   boardColumns,
   boardProjects,
@@ -58,6 +60,14 @@ export function WorkBoard({ t, locale }: { t: Dictionary; locale: Locale }) {
           <p className="sec-label">{t.work.label}</p>
           <h2>{t.work.heading}</h2>
           <p className="sec-desc">{t.work.desc}</p>
+          {/* Appears with the portfolio routes, not before. */}
+          {siteConfig.features.portfolio ? (
+            <p style={{ marginTop: "14px" }}>
+              <Link className="btn btn-ghost btn-sm" href={`/${locale}/work`}>
+                {t.portfolio.seeAll}
+              </Link>
+            </p>
+          ) : null}
         </div>
         <div className="board">
           {boardColumns.map((column, index) => {

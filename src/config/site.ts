@@ -38,6 +38,12 @@ export type SiteConfig = {
   features: {
     /** Turn on with the dashboard in phase 4. */
     dashboard: boolean;
+    /**
+     * Turn on once the portfolio migrations are applied and seeded. Until
+     * then the routes and the nav link stay hidden rather than rendering an
+     * empty grid against a table that does not exist yet.
+     */
+    portfolio: boolean;
   };
 };
 
@@ -58,6 +64,7 @@ export const siteConfig: SiteConfig = {
   location: "Remote · UTC+3:30",
   features: {
     dashboard: false,
+    portfolio: false,
   },
 };
 

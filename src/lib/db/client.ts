@@ -1,5 +1,5 @@
 import { createBrowserClient, createServerClient } from "@supabase/ssr";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { databaseAnonKey, databaseUrl } from "@/lib/env";
 
 /**
@@ -15,6 +15,19 @@ import { databaseAnonKey, databaseUrl } from "@/lib/env";
  */
 
 export type Database = SupabaseClient;
+
+/**
+ * Client for public, unauthenticated reads on the server.
+ *
+ * Carries no session, so it is only ever as privileged as an anonymous
+ * visitor — which makes it the right tool for published portfolio content
+ * and the wrong one for anything the dashboard needs.
+ */
+export function publicClient(): Database {
+  return createClient(databaseUrl(), databaseAnonKey(), {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 /** Client for use in browser components. */
 export function browserClient(): Database {

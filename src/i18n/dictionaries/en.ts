@@ -228,6 +228,27 @@ export const en = {
     github: "GitHub",
   },
 
+  portfolio: {
+    label: "Selected work",
+    heading: "Work we have shipped",
+    desc: "Pick something close to what you need and send us the brief — the form arrives with the sample already attached.",
+    all: "All",
+    empty: "Nothing published here yet.",
+    backToIndex: "All work",
+    problemHeading: "The problem",
+    approachHeading: "What we built",
+    stackHeading: "Built with",
+    viewRepo: "View the code",
+    viewLive: "See it live",
+    requestSimilar: "Request something like this",
+    requestSimilarNote: "Opens the form with this project attached.",
+    basedOn: "Based on",
+    clearBasedOn: "Remove",
+    seeAll: "See all work",
+    /** Shown on a Persian page when the entry has no Persian copy yet. */
+    fallbackNotice: "This project has not been translated yet, so it is shown in English.",
+  },
+
   footer: {
     tagline: "designed & built by two developers",
     teamAccess: "Team access",

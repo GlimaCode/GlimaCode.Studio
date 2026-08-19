@@ -31,3 +31,17 @@ export type TimelineKey = (typeof TIMELINES)[number];
 export const DEFAULT_PROJECT_TYPE: ProjectTypeKey = "landing";
 export const DEFAULT_BUDGET: BudgetKey = "to700";
 export const DEFAULT_TIMELINE: TimelineKey = "weeks";
+
+/**
+ * Closest project type for a portfolio category.
+ *
+ * Used when a visitor arrives from "Request something like this": the form
+ * opens with a sensible type already chosen rather than making them restate
+ * what they just clicked. Anything unmapped falls through to the default.
+ */
+export const PROJECT_TYPE_FOR_CATEGORY: Record<string, ProjectTypeKey> = {
+  "landing-page": "landing",
+  "admin-dashboard": "dashboard",
+  "web-app": "mvp",
+  "data-tool": "other",
+};

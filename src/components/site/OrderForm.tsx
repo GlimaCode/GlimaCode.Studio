@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dictionary, Locale } from "@/i18n";
 import {
+  PROJECT_TYPE_FOR_CATEGORY,
   BUDGETS,
   DEFAULT_BUDGET,
   DEFAULT_PROJECT_TYPE,
@@ -21,7 +22,25 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function OrderForm({ t, locale }: { t: Dictionary; locale: Locale }) {
+/**
+ * A portfolio sample the visitor arrived from. Resolved on the server so the
+ * title is real rather than taken from a query string a stranger could edit.
+ */
+export type RequestSource = {
+  slug: string;
+  title: string;
+  categorySlug: string;
+};
+
+export function OrderForm({
+  t,
+  locale,
+  source,
+}: {
+  t: Dictionary;
+  locale: Locale;
+  source?: RequestSource | null;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const typeRef = useRef<HTMLSelectElement>(null);
   const nameFieldRef = useRef<HTMLDivElement>(null);
@@ -108,6 +127,7 @@ export function OrderForm({ t, locale }: { t: Dictionary; locale: Locale }) {
       timeline: String(data.get("timeline") ?? "") as TimelineKey,
       description,
       locale,
+      sourceProjectSlug: source?.slug ?? null,
     };
 
     const result = await submitProjectRequest(id, input);
@@ -131,6 +151,14 @@ export function OrderForm({ t, locale }: { t: Dictionary; locale: Locale }) {
         onSubmit={handleSubmit}
         style={confirmedId ? { display: "none" } : undefined}
       >
+        {source ? (
+          <p className="pf-source">
+            <span>
+              {t.portfolio.basedOn} <b>{source.title}</b>
+            </span>
+            <a href={`/${locale}#start`}>{t.portfolio.clearBasedOn}</a>
+          </p>
+        ) : null}
         <div className="order-head">
           <h3>{t.start.cardTitle}</h3>
           <span className="req-id">
@@ -183,7 +211,10 @@ export function OrderForm({ t, locale }: { t: Dictionary; locale: Locale }) {
               id="ptype"
               name="ptype"
               ref={typeRef}
-              defaultValue={DEFAULT_PROJECT_TYPE}
+              defaultValue={
+                (source && PROJECT_TYPE_FOR_CATEGORY[source.categorySlug]) ||
+                DEFAULT_PROJECT_TYPE
+              }
             >
               {PROJECT_TYPES.map((key) => (
                 <option value={key} key={key}>

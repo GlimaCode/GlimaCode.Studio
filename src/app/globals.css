@@ -704,3 +704,103 @@
 [dir="rtl"] .ticket-id{text-align:right}
 [dir="rtl"] .chips{justify-content:flex-end}
 [dir="rtl"] .sec-coord{direction:ltr;text-align:left}
+
+/* ---------- Portfolio index and detail ---------- */
+/* Reuses the card language of the board: same radius, shadow, hover lift and
+   blueprint corner ticks, so the new surfaces read as the same system. */
+.pf-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.pf-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12.5px;color:var(--slate);text-decoration:none;
+  background:var(--card);border:1px solid var(--line);border-radius:9px;
+  padding:8px 12px;min-height:38px;
+  transition:border-color var(--fast) ease, color var(--fast) ease,
+             background var(--fast) ease;
+}
+.pf-chip:hover{border-color:var(--cobalt);color:var(--cobalt)}
+.pf-chip:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.pf-chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.pf-chip-count{
+  font-size:11px;font-variant-numeric:tabular-nums;
+  background:var(--paper);color:var(--slate);border-radius:5px;padding:1px 6px;
+}
+.pf-chip.active .pf-chip-count{background:rgba(255,255,255,.16);color:#fff}
+
+.pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pf-card{
+  display:flex;flex-direction:column;text-decoration:none;color:inherit;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;position:relative;box-shadow:var(--shadow-1);
+  transition:transform var(--fast) var(--ease), box-shadow var(--fast) var(--ease),
+             border-color var(--fast) ease;
+}
+.pf-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);border-color:var(--cobalt)}
+.pf-card:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.pf-card::before,.pf-card::after{
+  content:"";position:absolute;width:11px;height:11px;opacity:0;
+  border:1.5px solid var(--cobalt);
+  transition:opacity var(--fast) ease, transform var(--fast) var(--ease);
+  transform:scale(.6);
+}
+.pf-card::before{top:-5px;left:-5px;border-right:0;border-bottom:0}
+.pf-card::after{bottom:-5px;right:-5px;border-left:0;border-top:0}
+.pf-card:hover::before,.pf-card:hover::after{opacity:1;transform:scale(1)}
+.pf-card-category{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;color:var(--cobalt);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:10px;
+}
+.pf-card h3{font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;font-size:17px;font-weight:600;margin-bottom:8px}
+.pf-card p{font-size:14px;color:var(--slate);margin-bottom:14px;flex:1}
+
+.pf-back{
+  color:var(--slate);text-decoration:none;
+  transition:color var(--fast) ease;
+}
+.pf-back:hover{color:var(--cobalt)}
+.pf-notice{
+  font-size:13px;color:var(--slate);background:var(--cobalt-soft);
+  border:1px solid #CBD6FC;border-radius:10px;padding:10px 14px;margin-bottom:24px;
+}
+.pf-detail{display:grid;grid-template-columns:1.55fr .95fr;gap:34px;align-items:start}
+.pf-detail-main h3{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:17px;font-weight:600;margin:0 0 10px;
+}
+.pf-detail-main h3 + p{margin-bottom:26px}
+.pf-detail-main p{font-size:15.5px;color:var(--slate);line-height:1.75}
+.pf-detail-side{
+  display:flex;flex-direction:column;gap:12px;align-items:stretch;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow-1);position:sticky;top:96px;
+}
+.pf-meta{display:flex;flex-direction:column;gap:10px;margin-bottom:4px}
+.pf-meta-label{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;color:var(--slate);text-transform:uppercase;letter-spacing:.09em;
+}
+.pf-request{justify-content:center}
+.pf-request-note{font-size:12.5px;color:var(--slate);margin:-4px 0 6px}
+.pf-detail-side .btn-sm{justify-content:center}
+
+/* Attribution chip on the request form when a sample was carried in. */
+.pf-source{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12.5px;color:var(--slate);
+  background:var(--cobalt-soft);border:1px solid #CBD6FC;
+  border-radius:10px;padding:10px 14px;margin-bottom:20px;
+}
+.pf-source b{color:var(--ink);font-weight:500}
+.pf-source a{color:var(--cobalt);text-decoration:none;margin-inline-start:auto}
+.pf-source a:hover{text-decoration:underline}
+
+@media(max-width:900px){
+  .pf-grid{grid-template-columns:repeat(2,1fr)}
+  .pf-detail{grid-template-columns:1fr;gap:24px}
+  .pf-detail-side{position:static}
+}
+@media(max-width:640px){
+  .pf-grid{grid-template-columns:1fr}
+}
