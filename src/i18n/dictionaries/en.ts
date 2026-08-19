@@ -78,7 +78,7 @@ export const en = {
     "PRJ-01": {
       title: "Listing Quality Auditor",
       description:
-        "A product-data quality auditor with its rules held as data rather than code. Report-only by design, built on the principle that absence of evidence is never a pass. Zero dependencies, covered by a full test suite.",
+        "A product-data quality auditor that reports what's wrong and proves it, without touching your catalogue. Rules live as data, so changing one takes an edit rather than a release. Zero dependencies, 13 tests.",
     },
     "PRJ-02": {
       title: "Vehicle Catalog",
