@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import {
+  DEFAULT_LOCALE,
   LOCALES,
   bcp47,
   directionOf,
@@ -9,6 +10,7 @@ import {
   type Locale,
 } from "@/i18n";
 import { siteConfig } from "@/config/site";
+import { stripIsolates } from "@/i18n/pending";
 import { fontVariables } from "../fonts";
 import "../globals.css";
 
@@ -47,27 +49,33 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const dictionary = getDictionary(locale);
+  // Metadata is plain text: strip the directional isolates that only matter
+  // when a fallback string is laid out inside a right-to-left page.
+  const title = `${siteConfig.brand} — ${stripIsolates(dictionary.meta.tagline)}`;
+  const description = stripIsolates(dictionary.meta.description);
 
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
-      default: `${siteConfig.brand} — ${dictionary.meta.tagline}`,
+      default: title,
       template: `%s — ${siteConfig.brand}`,
     },
-    description: dictionary.meta.description,
+    description,
     alternates: {
       canonical: `/${locale}`,
-      languages: Object.fromEntries(
-        LOCALES.map((code) => [bcp47(code), `/${code}`]),
-      ),
+      languages: {
+        ...Object.fromEntries(LOCALES.map((code) => [bcp47(code), `/${code}`])),
+        // Shown to anyone whose language matches neither locale.
+        "x-default": `/${DEFAULT_LOCALE}`,
+      },
     },
     openGraph: {
       type: "website",
       locale: bcp47(locale),
       url: `${siteConfig.url}/${locale}`,
       siteName: siteConfig.brand,
-      title: `${siteConfig.brand} — ${dictionary.meta.tagline}`,
-      description: dictionary.meta.description,
+      title,
+      description,
     },
   };
 }

@@ -23,3 +23,13 @@ const PDI = "⁩";
 export function pending(englishSource: string): string {
   return `${LRI}${englishSource}${PDI}`;
 }
+
+/**
+ * Removes the isolates for contexts that are plain text rather than rendered
+ * markup — page titles, meta descriptions, link previews. There is no
+ * bidirectional layout to protect there, so the characters would only travel
+ * to crawlers and social cards as invisible noise.
+ */
+export function stripIsolates(text: string): string {
+  return text.replace(/[⁦⁩]/g, "");
+}
