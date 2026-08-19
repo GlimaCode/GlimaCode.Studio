@@ -19,9 +19,7 @@ import { pending } from "../pending";
 export const fa: Dictionary = {
   meta: {
     tagline: "استودیوی دونفره‌ی توسعه‌ی وب",
-    description: pending(
-      "GlimaCode is a two-developer React and Supabase studio. Scoped plans, staged delivery, and a second developer reviewing every line before it ships.",
-    ),
+    description: "استودیوی توسعه‌ی وب GlimaCode — ساخت وب‌اپلیکیشن، داشبورد و لندینگ‌پیج با React و Supabase. اسکوپ مشخص، تحویل مرحله‌ای، بازبینی دونفره.",
   },
 
   nav: {
@@ -38,12 +36,10 @@ export const fa: Dictionary = {
   },
 
   hero: {
-    eyebrow: pending("we're a two-developer studio"),
-    headline: pending("Web apps, built like"),
-    headlineAccent: pending("tickets on a board."),
-    sub: pending(
-      "We're **Ali** and **Mostafa** — a two-person React & Supabase studio. Every project gets a scoped plan, staged delivery, and a second developer reviewing every line before it ships.",
-    ),
+    eyebrow: "ما یک استودیوی دونفره‌ایم",
+    headline: "وب‌اپلیکیشن می‌سازیم،",
+    headlineAccent: "مثل تسک‌های روی برد.",
+    sub: "ما **علی** و **مصطفی** هستیم — یک استودیوی دونفره‌ی React و Supabase. هر پروژه با یک نقشه‌ی مشخص شروع می‌شود، مرحله‌مرحله تحویل داده می‌شود، و پیش از اینکه به دست شما برسد، نفر دوم کدش را بازبینی می‌کند.",
     ctaPrimary: "شروع پروژه",
     ctaSecondary: "دیدن نمونه‌کارها",
     availability: "پذیرای پروژه‌ی جدید",
@@ -68,10 +64,8 @@ export const fa: Dictionary = {
 
   work: {
     label: "نمونه‌کارهای منتخب",
-    heading: pending("Projects, the way we run them: a board."),
-    desc: pending(
-      "We build work-management software for a living — so here's our portfolio in its native format.",
-    ),
+    heading: "پروژه‌ها را همان‌طور نشان می‌دهیم که اجرا می‌کنیم: روی یک برد.",
+    desc: "کارمان ساختن نرم‌افزار مدیریت کار است — پس نمونه‌کارهایمان را هم در قالب طبیعی خودشان می‌بینید.",
     columns: {
       shipped: "تحویل‌شده",
       in_progress: "در حال انجام",
@@ -82,28 +76,22 @@ export const fa: Dictionary = {
       inProgress: "وضعیت: در حال انجام",
       planned: "وضعیت: برنامه‌ریزی‌شده",
     },
-    claimSlot: pending("Claim this slot"),
+    claimSlot: "این جای خالی را بگیرید",
   },
 
   projects: {
     // Product names stay in Latin script.
     "PRJ-01": {
       title: "Listing Quality Auditor",
-      description: pending(
-        "A product-data quality auditor that reports what's wrong and proves it, without touching your catalogue. Rules live as data, so changing one takes an edit rather than a release. Zero dependencies, 13 tests.",
-      ),
+      description: "یک ممیز کیفیت داده‌ی محصول که مشکل را پیدا می‌کند و مدرکش را نشان می‌دهد، بدون اینکه به کاتالوگ شما دست بزند. قوانین به‌صورت داده ذخیره می‌شوند، پس تغییر یک قانون یک ویرایش است نه یک نسخه‌ی جدید. صفر وابستگی، ۱۳ تست.",
     },
     "PRJ-02": {
       title: "Vehicle Catalog",
-      description: pending(
-        "A standardised vehicle catalogue with explain-why search results, an alias system for messy inputs, a validation workflow, and spreadsheet export for downstream teams.",
-      ),
+      description: "کاتالوگ استاندارد داده‌ی خودرو با جستجویی که می‌گوید چرا هر نتیجه را برگردانده، سیستم نام‌های جایگزین برای ورودی‌های نامرتب، ورک‌فلوی بازبینی، و خروجی اکسل برای تیم‌های بعدی.",
     },
     "PRJ-03": {
       title: "Title Batch Generator",
-      description: pending(
-        "A rule-based engine that generates compliant product titles for hundreds of listings at once — deterministic, traceable, and entirely client-side, so no data ever leaves the browser.",
-      ),
+      description: "موتور قانون‌محوری که برای صدها محصول همزمان عنوان استاندارد می‌سازد — قطعی، قابل ردیابی، و کاملاً داخل مرورگر، طوری که هیچ داده‌ای از سیستم شما بیرون نمی‌رود.",
     },
     "PRJ-04": {
       title: "glimacode.com",
@@ -121,10 +109,8 @@ export const fa: Dictionary = {
 
   services: {
     label: "خدمات",
-    heading: pending("Fixed scope. Clear timeline. Staged delivery."),
-    desc: pending(
-      "Three packaged services — or tell us what you need and we'll scope it as a custom ticket.",
-    ),
+    heading: "اسکوپ مشخص. زمان‌بندی روشن. تحویل مرحله‌ای.",
+    desc: "سه سرویس آماده — یا اگر چیز دیگری لازم دارید، بگویید تا با هم تعریفش کنیم.",
     requestThis: "همین را می‌خواهم",
     days: "روز",
     flexible: "منعطف",
@@ -133,71 +119,53 @@ export const fa: Dictionary = {
     items: {
       landing: {
         title: "لندینگ‌پیج",
-        body: pending(
-          "A fast, responsive React landing page — up to five sections, contact form, SEO basics, and deployment included. Designed to convert, built to last.",
-        ),
+        body: "یک لندینگ‌پیج React سریع و ریسپانسیو — تا پنج بخش، فرم تماس، سئوی پایه و انتشار روی سرور. ساخته‌شده برای اینکه بازدیدکننده را به مشتری تبدیل کند.",
       },
       dashboard: {
         title: "داشبورد ادمین",
-        body: pending(
-          "A full admin panel on React + Supabase: authentication, CRUD, data tables, charts, and row-level security — the tool your team opens every morning.",
-        ),
+        body: "یک پنل مدیریت کامل روی React و Supabase: ورود امن، مدیریت داده، جدول و نمودار، و کنترل دسترسی در سطح ردیف — همان ابزاری که تیم شما هر روز صبح بازش می‌کند.",
       },
       whitelabel: {
         title: "توسعه‌ی White-label",
-        body: pending(
-          "For agencies: we build under your brand — hourly or monthly capacity, direct async communication, and a second-developer review on everything we hand you.",
-        ),
+        body: "برای آژانس‌ها: زیر برند شما می‌سازیم. ظرفیت ساعتی یا ماهانه، ارتباط مستقیم و بدون واسطه، و بازبینی نفر دوم روی هر چیزی که تحویلتان می‌دهیم.",
       },
     },
   },
 
   process: {
     label: "فرآیند",
-    heading: pending("How a project moves across our board"),
+    heading: "یک پروژه چطور روی برد ما جلو می‌رود",
     steps: {
       analyze: {
         title: "تحلیل",
-        body: pending(
-          "We review your brief against our capacity and skills — honestly. If we're not the right fit, we'll say so within 24 hours.",
-        ),
+        body: "بریف شما را با ظرفیت و توانمان می‌سنجیم — صادقانه. اگر گزینه‌ی درستی برایتان نباشیم، ظرف ۲۴ ساعت همین را می‌گوییم.",
       },
       kickoff: {
         title: "جلسه‌ی شروع",
-        body: pending(
-          "Scope, timeline, and price get fixed in writing before any code. You'll know exactly what's included — and what isn't.",
-        ),
+        body: "پیش از نوشتن اولین خط کد، اسکوپ و زمان و قیمت مکتوب می‌شود. دقیقاً می‌دانید چه چیزی هست — و چه چیزی نیست.",
       },
       build: {
         title: "ساخت مرحله‌به‌مرحله",
-        body: pending(
-          "Work ships in reviewable milestones with short screen-recorded demos, so you see progress instead of waiting for a big reveal.",
-        ),
+        body: "کار در مراحل قابل بررسی تحویل داده می‌شود، همراه با ویدیوی کوتاه از هر مرحله. پیشرفت را می‌بینید، نه اینکه منتظر یک رونمایی بزرگ بمانید.",
       },
       handoff: {
         title: "بازبینی و تحویل",
-        body: pending(
-          "Every deliverable is checked by the second developer before you see it. Then: clean code, docs, and deployment — yours.",
-        ),
+        body: "هر تحویلی را نفر دوم بازبینی می‌کند، بعد به دست شما می‌رسد: کد تمیز، مستندات، و انتشار روی سرور — همه مال شما.",
       },
     },
   },
 
   team: {
     label: "تیم",
-    heading: pending("Two developers. Four eyes on everything."),
+    heading: "دو برنامه‌نویس. چهار چشم روی هر خط کد.",
     members: {
       ali: {
         role: "توسعه‌دهنده‌ی فول‌استک · مسئول ارتباط با کلاینت",
-        body: pending(
-          "Developer and project coordinator with daily experience building work-management software used on real factory floors. Handles scoping, communication, and full-stack delivery.",
-        ),
+        body: "برنامه‌نویس و هماهنگ‌کننده‌ی پروژه، با تجربه‌ی روزمره‌ی ساخت نرم‌افزارهایی که واقعاً در محیط کار استفاده می‌شوند. تعریف اسکوپ، ارتباط با کارفرما و توسعه‌ی فول‌استک با اوست.",
       },
       mostafa: {
         role: "توسعه‌دهنده‌ی فول‌استک · مسئول تحویل",
-        body: pending(
-          "Developer focused on architecture, code quality, and shipping — the second pair of eyes that reviews every deliverable before it reaches you.",
-        ),
+        body: "برنامه‌نویس با تمرکز روی معماری، کیفیت کد و تحویل — همان جفت‌چشم دومی که پیش از رسیدن هر خروجی به دست شما، بازبینی‌اش می‌کند.",
       },
     },
   },
@@ -205,9 +173,7 @@ export const fa: Dictionary = {
   start: {
     label: "شروع پروژه",
     heading: "ثبت تیکت",
-    desc: pending(
-      "Tell us what you're building. We reply within 24 hours with honest thoughts on scope, timeline, and price.",
-    ),
+    desc: "بگویید چه می‌سازید. ظرف ۲۴ ساعت با نظر صادقانه‌مان درباره‌ی اسکوپ، زمان و قیمت جواب می‌دهیم.",
     cardTitle: "درخواست پروژه",
     idPrefix: "شناسه:",
     fields: {
@@ -258,10 +224,8 @@ export const fa: Dictionary = {
   },
 
   contact: {
-    heading: pending("Prefer a direct line?"),
-    body: pending(
-      "Skip the form — email or message us and we'll take it from there.",
-    ),
+    heading: "راه مستقیم‌تری می‌خواهید؟",
+    body: "فرم را رها کنید — ایمیل بزنید یا پیام بدهید، ادامه‌اش با ما.",
     email: "ایمیل به استودیو",
     linkedinAli: "علی در لینکدین",
     linkedinMostafa: "مصطفی در لینکدین",
@@ -270,10 +234,8 @@ export const fa: Dictionary = {
 
   portfolio: {
     label: "نمونه‌کارهای منتخب",
-    heading: pending("Work we have shipped"),
-    desc: pending(
-      "Pick something close to what you need and send us the brief — the form arrives with the sample already attached.",
-    ),
+    heading: "نمونه‌کارها",
+    desc: "چیزی که ساخته‌ایم و چرا این‌طور ساخته‌ایم. اگر نمونه‌ای به کار شما می‌آید، از همان‌جا می‌توانید درخواست بدهید.",
     all: "همه",
     empty: "هنوز چیزی منتشر نشده است.",
     backToIndex: "همه‌ی نمونه‌کارها",
@@ -292,7 +254,7 @@ export const fa: Dictionary = {
   },
 
   footer: {
-    tagline: pending("designed & built by two developers"),
+    tagline: "طراحی و ساخته‌شده توسط دو برنامه‌نویس",
     teamAccess: "دسترسی تیم",
   },
 };
