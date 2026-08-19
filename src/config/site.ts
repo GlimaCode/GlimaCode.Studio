@@ -64,7 +64,7 @@ export const siteConfig: SiteConfig = {
   location: "Remote · UTC+3:30",
   features: {
     dashboard: false,
-    portfolio: false,
+    portfolio: true,
   },
 };
 

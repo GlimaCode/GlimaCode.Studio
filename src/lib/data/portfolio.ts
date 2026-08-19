@@ -95,9 +95,20 @@ function pickNullable(
 
 function toProject(row: ProjectRow, locale: Locale): PortfolioProject {
   const category = row.portfolio_categories;
-  const translated = locale === "fa";
+
+  /**
+   * Whether the reader is being shown English because Persian is missing.
+   *
+   * Judged on the prose only. Titles are product names and stay in Latin
+   * script on purpose, so a null title_fa is the intended state rather than
+   * a gap — keying the notice off it would label fully translated entries as
+   * untranslated.
+   */
   const missingPersian =
-    translated && (!row.title_fa || !row.summary_fa);
+    locale === "fa" &&
+    (!row.summary_fa ||
+      (!!row.problem_en && !row.problem_fa) ||
+      (!!row.description_en && !row.description_fa));
 
   return {
     slug: row.slug,

@@ -95,7 +95,15 @@ export default async function WorkIndexPage({
           </div>
 
           {categories.length > 1 ? (
-            <nav className="pf-filter reveal" aria-label={t.portfolio.label}>
+            /* A div, not a <nav>: the ported stylesheet styles `nav` by
+               element with position:fixed, so a nav here would leave the
+               flow and sit on top of the real header. role keeps the
+               landmark semantics without inheriting those styles. */
+            <div
+              className="pf-filter reveal"
+              role="navigation"
+              aria-label={t.portfolio.label}
+            >
               <Link
                 className={`pf-chip${active ? "" : " active"}`}
                 href={`/${locale}/work`}
@@ -115,7 +123,7 @@ export default async function WorkIndexPage({
                   <span className="pf-chip-count">{c.count}</span>
                 </Link>
               ))}
-            </nav>
+            </div>
           ) : null}
 
           {visible.length ? (

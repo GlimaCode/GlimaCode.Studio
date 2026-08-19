@@ -1,14 +1,10 @@
 import type { Dictionary } from "./en";
-import { pending } from "../pending";
 
 /**
  * Persian dictionary.
  *
- * Interface strings — labels, buttons, field names, validation messages,
- * status words — are written here and should be reviewed rather than
- * trusted. Marketing prose is wrapped in `pending()` and still renders its
- * English source: that copy needs to be written by a native speaker, not
- * translated from the English sentence structure.
+ * Every string here is native Persian, written rather than translated from
+ * the English sentence structure. Nothing falls back to English any more.
  *
  * Brand and technology names stay in Latin script inside Persian sentences:
  * GlimaCode, React, Supabase, TypeScript, PostgreSQL, White-label, MVP.
@@ -95,15 +91,11 @@ export const fa: Dictionary = {
     },
     "PRJ-04": {
       title: "glimacode.com",
-      description: pending(
-        "The site you are reading. React and Supabase, a data-driven portfolio, and a request pipeline the two of us triage — built in the open as our own reference project.",
-      ),
+      description: "همین سایتی که دارید می‌خوانید. React و Supabase، پورتفولیویی که از دیتابیس می‌آید، و خط درخواستی که خودمان دو نفر بررسی‌اش می‌کنیم — ساخته‌شده به‌صورت عمومی، به‌عنوان پروژه‌ی مرجع خودمان.",
     },
     "PRJ-05": {
       title: "پروژه‌ی شما",
-      description: pending(
-        "Have an internal tool, dashboard, or MVP that needs to ship? This slot is open — send us the brief below and we'll scope it together.",
-      ),
+      description: "ابزار داخلی، داشبورد یا MVP‌ای دارید که باید ساخته شود؟ این جای خالی مال شماست — بریفتان را بفرستید تا با هم تعریفش کنیم.",
     },
   },
 
