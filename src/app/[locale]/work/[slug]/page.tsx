@@ -6,6 +6,7 @@ import { stripIsolates } from "@/i18n/pending";
 import { siteConfig } from "@/config/site";
 import { getPublishedProject } from "@/lib/data/portfolio";
 import { Nav } from "@/components/site/Nav";
+import { Start } from "@/components/site/Start";
 import { Footer } from "@/components/site/Footer";
 import { SiteMotion } from "@/components/site/SiteMotion";
 
@@ -43,9 +44,17 @@ export default async function ProjectPage({ params }: PageParams) {
   const project = await getPublishedProject(slug, locale);
   if (!project) notFound();
 
-  // Carries the sample into the request form, so the visitor never retypes
-  // which piece of work they liked. Phase 3 stores it on the request row.
-  const requestHref = `/${locale}?from=${encodeURIComponent(project.slug)}#start`;
+  /**
+   * The request form is rendered on this page rather than back on the home
+   * page. That keeps the home page free of search parameters and therefore
+   * statically prerendered, and it means the visitor never leaves the case
+   * study they were just persuaded by. Phase 3 stores the link on the row.
+   */
+  const source = {
+    slug: project.slug,
+    title: project.title,
+    categorySlug: project.categorySlug,
+  };
 
   return (
     <>
@@ -101,9 +110,9 @@ export default async function ProjectPage({ params }: PageParams) {
                 </div>
               </div>
 
-              <Link className="btn btn-primary pf-request" href={requestHref}>
+              <a className="btn btn-primary pf-request" href="#start">
                 {t.portfolio.requestSimilar}
-              </Link>
+              </a>
               <p className="pf-request-note">{t.portfolio.requestSimilarNote}</p>
 
               {project.repoUrl ? (
@@ -130,6 +139,8 @@ export default async function ProjectPage({ params }: PageParams) {
           </div>
         </div>
       </section>
+
+      <Start t={t} locale={locale} source={source} />
 
       <Footer t={t} />
       <SiteMotion locale={locale} />

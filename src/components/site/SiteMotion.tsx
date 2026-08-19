@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   KEY_CODE_MAP,
   KEY_MAP,
@@ -31,6 +32,8 @@ function isKeyAction(value: string): value is KeyAction {
  * frame. Every listener and observer is torn down on unmount.
  */
 export function SiteMotion({ locale }: { locale: Locale }) {
+  const router = useRouter();
+
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const cleanups: Array<() => void> = [];
@@ -173,10 +176,17 @@ export function SiteMotion({ locale }: { locale: Locale }) {
         document
           .querySelectorAll(`[data-key="${action}"]`)
           .forEach((el) => flashKey(el, 170));
-        const target = document.querySelector(KEY_MAP[action]);
-        if (!target) return;
+        const hash = KEY_MAP[action];
+        const target = document.querySelector(hash);
         const timer = window.setTimeout(() => {
-          target.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+          if (target) {
+            target.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+          } else {
+            // On a portfolio page the home page sections are not in the
+            // document. The shortcut should still take you there rather than
+            // appearing broken.
+            router.push(`/${locale}${hash}`);
+          }
           flashTimers.delete(timer);
         }, 90);
         flashTimers.add(timer);
@@ -281,7 +291,7 @@ export function SiteMotion({ locale }: { locale: Locale }) {
       disposed = true;
       cleanups.forEach((fn) => fn());
     };
-  }, [locale]);
+  }, [locale, router]);
 
   return null;
 }

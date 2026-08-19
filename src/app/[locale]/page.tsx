@@ -1,8 +1,5 @@
 import { notFound } from "next/navigation";
 import { getDictionary, isLocale } from "@/i18n";
-import { siteConfig } from "@/config/site";
-import { getPublishedProject } from "@/lib/data/portfolio";
-import type { RequestSource } from "@/components/site/OrderForm";
 import { Contact } from "@/components/site/Contact";
 import { Footer } from "@/components/site/Footer";
 import { Hero } from "@/components/site/Hero";
@@ -15,34 +12,23 @@ import { Team } from "@/components/site/Team";
 import { Ticker } from "@/components/site/Ticker";
 import { WorkBoard } from "@/components/site/WorkBoard";
 
+/**
+ * Deliberately reads no search parameters.
+ *
+ * This is the page a cold visitor lands on and the one carrying the keyboard
+ * hero, so it must stay statically prerendered and come off the CDN. Reading
+ * a query string here would make it server-rendered on every request. The
+ * "request something like this" flow therefore lives on the portfolio detail
+ * page, which is dynamic already, rather than bouncing through here.
+ */
 export default async function HomePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ from?: string }>;
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getDictionary(locale);
-
-  /**
-   * "Request something like this" arrives as ?from=<slug>. The project is
-   * looked up here rather than trusting a title passed in the URL, so the
-   * form can only ever attribute itself to a real published sample.
-   */
-  const { from } = await searchParams;
-  let source: RequestSource | null = null;
-  if (siteConfig.features.portfolio && from) {
-    const project = await getPublishedProject(from, locale);
-    if (project) {
-      source = {
-        slug: project.slug,
-        title: project.title,
-        categorySlug: project.categorySlug,
-      };
-    }
-  }
 
   return (
     <>
@@ -54,7 +40,7 @@ export default async function HomePage({
       <Services t={t} locale={locale} />
       <Process t={t} />
       <Team t={t} />
-      <Start t={t} locale={locale} source={source} />
+      <Start t={t} locale={locale} />
       <Contact t={t} />
       <Footer t={t} />
       <SiteMotion locale={locale} />
