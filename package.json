@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "i18n:pending": "node scripts/i18n-pending.mjs"
+    "i18n:pending": "node scripts/i18n-pending.mjs",
+    "i18n:inventory": "node scripts/i18n-inventory.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
