@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "i18n:pending": "node scripts/i18n-pending.mjs",
-    "i18n:inventory": "node scripts/i18n-inventory.mjs"
+    "i18n:inventory": "node scripts/i18n-inventory.mjs",
+    "verify:fonts": "node scripts/verify-fonts.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

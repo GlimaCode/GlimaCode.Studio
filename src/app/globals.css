@@ -804,3 +804,27 @@
 @media(max-width:640px){
   .pf-grid{grid-template-columns:1fr}
 }
+
+/* ---------- Font stack ordering (Turbopack workaround) ---------- */
+/* next/font offers `adjustFontFallback: false`, which is set in fonts.ts and
+   is the correct fix: it stops a metric-matched local-Arial face being
+   injected inside each Latin font's CSS variable. The webpack build honours
+   it; the Turbopack build (Next 16.3.1, the default) ignores it and emits
+   the face anyway.
+
+   That face carries no unicode-range, so in `var(--font-plex-sans),
+   var(--font-vazirmatn)` it claims every Persian glyph before the cascade
+   reaches Vazirmatn — the whole Persian site silently renders in Arial.
+
+   Redefining the variables here puts Vazirmatn ahead of that face. It is
+   also harmless under webpack, where the Fallback family does not exist and
+   naming it is simply skipped. `html[lang]` is 0,1,1, which outranks the
+   0,1,0 class selector next/font generates.
+
+   Delete this block once Turbopack honours the option; the guard in
+   scripts/verify-fonts.mjs will fail loudly if it is removed too early. */
+html[lang]{
+  --font-sora:"Sora","Vazirmatn","Sora Fallback";
+  --font-plex-sans:"IBM Plex Sans","Vazirmatn","IBM Plex Sans Fallback";
+  --font-plex-mono:"IBM Plex Mono","Vazirmatn","IBM Plex Mono Fallback";
+}

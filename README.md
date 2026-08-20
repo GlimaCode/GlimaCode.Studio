@@ -89,6 +89,38 @@ as character, so they keep working under a Persian input method.
 
 Brand and technology names stay in Latin script inside Persian sentences.
 
+## Deliberate divergences from the prototype
+
+The port is checked against `studio-site-v3.html` on every phase boundary and
+the English rendering is expected to match it exactly. These differences are
+intentional. Do not "fix" them back.
+
+**Fonts are self-hosted rather than fetched from Google.** Same typefaces, no
+third-party request, and the site keeps its typography on networks where
+fonts.googleapis.com is unreachable. This is the only edit inside the ported
+stylesheet: three `font-family` declarations now read from variables.
+
+**IBM Plex Sans 700 is loaded.** The prototype loaded 400/500/600 only, while
+`<strong>` asks for 700 — so the emphasised names in the hero were rendered
+as synthetic bold by the browser, in the prototype and in the port after it.
+Real bold is crisper and is not what the prototype shows. The style and
+geometry diff still passes, because it measures computed values and box
+sizes rather than how glyphs are rasterised.
+
+**Sora 400 is not loaded.** Nothing in the design asks for it; measured, not
+assumed.
+
+**Vazirmatn sits ahead of the metric-matched fallback in every Latin stack.**
+Without that, Persian renders in system Arial. See the comment in
+`globals.css` and the guard in `scripts/verify-fonts.mjs`.
+
+**Prices are gone and the services heading changed** from "Clear price" to
+"Clear timeline", so the page does not promise something it no longer shows.
+
+**The category filter is a `div` with a navigation role, not a `nav`.** The
+ported stylesheet styles `nav` by element with `position: fixed`, so a real
+`nav` there leaves the flow and covers the header.
+
 ## Conventions
 
 - Prices on the site are floors, quoted as "from". Keep the copy honest.
