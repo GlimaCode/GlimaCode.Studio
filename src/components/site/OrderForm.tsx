@@ -14,11 +14,7 @@ import {
   type ProjectTypeKey,
   type TimelineKey,
 } from "@/content/formOptions";
-import {
-  generateTicketId,
-  submitProjectRequest,
-  type ProjectRequestInput,
-} from "@/lib/data/requests";
+import { submitProjectRequest } from "@/lib/data/requests";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,19 +43,14 @@ export function OrderForm({
   const emailFieldRef = useRef<HTMLDivElement>(null);
   const descFieldRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * The ticket reference comes from the clock, so it cannot be generated
-   * during render without the server and client disagreeing. The server
-   * sends the placeholder, and after mount we write the real reference
-   * straight to the node — display-only state that never needs a re-render.
-   */
-  const ticketIdRef = useRef<string | null>(null);
-  const previewRef = useRef<HTMLSpanElement>(null);
+  /** When the form became available, for the timing check. */
+  const shownAt = useRef<number>(0);
   const [confirmedId, setConfirmedId] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const [problem, setProblem] = useState<"throttled" | "failed" | null>(null);
 
   useEffect(() => {
-    ticketIdRef.current = generateTicketId();
-    if (previewRef.current) previewRef.current.textContent = ticketIdRef.current;
+    shownAt.current = Date.now();
   }, []);
 
   /**
@@ -101,8 +92,9 @@ export function OrderForm({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    if (sending) return;
 
+    const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "").trim();
     const email = String(data.get("email") ?? "").trim();
     const description = String(data.get("desc") ?? "").trim();
@@ -114,11 +106,12 @@ export function OrderForm({
     mark(nameFieldRef.current, nameInvalid);
     mark(emailFieldRef.current, emailInvalid);
     mark(descFieldRef.current, descInvalid);
-
     if (nameInvalid || emailInvalid || descInvalid) return;
 
-    const id = ticketIdRef.current ?? generateTicketId();
-    const input: ProjectRequestInput = {
+    setProblem(null);
+    setSending(true);
+
+    const result = await submitProjectRequest({
       name,
       email,
       company: String(data.get("company") ?? "").trim(),
@@ -128,17 +121,26 @@ export function OrderForm({
       description,
       locale,
       sourceProjectSlug: source?.slug ?? null,
-    };
+      website: String(data.get("website") ?? ""),
+      elapsedMs: shownAt.current ? Date.now() - shownAt.current : undefined,
+    });
 
-    const result = await submitProjectRequest(id, input);
-    setConfirmedId(result.ticketId);
+    setSending(false);
+
+    if (result.ok) {
+      setConfirmedId(result.ticketId);
+      return;
+    }
+    // "invalid" should be unreachable — the same rules ran above — so it is
+    // reported as a failure rather than silently ignored.
+    setProblem(result.reason === "throttled" ? "throttled" : "failed");
   }
 
   function startAnother() {
     formRef.current?.reset();
-    ticketIdRef.current = generateTicketId();
-    if (previewRef.current) previewRef.current.textContent = ticketIdRef.current;
+    shownAt.current = Date.now();
     setConfirmedId(null);
+    setProblem(null);
     document.getElementById("start")?.scrollIntoView();
   }
 
@@ -149,7 +151,7 @@ export function OrderForm({
         ref={formRef}
         noValidate
         onSubmit={handleSubmit}
-        style={confirmedId ? { display: "none" } : undefined}
+        style={confirmedId !== null ? { display: "none" } : undefined}
       >
         {source ? (
           <p className="pf-source">
@@ -161,12 +163,6 @@ export function OrderForm({
         ) : null}
         <div className="order-head">
           <h3>{t.start.cardTitle}</h3>
-          <span className="req-id">
-            {t.start.idPrefix}{" "}
-            <span id="reqIdPreview" ref={previewRef} dir="ltr">
-              REQ-····
-            </span>
-          </span>
         </div>
         <div className="form-grid">
           <div className="field" id="f-name" ref={nameFieldRef}>
@@ -259,15 +255,41 @@ export function OrderForm({
             <span className="error">{t.start.errors.description}</span>
           </div>
         </div>
+
+        {/* Honeypot. Hidden from sight and from assistive technology, and
+            excluded from tab order, so no person can reach it — anything in
+            it came from something filling every field it found. Positioned
+            off-screen rather than display:none, which some bots skip. */}
+        <div className="hp-field" aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
+
         <div className="order-actions">
-          <button type="submit" className="btn btn-primary magnetic">
-            {t.start.submit}
+          <button
+            type="submit"
+            className="btn btn-primary magnetic"
+            disabled={sending}
+          >
+            {sending ? t.start.sending : t.start.submit}
           </button>
           <span className="order-note">{t.start.note}</span>
         </div>
+
+        {problem ? (
+          <p className="order-problem" role="alert">
+            {problem === "throttled" ? t.start.throttled : t.start.failed}
+          </p>
+        ) : null}
       </form>
 
-      {confirmedId ? (
+      {confirmedId !== null ? (
         <div className="order-success show" id="orderSuccess">
           <div className="check-ring" aria-hidden="true">
             <svg

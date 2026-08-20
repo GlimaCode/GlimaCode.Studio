@@ -210,11 +210,16 @@ export const en = {
       flexible: "Flexible",
     },
     submit: "Send request",
-    note: "Sends via your email app — we reply within 24 hours.",
+    sending: "Sending…",
+    note: "We reply within 24 hours.",
+    /** Shown when the address has filed several requests in a short time. */
+    throttled: "That is a lot of requests from one address. Give it an hour, or email us directly.",
+    /** Shown when the request could not be saved at all. */
+    failed: "Something went wrong sending that. Please email us directly so it does not get lost.",
     success: {
       openedBefore: "Ticket",
       openedAfter: "opened",
-      body: "Your email app should have opened with the request pre-filled — just press send. If it didn't, email us directly and mention the ticket ID.",
+      body: "We have it. Quote this reference if you get in touch before we reply — we answer within 24 hours.",
       again: "Open another ticket",
     },
   },

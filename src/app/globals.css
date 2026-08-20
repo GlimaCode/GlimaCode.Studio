@@ -828,3 +828,19 @@ html[lang]{
   --font-plex-sans:"IBM Plex Sans","Vazirmatn","IBM Plex Sans Fallback";
   --font-plex-mono:"IBM Plex Mono","Vazirmatn","IBM Plex Mono Fallback";
 }
+
+/* ---------- Request form: honeypot and failure notice ---------- */
+/* Positioned off-screen rather than display:none. A bot that skips hidden
+   fields is exactly the bot this is meant to catch, and display:none is the
+   first thing they learn to skip. aria-hidden and tabindex keep it away from
+   anyone using the keyboard or a screen reader. */
+.hp-field{
+  position:absolute;left:-9999px;top:auto;width:1px;height:1px;
+  overflow:hidden;
+}
+.order-problem{
+  margin-top:14px;font-size:13.5px;color:var(--red);
+  background:#FDF0EE;border:1px solid #F3C9C2;border-radius:10px;padding:10px 14px;
+}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn:disabled:hover{transform:none}
