@@ -1108,7 +1108,10 @@ html[lang]{
   user-select:all;-webkit-user-select:all;
 }
 /* Light panel: slate on white, 5.40:1. */
-.order-success .contact-address{color:var(--slate);margin:12px 0 0}
+/* `auto` on the sides, not 0: .order-success p sets `margin:0 auto 6px`
+   and a 48ch max-width, so zeroing the horizontal margins pins the box
+   to the left of a panel where everything else is centred. */
+.order-success .contact-address{color:var(--slate);margin:12px auto 0}
 /* Dark card: the same colour the card's own body copy uses, 8.93:1.
    Stated rather than inherited, so it survives the rule above it changing. */
 .contact-card .contact-address{color:#B9C4D8;margin:14px auto 0}
