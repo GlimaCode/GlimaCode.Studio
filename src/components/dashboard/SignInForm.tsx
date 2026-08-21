@@ -14,10 +14,10 @@ export function SignInForm() {
   const [state, action, pending] = useActionState(signIn, INITIAL);
 
   return (
-    <div className="signin-wrap">
+    <main className="signin-wrap" id="main">
       <form className="order-card signin-card" action={action}>
         <div className="order-head">
-          <h3>Team access</h3>
+          <h1>Team access</h1>
         </div>
         <div className="field">
           <label htmlFor="email">Email</label>
@@ -52,6 +52,6 @@ export function SignInForm() {
           </button>
         </div>
       </form>
-    </div>
+    </main>
   );
 }

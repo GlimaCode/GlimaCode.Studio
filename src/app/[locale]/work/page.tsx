@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getDictionary, isLocale, type Locale } from "@/i18n";
 import { stripIsolates } from "@/i18n/pending";
 import { siteConfig } from "@/config/site";
+import { localeAlternates } from "@/lib/seo/alternates";
 import {
   categoriesFrom,
   listPublishedProjects,
@@ -27,7 +28,10 @@ export async function generateMetadata({
   return {
     title: stripIsolates(t.portfolio.heading),
     description: stripIsolates(t.portfolio.desc),
-    alternates: { canonical: `/${locale}/work` },
+    // Canonical alone would leave /en/work and /fa/work looking like two
+    // unrelated pages. The layout pairs the home pages; every other route has
+    // to pair its own, because alternates do not inherit.
+    alternates: localeAlternates(locale, "/work"),
   };
 }
 
@@ -41,7 +45,7 @@ function ProjectCard({
   return (
     <Link className="pf-card" href={`/${locale}/work/${project.slug}`}>
       <span className="pf-card-category">{project.categoryLabel}</span>
-      <h3>{project.title}</h3>
+      <h2>{project.title}</h2>
       <p>{project.summary}</p>
       <div className="chips" lang="en" dir="ltr">
         {project.tech.slice(0, 4).map((tech) => (
@@ -81,66 +85,70 @@ export default async function WorkIndexPage({
   return (
     <>
       <div id="progress" aria-hidden="true"></div>
-      <Nav t={t} locale={locale} />
+      {/* This page has none of the home page's sections, so every header
+          link goes home. */}
+      <Nav t={t} locale={locale} localSections={[]} />
 
-      <section id="work" style={{ paddingTop: "140px" }}>
-        <div className="wrap">
-          <div className="sec-head reveal">
-            <span className="sec-coord" dir="ltr">
-              SEC 01 / GRID 48
-            </span>
-            <p className="sec-label">{t.portfolio.label}</p>
-            <h2>{t.portfolio.heading}</h2>
-            <p className="sec-desc">{t.portfolio.desc}</p>
-          </div>
+      <main id="main">
+        <section id="work" style={{ paddingTop: "140px" }}>
+          <div className="wrap">
+            <div className="sec-head reveal">
+              <span className="sec-coord" dir="ltr">
+                SEC 01 / GRID 48
+              </span>
+              <p className="sec-label">{t.portfolio.label}</p>
+              <h1>{t.portfolio.heading}</h1>
+              <p className="sec-desc">{t.portfolio.desc}</p>
+            </div>
 
-          {categories.length > 1 ? (
-            /* A div, not a <nav>: the ported stylesheet styles `nav` by
-               element with position:fixed, so a nav here would leave the
-               flow and sit on top of the real header. role keeps the
-               landmark semantics without inheriting those styles. */
-            <div
-              className="pf-filter reveal"
-              role="navigation"
-              aria-label={t.portfolio.label}
-            >
-              <Link
-                className={`pf-chip${active ? "" : " active"}`}
-                href={`/${locale}/work`}
-                aria-current={active ? undefined : "page"}
+            {categories.length > 1 ? (
+              /* A div, not a <nav>: the ported stylesheet styles `nav` by
+                 element with position:fixed, so a nav here would leave the
+                 flow and sit on top of the real header. role keeps the
+                 landmark semantics without inheriting those styles. */
+              <div
+                className="pf-filter reveal"
+                role="navigation"
+                aria-label={t.portfolio.label}
               >
-                {t.portfolio.all}
-                <span className="pf-chip-count">{projects.length}</span>
-              </Link>
-              {categories.map((c) => (
                 <Link
-                  key={c.slug}
-                  className={`pf-chip${active === c.slug ? " active" : ""}`}
-                  href={`/${locale}/work?category=${c.slug}`}
-                  aria-current={active === c.slug ? "page" : undefined}
+                  className={`pf-chip${active ? "" : " active"}`}
+                  href={`/${locale}/work`}
+                  aria-current={active ? undefined : "page"}
                 >
-                  {c.label}
-                  <span className="pf-chip-count">{c.count}</span>
+                  {t.portfolio.all}
+                  <span className="pf-chip-count">{projects.length}</span>
                 </Link>
-              ))}
-            </div>
-          ) : null}
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    className={`pf-chip${active === c.slug ? " active" : ""}`}
+                    href={`/${locale}/work?category=${c.slug}`}
+                    aria-current={active === c.slug ? "page" : undefined}
+                  >
+                    {c.label}
+                    <span className="pf-chip-count">{c.count}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
 
-          {visible.length ? (
-            <div className="pf-grid">
-              {visible.map((project) => (
-                <ProjectCard
-                  key={project.slug}
-                  project={project}
-                  locale={locale}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="empty">{t.portfolio.empty}</div>
-          )}
-        </div>
-      </section>
+            {visible.length ? (
+              <div className="pf-grid">
+                {visible.map((project) => (
+                  <ProjectCard
+                    key={project.slug}
+                    project={project}
+                    locale={locale}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="empty">{t.portfolio.empty}</div>
+            )}
+          </div>
+        </section>
+      </main>
 
       <Footer t={t} />
       <SiteMotion locale={locale} />

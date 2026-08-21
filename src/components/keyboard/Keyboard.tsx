@@ -24,6 +24,31 @@ function Keycap({ def, t }: { def: KeyDef; t: Dictionary }) {
   );
   const sub = sublabel ? <span className="sub">{sublabel}</span> : null;
 
+  /**
+   * ACCESSIBLE NAME
+   *
+   * These keys used to carry aria-label="Go to work" over a visible "W work".
+   * WCAG 2.5.3 (Label in Name) asks that the accessible name contain the
+   * text a sighted user can see, and that pairing fails it: someone driving
+   * the page by voice reads "W work" off the screen, says it, and nothing
+   * happens — the name they needed was a phrase that appears nowhere.
+   *
+   * Hiding the letter from assistive technology does not fix it. aria-hidden
+   * removes an element from the accessibility tree, not from the screen, and
+   * the rule is about what is on the screen. Verified the hard way: the audit
+   * still failed with the letter hidden.
+   *
+   * So a key with a sub-label is named by its own contents. Visible text and
+   * accessible name become the same string by construction, which is the only
+   * version of this that cannot drift apart later. A screen reader announces
+   * "W work, button" — the letter is genuinely part of the label here, since
+   * pressing W is what the key is advertising.
+   *
+   * A key with no sub-label — esc, and the wordmark — has the cap as its only
+   * visible text, so it takes a name that begins with exactly that.
+   */
+  const capText = def.brand ? siteConfig.brand : def.cap;
+
   if (!def.action) {
     return (
       <div className={className} aria-hidden="true">
@@ -38,7 +63,9 @@ function Keycap({ def, t }: { def: KeyDef; t: Dictionary }) {
       type="button"
       className={className}
       data-key={def.action}
-      aria-label={`${t.keyboard.goTo} ${sublabel ?? t.keyboard.top}`}
+      aria-label={
+        sublabel ? undefined : `${capText} ${t.keyboard.goTo} ${t.keyboard.top}`
+      }
     >
       {label}
       {sub}

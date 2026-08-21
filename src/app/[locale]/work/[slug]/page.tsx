@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getDictionary, isLocale } from "@/i18n";
 import { stripIsolates } from "@/i18n/pending";
 import { siteConfig } from "@/config/site";
+import { localeAlternates } from "@/lib/seo/alternates";
 import { getPublishedProject } from "@/lib/data/portfolio";
 import { Nav } from "@/components/site/Nav";
 import { Start } from "@/components/site/Start";
@@ -24,12 +25,14 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: stripIsolates(project.summary),
-    alternates: { canonical: `/${locale}/work/${slug}` },
+    alternates: localeAlternates(locale, `/work/${slug}`),
     openGraph: {
       type: "article",
       title: `${project.title} — ${siteConfig.brand}`,
       description: stripIsolates(project.summary),
       url: `${siteConfig.url}/${locale}/work/${slug}`,
+      // A real cover image beats the generated card when one exists; leaving
+      // this undefined lets the opengraph-image route supply the fallback.
       images: project.coverUrl ? [project.coverUrl] : undefined,
     },
   };
@@ -59,88 +62,92 @@ export default async function ProjectPage({ params }: PageParams) {
   return (
     <>
       <div id="progress" aria-hidden="true"></div>
-      <Nav t={t} locale={locale} />
+      {/* The request form lives on this page, so "start" stays local; the
+          rest of the header goes home. */}
+      <Nav t={t} locale={locale} localSections={["start"]} />
 
-      <section id="work" style={{ paddingTop: "140px" }}>
-        <div className="wrap">
-          <div className="sec-head reveal">
-            <span className="sec-coord" dir="ltr">
-              SEC 01 / GRID 48
-            </span>
-            <p className="sec-label">
-              <Link className="pf-back" href={`/${locale}/work`}>
-                ← {t.portfolio.backToIndex}
-              </Link>
-            </p>
-            <h2>{project.title}</h2>
-            <p className="sec-desc">{project.summary}</p>
-          </div>
-
-          {project.usesFallbackCopy ? (
-            <p className="pf-notice">{t.portfolio.fallbackNotice}</p>
-          ) : null}
-
-          <div className="pf-detail">
-            <div className="pf-detail-main">
-              {project.problem ? (
-                <>
-                  <h3>{t.portfolio.problemHeading}</h3>
-                  <p>{project.problem}</p>
-                </>
-              ) : null}
-              {project.description ? (
-                <>
-                  <h3>{t.portfolio.approachHeading}</h3>
-                  <p>{project.description}</p>
-                </>
-              ) : null}
+      <main id="main">
+        <section id="work" style={{ paddingTop: "140px" }}>
+          <div className="wrap">
+            <div className="sec-head reveal">
+              <span className="sec-coord" dir="ltr">
+                SEC 01 / GRID 48
+              </span>
+              <p className="sec-label">
+                <Link className="pf-back" href={`/${locale}/work`}>
+                  ← {t.portfolio.backToIndex}
+                </Link>
+              </p>
+              <h1>{project.title}</h1>
+              <p className="sec-desc">{project.summary}</p>
             </div>
 
-            <aside className="pf-detail-side">
-              <div className="pf-meta">
-                <span className="pf-meta-label">
-                  {t.portfolio.stackHeading}
-                </span>
-                <div className="chips" lang="en" dir="ltr">
-                  {project.tech.map((tech) => (
-                    <span className="chip" key={tech}>
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+            {project.usesFallbackCopy ? (
+              <p className="pf-notice">{t.portfolio.fallbackNotice}</p>
+            ) : null}
+
+            <div className="pf-detail">
+              <div className="pf-detail-main">
+                {project.problem ? (
+                  <>
+                    <h2>{t.portfolio.problemHeading}</h2>
+                    <p>{project.problem}</p>
+                  </>
+                ) : null}
+                {project.description ? (
+                  <>
+                    <h2>{t.portfolio.approachHeading}</h2>
+                    <p>{project.description}</p>
+                  </>
+                ) : null}
               </div>
 
-              <a className="btn btn-primary pf-request" href="#start">
-                {t.portfolio.requestSimilar}
-              </a>
-              <p className="pf-request-note">{t.portfolio.requestSimilarNote}</p>
+              <aside className="pf-detail-side">
+                <div className="pf-meta">
+                  <span className="pf-meta-label">
+                    {t.portfolio.stackHeading}
+                  </span>
+                  <div className="chips" lang="en" dir="ltr">
+                    {project.tech.map((tech) => (
+                      <span className="chip" key={tech}>
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-              {project.repoUrl ? (
-                <a
-                  className="btn btn-ghost btn-sm"
-                  href={project.repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.portfolio.viewRepo}
+                <a className="btn btn-primary pf-request" href="#start">
+                  {t.portfolio.requestSimilar}
                 </a>
-              ) : null}
-              {project.liveUrl ? (
-                <a
-                  className="btn btn-ghost btn-sm"
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t.portfolio.viewLive}
-                </a>
-              ) : null}
-            </aside>
+                <p className="pf-request-note">{t.portfolio.requestSimilarNote}</p>
+
+                {project.repoUrl ? (
+                  <a
+                    className="btn btn-ghost btn-sm"
+                    href={project.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t.portfolio.viewRepo}
+                  </a>
+                ) : null}
+                {project.liveUrl ? (
+                  <a
+                    className="btn btn-ghost btn-sm"
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t.portfolio.viewLive}
+                  </a>
+                ) : null}
+              </aside>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <Start t={t} locale={locale} source={source} />
+        <Start t={t} locale={locale} source={source} />
+      </main>
 
       <Footer t={t} />
       <SiteMotion locale={locale} />

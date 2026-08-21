@@ -56,7 +56,11 @@ export default async function RequestDetailPage({
         </div>
       </div>
 
-      <div className="dash-body">
+      <main className="dash-body" id="main">
+        {/* The reference is the page's identity, so it is the heading. */}
+        <h1 className="dash-h1" dir="ltr">
+          {request.ticketId}
+        </h1>
         {!request.delivered ? (
           <div className="dash-banner dash-banner-warn">
             No successful delivery is recorded for this request.{" "}
@@ -190,7 +194,7 @@ export default async function RequestDetailPage({
             </a>
           </aside>
         </div>
-      </div>
+      </main>
     </>
   );
 }

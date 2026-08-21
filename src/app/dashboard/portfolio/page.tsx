@@ -20,11 +20,13 @@ export default async function PortfolioAdminPage() {
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — portfolio
           </span>
-          <div className="tabs" role="tablist">
+          <div className="tabs" role="navigation" aria-label="Dashboard sections">
             <Link className="tab" href="/dashboard">
               Requests
             </Link>
-            <span className="tab active">Portfolio</span>
+            <span className="tab active" aria-current="page">
+              Portfolio
+            </span>
           </div>
           <form action={signOut}>
             <button className="btn btn-ghost btn-sm" type="submit">
@@ -34,7 +36,8 @@ export default async function PortfolioAdminPage() {
         </div>
       </div>
 
-      <div className="dash-body">
+      <main className="dash-body" id="main">
+        <h1 className="dash-h1">Portfolio</h1>
         <div className="dash-banner">
           Content is edited in the database. This page controls what is visible
           and in what order — the two things that should not need a deploy.
@@ -113,7 +116,7 @@ export default async function PortfolioAdminPage() {
         ) : (
           <div className="empty">No portfolio entries.</div>
         )}
-      </div>
+      </main>
     </>
   );
 }

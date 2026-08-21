@@ -21,8 +21,14 @@ function Ticket({ project, t }: { project: BoardProject; t: Dictionary }) {
 
   return (
     <article className="ticket">
+      {/* The dot is the only thing that says whether this shipped, so it
+          carries a label rather than being hidden. An empty span cannot: ARIA
+          forbids aria-label on a generic element, and a screen reader is free
+          to ignore it. role="img" makes the element something that can be
+          named, which is what it already is — a colour standing in for a word. */}
       <span
         className={`status ${project.shipped ? "done" : "wip"}`}
+        role="img"
         aria-label={statusLabel(project, t)}
       ></span>
       {/* Reference codes are identifiers, not prose. */}

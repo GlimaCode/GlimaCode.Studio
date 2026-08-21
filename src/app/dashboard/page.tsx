@@ -72,10 +72,10 @@ export default async function DashboardPage() {
   const member = await currentTeamMember();
   if (!member) {
     return (
-      <div className="signin-wrap">
+      <main className="signin-wrap" id="main">
         <div className="order-card signin-card">
           <div className="order-head">
-            <h3>Not a team account</h3>
+            <h1>Not a team account</h1>
           </div>
           <p className="sec-desc" style={{ marginBottom: "18px" }}>
             You are signed in as {user.email}, but that account is not on the
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
             </button>
           </form>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -102,8 +102,10 @@ export default async function DashboardPage() {
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — team dashboard
           </span>
-          <div className="tabs" role="tablist">
-            <span className="tab active">Requests</span>
+          <div className="tabs" role="navigation" aria-label="Dashboard sections">
+            <span className="tab active" aria-current="page">
+              Requests
+            </span>
             <Link className="tab" href="/dashboard/portfolio">
               Portfolio
             </Link>
@@ -116,7 +118,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="dash-body">
+      <main className="dash-body" id="main">
+        <h1 className="dash-h1">Requests</h1>
         {undelivered ? (
           <div className="dash-banner dash-banner-warn">
             {undelivered} request{undelivered === 1 ? "" : "s"} with no recorded
@@ -134,7 +137,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="empty">No requests yet.</div>
         )}
-      </div>
+      </main>
     </>
   );
 }

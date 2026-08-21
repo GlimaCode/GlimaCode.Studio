@@ -121,6 +121,38 @@ Without that, Persian renders in system Arial. See the comment in
 ported stylesheet styles `nav` by element with `position: fixed`, so a real
 `nav` there leaves the flow and covers the header.
 
+**The header carries a skip link, and every page has a `<main>`.** The
+prototype had neither, so a keyboard user tabbed through the whole header on
+every page and a screen reader had no landmark to jump to. The link is
+off-screen until focused; nothing changes visually.
+
+**The portfolio routes title themselves with `<h1>`, not `<h2>`.** On the home
+page those really are sections under the hero's heading. On their own routes
+they are the page, and the outline had no level one at all. `.sec-head h1` in
+the additions block reproduces the h2's type exactly, including undoing the
+two properties the hero's `h1` carries and `h2` never did.
+
+**Keys on the shortcut board are named by their own contents.** They carried
+`aria-label="Go to work"` over a visible "W work", which fails WCAG 2.5.3 —
+someone driving the page by voice reads the screen, says what they see, and
+nothing happens. Hiding the letter from assistive technology does not fix it;
+the rule is about what is visible, not what is exposed. Dropping the label so
+the name is the visible text is the only version that cannot drift.
+
+**Three accents have deeper variants for use as text.** Red, green and amber
+were chosen to be noticed, not read: as text on paper they measure 4.27, 2.82
+and 1.71 against a 4.5 requirement. The originals still fill dots, borders and
+backgrounds. See the contrast block at the end of `globals.css` for the
+measurements and for what was deliberately left alone.
+
+**The hero entrance is unchanged, and it costs about 800 ms of Largest
+Contentful Paint on a first visit.** Chrome does not count an element at
+`opacity: 0`, so the hero paragraph — the largest thing on the screen — is
+recorded only when its fade finishes. Measured cold with a 4× CPU throttle:
+1440 ms as designed, 835 ms with a briefer fade, 590 ms with the rise but no
+fade. This is a design decision, not a defect, and it is written down here so
+the next person to run Lighthouse knows it was measured rather than missed.
+
 ## Conventions
 
 - Prices on the site are floors, quoted as "from". Keep the copy honest.

@@ -230,3 +230,37 @@ export async function listPublishedSlugs(): Promise<string[]> {
 
   return (data as { slug: string }[]).map((row) => row.slug);
 }
+
+/**
+ * Published projects with their last edit, for the sitemap.
+ *
+ * Separate from listPublishedSlugs because a sitemap wants a date and static
+ * generation does not, and widening the other function would mean every
+ * caller carrying a field only one of them reads.
+ */
+export async function listSitemapProjects(): Promise<
+  { slug: string; updatedAt: Date | null }[]
+> {
+  if (!hasDatabaseConfig()) return [];
+
+  const { data, error } = await publicClient()
+    .from("portfolio_projects")
+    .select("slug, updated_at")
+    .eq("published", true);
+
+  if (error) {
+    console.error("[portfolio] listSitemapProjects failed:", error.message);
+    return [];
+  }
+
+  return (data as { slug: string; updated_at: string | null }[]).map((row) => {
+    const parsed = row.updated_at ? new Date(row.updated_at) : null;
+    return {
+      slug: row.slug,
+      // An unparseable timestamp becomes no timestamp. A sitemap entry with a
+      // wrong lastmod is worse than one without: crawlers use it to decide
+      // whether to bother re-reading the page.
+      updatedAt: parsed && !Number.isNaN(parsed.valueOf()) ? parsed : null,
+    };
+  });
+}

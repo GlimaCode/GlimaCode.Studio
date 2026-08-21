@@ -4,7 +4,8 @@ Operational procedures for glimacode.com. Written on the assumption that the
 studio may need to move host or database provider at short notice, and that
 whoever is doing it may be tired and in a hurry.
 
-Sections marked **pending** are filled in as the corresponding phase lands.
+Every section is written. If one goes stale, fix it here rather than
+remembering the correction.
 
 ## Where things live
 
@@ -49,13 +50,82 @@ records are managed in the Vercel dashboard, not at the registrar.
   ever lost, everything else is replaceable but this is not — keep the
   credentials in a password manager both of you can reach.
 
-## Database restore
+## Database backup and restore
 
-**Pending — written in phase 4, once there is data worth restoring.**
+### What actually needs backing up
 
-Will cover: taking a backup, where backups are kept, restoring into a fresh
-Postgres instance from `db/migrations` plus a data dump, and verifying
-row-level security survived the restore.
+The schema does not. It is `db/migrations`, in the repository, applied in
+filename order. Restoring a schema dump on top of those migrations gives you
+two sources of truth that will disagree eventually.
+
+What needs backing up is the data, and it is small: portfolio content, the
+requests table, the delivery log, and the team roster. All of it fits in a
+file you can read.
+
+One thing is **not** in the database at all in a portable form: the accounts.
+Authentication lives in the provider's `auth` schema, and `team_members.user_id`
+points at it. See *After a restore into a different project* below — getting
+this wrong is the difference between a working dashboard and one that signs
+you in and then tells you that you are not on the team.
+
+### Check what the provider already does
+
+Before writing your own procedure, find out what the plan includes. Supabase
+takes daily backups on paid plans and **none** on the free plan. Look under
+Database → Backups. If that page is empty, the only backups that exist are
+the ones you take.
+
+### Taking a backup
+
+Requires the database password, which is in the project's connection settings
+and is not in this repository.
+
+```
+pg_dump "<connection string>" --data-only --schema=public   --exclude-table=schema_migrations   -f glimacode-data-YYYY-MM-DD.sql
+```
+
+`--data-only` and `--schema=public` are both load-bearing. Without the first
+you get a schema that competes with the migrations; without the second you
+drag in the provider's internal schemas, which will not exist the same way
+anywhere else.
+
+Keep the file somewhere that is not the same provider. A backup that dies with
+the thing it was backing up is a ritual, not a backup.
+
+### Restoring
+
+1. Stand up Postgres and apply `db/migrations` in filename order.
+2. Load the data dump with `psql "<connection string>" -f <file>`.
+3. Fix the roster (below) if this is a different project.
+4. Run `db/verify/rls_probe.sql` in the SQL editor.
+
+Step 4 is not optional and it is the reason the probe exists. Grants and
+policies are created by the migrations, but a restore is exactly the moment
+when a step gets skipped and nobody notices — and the failure mode is silent:
+the site works perfectly while every client brief is readable by the public.
+The probe answers that question in eighteen lines of output.
+
+### After a restore into a different project
+
+Accounts do not travel. A new project has a new `auth` schema, so:
+
+1. Create the two team accounts by hand, as originally done. Public signup
+   stays off; there is no self-service path and there should not be.
+2. Read the new user ids from the provider's auth dashboard.
+3. Update the roster to match:
+
+   ```sql
+   update public.team_members set user_id = '<new uuid>' where name = 'Ali';
+   update public.team_members set user_id = '<new uuid>' where name = 'Mostafa';
+   ```
+
+4. Sign in and confirm the request list loads. If it says you are not on the
+   team roster, step 3 is wrong — the account is real, it is just pointing at
+   an id that no longer exists.
+
+Requests keep their ticket references across a restore. They are stored on the
+row, not derived, so a reference quoted in an email six months ago still finds
+the right record.
 
 ## Rotating the anonymous key
 
@@ -112,7 +182,53 @@ move rewrites one function rather than every policy.
 
 ## Notification failures
 
-**Pending — written in phase 3, with the notification pipeline.**
+### How to tell
+
+The dashboard says so, on the list, without being asked. A request with no
+successful delivery carries a **not notified** flag, and a banner at the top
+counts them: *"1 request with no recorded delivery. Nobody was emailed about
+it — they are only here."*
+
+That wording is deliberate and worth keeping. The failure mode this design
+exists to prevent is a brief that arrives, is never emailed, and sits in a
+list nobody thought to check.
+
+### What it means
+
+Nothing was lost. The API route persists the request first and notifies
+second, and the notification is not allowed to fail the response — a visitor
+who saw a confirmation and a ticket reference really is in the database.
+
+An absent delivery record reads as *not delivered*. That is intentional: the
+log is written after the send attempt, so an attempt that died before it could
+log looks identical to one that never ran, and operationally both mean the
+same thing.
+
+### While no provider is configured
+
+With `MAIL_PROVIDER=none`, every request is flagged. This is the correct
+display of the true state, not a bug — nobody is being emailed, because there
+is nowhere to email from yet. Triage from the dashboard until the mailbox
+exists.
+
+### Turning delivery on
+
+Set three environment variables in the hosting project — `MAIL_PROVIDER`,
+`MAIL_FROM`, `MAIL_TO`, plus `MAIL_API_KEY` — and redeploy. No code changes:
+`src/lib/mail/` is written against a provider-agnostic interface for exactly
+this. Then submit a real request and confirm the flag does not appear.
+
+### When a send fails with a provider configured
+
+1. Open the request. The detail view shows every delivery attempt with its
+   provider and error text — that is usually the whole diagnosis.
+2. Reply by hand from the detail view. The visitor is waiting on a person,
+   not on the pipeline.
+3. Common causes: an expired API key, a sending domain that has lost its
+   DNS verification, or a recipient address that no longer exists.
+
+Attempts are append-only. Nothing overwrites the record of a failure, so the
+history of a bad week stays legible after it is fixed.
 
 ## Contacts
 

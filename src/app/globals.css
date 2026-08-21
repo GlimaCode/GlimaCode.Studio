@@ -622,6 +622,24 @@
    New rules go here so the boundary stays auditable.
 ===================================================================== */
 
+/* ---------- Skip link ---------- */
+/* Off-screen rather than display:none, because a hidden element is not
+   focusable and this link exists only to be reached by the Tab key. It is
+   the first thing in the header, so it is the first stop on every page —
+   otherwise a keyboard user tabs through the whole nav on every load.
+   Positioned with logical properties so it lands on the correct side in
+   Persian without a second rule. */
+.skip-link{
+  position:absolute;inset-inline-start:-9999px;top:8px;z-index:100;
+  padding:10px 16px;border-radius:8px;
+  background:var(--cobalt);color:#fff;text-decoration:none;
+  font-size:14px;font-weight:600;white-space:nowrap;
+}
+.skip-link:focus-visible,.skip-link:focus{
+  inset-inline-start:16px;
+  outline:2px solid var(--ink);outline-offset:2px;
+}
+
 /* ---------- Header lockup (replaces the prototype's text logo) ---------- */
 .logo-lockup{
   display:inline-flex;align-items:center;gap:9px;
@@ -751,7 +769,9 @@
   font-size:11.5px;color:var(--cobalt);text-transform:uppercase;
   letter-spacing:.1em;margin-bottom:10px;
 }
-.pf-card h3{font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;font-size:17px;font-weight:600;margin-bottom:8px}
+/* h2, not h3: on their own routes the portfolio titles sit directly under
+   the page's h1, so the outline would skip a level. */
+.pf-card h2{font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;font-size:17px;font-weight:600;margin-bottom:8px}
 .pf-card p{font-size:14px;color:var(--slate);margin-bottom:14px;flex:1}
 
 .pf-back{
@@ -764,11 +784,11 @@
   border:1px solid #CBD6FC;border-radius:10px;padding:10px 14px;margin-bottom:24px;
 }
 .pf-detail{display:grid;grid-template-columns:1.55fr .95fr;gap:34px;align-items:start}
-.pf-detail-main h3{
+.pf-detail-main h2{
   font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
   font-size:17px;font-weight:600;margin:0 0 10px;
 }
-.pf-detail-main h3 + p{margin-bottom:26px}
+.pf-detail-main h2 + p{margin-bottom:26px}
 .pf-detail-main p{font-size:15.5px;color:var(--slate);line-height:1.75}
 .pf-detail-side{
   display:flex;flex-direction:column;gap:12px;align-items:stretch;
@@ -947,4 +967,93 @@ html[lang]{
   .req-detail-grid{grid-template-columns:1fr}
   .req-side{position:static}
   .req-facts{grid-template-columns:1fr}
+}
+
+/* =====================================================================
+   Contrast corrections.
+
+   Measured against WCAG 2.1 AA with axe-core and by computing the ratios
+   directly, because axe reports the whole page as "needs review": the body
+   carries a grid background image, and axe will not guess a contrast ratio
+   over an image it cannot flatten.
+
+   The palette is sound where it matters — ink on paper is 14.8:1, slate 5.1,
+   cobalt 6.0. Three accents fail as *text*, which is a different job from
+   the one they were chosen for:
+
+       red    #D2452F on paper  4.27   needs 4.5
+       green  #1FA97A on paper  2.82
+       signal #FFB03A on paper  1.71
+
+   Rather than change the brand colours, this adds a deeper variant of each
+   for the cases where the colour has to be read rather than noticed. The
+   originals still fill dots, borders and backgrounds, which is what they
+   are good at.
+
+   Deliberately not changed:
+
+   .status.done / .status.wip — 10px dots on a card, below 3:1 as graphical
+   objects. They now carry role="img" and a translated label, so the state
+   they encode is available as text and the dot is decoration beside it.
+   Darkening them would make the board read as a warning panel.
+===================================================================== */
+
+:root{
+  --red-text:#C43A25;    /* 4.97 on paper, 5.28 on card, 4.61 on the error tint */
+  --green-text:#0F7050;  /* 5.72 on paper, 5.17 on cobalt-soft                  */
+  --signal-deep:#9A6000; /* 4.88 on paper — amber that survives being read      */
+}
+
+/* Field-level validation. The smallest text on the site and the only text
+   whose whole purpose is to be noticed and understood. */
+.field label .req{color:var(--red-text)}
+.field .error{color:var(--red-text)}
+
+/* Form-level failure, and the two places triage reports a delivery problem.
+   .req-flag sits on its own tint (#FDECEA), where the original red measured
+   3.96:1 — the flag the whole notification design depends on being read. */
+.order-problem{color:var(--red-text)}
+.req-flag{color:var(--red-text)}
+.req-attempt-error{color:var(--red-text)}
+
+/* The tick inside the confirmation ring: a 56px graphic that says the
+   request went through, at 2.55:1 against its own background. */
+.check-ring{color:var(--green-text)}
+
+/* The wordmark's hover accent. At 1.71:1 the word "Code" all but vanished
+   for the duration of the hover — the one moment a visitor is looking
+   straight at it. The mark keeps the original amber; it is an icon next to
+   an accessible name, not something anyone has to read. */
+.logo-lockup:hover .accent{color:var(--signal-deep)}
+
+/* ---------- Heading level on the portfolio routes ---------- */
+/* The work index and each case study had no <h1> at all: their title used
+   the .sec-head <h2> that every other section uses, because on the home page
+   those really are sections under the hero's <h1>. On their own routes they
+   are the page. Promoting the tag fixes the outline; this keeps the type
+   identical, since the prototype only ever styled h2 at this size. */
+.sec-head h1{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-weight:700;font-size:clamp(26px,3.4vw,38px);letter-spacing:-.015em;
+  /* The base h1 is the hero, and it carries two properties h2 never had:
+     line-height 1.05 and max-width 16ch. Both have to be undone here or the
+     promoted heading would set tighter and wrap earlier than the h2 it
+     replaced — an invisible layout change hiding inside a semantics fix. */
+  line-height:1.6;max-width:none;
+}
+
+/* ---------- Dashboard headings and landmarks ---------- */
+/* Each dashboard route had a title bar but no heading and no <main>, so
+   every page announced itself as an unstructured pile of divs. The bar is a
+   brand strip shared by all three routes; the heading names the route. */
+.dash-h1{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.4;
+  max-width:none;margin:0 0 18px;
+}
+/* The two card shells: their heading was an h3 for its size, not its rank. */
+.signin-card .order-head h1{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.4;
+  max-width:none;
 }

@@ -34,14 +34,19 @@ export default async function HomePage({
     <>
       <div id="progress" aria-hidden="true"></div>
       <Nav t={t} locale={locale} />
-      <Hero t={t} locale={locale} />
-      <Ticker />
-      <WorkBoard t={t} locale={locale} />
-      <Services t={t} locale={locale} />
-      <Process t={t} />
-      <Team t={t} />
-      <Start t={t} locale={locale} />
-      <Contact t={t} />
+      {/* Everything between the nav and the footer is the page itself. The
+          landmark is what lets a screen reader jump past the navigation on
+          every load instead of hearing it again each time. */}
+      <main id="main">
+        <Hero t={t} locale={locale} />
+        <Ticker />
+        <WorkBoard t={t} locale={locale} />
+        <Services t={t} locale={locale} />
+        <Process t={t} />
+        <Team t={t} />
+        <Start t={t} locale={locale} />
+        <Contact t={t} />
+      </main>
       <Footer t={t} />
       <SiteMotion locale={locale} />
     </>

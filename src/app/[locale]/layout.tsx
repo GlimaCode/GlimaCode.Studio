@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import {
-  DEFAULT_LOCALE,
   LOCALES,
   bcp47,
   directionOf,
@@ -11,6 +10,7 @@ import {
 } from "@/i18n";
 import { siteConfig } from "@/config/site";
 import { stripIsolates } from "@/i18n/pending";
+import { localeAlternates } from "@/lib/seo/alternates";
 import { fontVariables } from "../fonts";
 import "../globals.css";
 
@@ -61,21 +61,42 @@ export async function generateMetadata({
       template: `%s — ${siteConfig.brand}`,
     },
     description,
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        ...Object.fromEntries(LOCALES.map((code) => [bcp47(code), `/${code}`])),
-        // Shown to anyone whose language matches neither locale.
-        "x-default": `/${DEFAULT_LOCALE}`,
-      },
-    },
+    alternates: localeAlternates(locale),
     openGraph: {
       type: "website",
       locale: bcp47(locale),
+      // The other locale, so a crawler that only reads Open Graph still
+      // learns this page has a second rendering.
+      alternateLocale: LOCALES.filter((code) => code !== locale).map(bcp47),
       url: `${siteConfig.url}/${locale}`,
       siteName: siteConfig.brand,
       title,
       description,
+    },
+    /**
+     * No twitter:image is set anywhere. Declaring the card type is enough —
+     * Twitter and every other reader that follows its conventions fall back
+     * to og:image, which the opengraph-image route supplies. Duplicating the
+     * image into a second tag would mean a second place to forget.
+     */
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        // Defaults cap the text snippet and forbid large image previews on
+        // some surfaces. For a studio that is found by name and judged on a
+        // link preview, both caps work against us.
+        "max-snippet": -1,
+        "max-image-preview": "large",
+        "max-video-preview": -1,
+      },
     },
   };
 }
@@ -103,7 +124,14 @@ export default async function LocaleLayout({
           <style dangerouslySetInnerHTML={{ __html: NO_SCRIPT_FALLBACK }} />
         </noscript>
       </head>
-      <body>
+      {/* The reveal script below adds `ready` to this element before React
+          hydrates — that is the whole point of running it inline rather than
+          from an effect. React therefore finds a className the server never
+          sent and logs a hydration mismatch on every page load. The mismatch
+          is intended and the class is not patched away, so the warning is
+          noise; suppressing it here keeps a real one visible when it appears.
+          Only this element's own attributes are exempted, not its children. */}
+      <body suppressHydrationWarning>
         {children}
         <script dangerouslySetInnerHTML={{ __html: REVEAL_HERO }} />
       </body>
