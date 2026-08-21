@@ -7,6 +7,13 @@ layer. A visitor can browse sample work, open a request against any of it,
 and get a ticket reference back. The team triages those requests and manages
 the portfolio from an authenticated dashboard.
 
+Three documents, and they do different jobs. This one says what the project
+is. [`docs/RUNBOOK.md`](docs/RUNBOOK.md) says what to do — deploys, DNS,
+backups, key rotation. [`docs/HANDOVER.md`](docs/HANDOVER.md) says *why*: the
+decisions that look like mistakes and are not, what each guard is a scar
+from, and what to check first when something breaks. Read that one before
+changing anything that looks obviously wrong.
+
 ## Stack
 
 | Piece | Choice | Why |
