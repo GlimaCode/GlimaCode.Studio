@@ -21,11 +21,16 @@ export type SiteConfig = {
   email: string;
   /** GitHub organisation, not a personal profile. */
   github: string;
-  /** Personal profiles. Null hides the corresponding button entirely. */
-  linkedin: {
-    ali: string | null;
-    mostafa: string | null;
-  };
+  /**
+   * The studio's LinkedIn page. Null hides the button entirely.
+   *
+   * Personal profiles are deliberately not linked, even though one of them
+   * exists. For a two-developer studio, linking one founder and not the
+   * other reads worse than linking neither — so it is both or nothing, and
+   * the thing actually worth linking is the company page. Filling this in
+   * brings the button back; no markup has to be restored.
+   */
+  linkedin: string | null;
   /** Shown beside the pulsing availability dot in the hero. */
   availability: string;
   /** Working location and offset, shown in the hero meta row. */
@@ -55,11 +60,7 @@ export const siteConfig: SiteConfig = {
   url: "https://glimacode.com",
   email: "glimacode.studio@gmail.com",
   github: "https://github.com/GlimaCode",
-  linkedin: {
-    ali: "https://www.linkedin.com/in/ali-ahmadi-165538271",
-    // Not published yet — the button stays hidden until this is filled in.
-    mostafa: null,
-  },
+  linkedin: null,
   availability: "Taking new projects",
   location: "Remote · UTC+3:30",
   features: {
@@ -70,9 +71,15 @@ export const siteConfig: SiteConfig = {
 
 /** Builds a mailto: link, optionally pre-filling subject and body. */
 export function mailto(subject?: string, body?: string): string {
-  const params = new URLSearchParams();
-  if (subject) params.set("subject", subject);
-  if (body) params.set("body", body);
-  const query = params.toString();
+  // Built by hand rather than with URLSearchParams, which encodes a space as
+  // "+". That is correct for a form submission and wrong here: RFC 6068 gives
+  // "+" no special meaning in a mailto query, so mail clients show it
+  // literally and the subject arrives as "Project+request". The helper had
+  // never been called with a subject, so nothing had shipped — the bug was
+  // waiting for the first caller that used one.
+  const parts: string[] = [];
+  if (subject) parts.push(`subject=${encodeURIComponent(subject)}`);
+  if (body) parts.push(`body=${encodeURIComponent(body)}`);
+  const query = parts.join("&");
   return `mailto:${siteConfig.email}${query ? `?${query}` : ""}`;
 }

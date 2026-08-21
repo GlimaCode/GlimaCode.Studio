@@ -26,6 +26,12 @@ export default async function RequestDetailPage({
   const request = await getRequest(ticket);
   if (!request) notFound();
 
+  // Percent-encoded, not URLSearchParams: "+" is not a space in a mailto
+  // query, so a form encoder puts a literal plus in the subject line.
+  const replyHref = `mailto:${request.email}?subject=${encodeURIComponent(
+    `Re: ${request.ticketId}`,
+  )}`;
+
   async function updateStatus(formData: FormData) {
     "use server";
     await setRequestStatus(ticket, String(formData.get("status") ?? ""));
@@ -92,7 +98,12 @@ export default async function RequestDetailPage({
               <div>
                 <dt>Email</dt>
                 <dd dir="ltr">
-                  <a href={`mailto:${request.email}`}>{request.email}</a>
+                  {/* Same subject as the Reply button below, so a reply is
+                      filed identically whichever path was taken. The address
+                      is also the fallback when mailto: does nothing, which on
+                      a desktop with no mail handler is often — so it is shown
+                      in full rather than behind a "Reply" label. */}
+                  <a href={replyHref}>{request.email}</a>
                 </dd>
               </div>
               <div>
@@ -189,10 +200,7 @@ export default async function RequestDetailPage({
               )}
             </div>
 
-            <a
-              className="btn btn-primary btn-sm"
-              href={`mailto:${request.email}?subject=${encodeURIComponent(`Re: ${request.ticketId}`)}`}
-            >
+            <a className="btn btn-primary btn-sm" href={replyHref}>
               Reply by email
             </a>
           </aside>

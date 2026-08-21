@@ -15,6 +15,7 @@ import {
   type TimelineKey,
 } from "@/content/formOptions";
 import { submitProjectRequest } from "@/lib/data/requests";
+import { siteConfig } from "@/config/site";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -313,6 +314,16 @@ export function OrderForm({
             {t.start.success.openedAfter}
           </p>
           <p>{t.start.success.body}</p>
+          {/* The copy above tells people to quote this reference "if you get
+              in touch", and until now the page did not say where. The contact
+              card carries the address, but it only exists on the home page —
+              a visitor who submitted from a case study was told to make
+              contact and given no means. Printed rather than linked, for the
+              same reason as the contact card: a mailto: that does nothing is
+              indistinguishable from a broken site. */}
+          <p className="contact-address" dir="ltr" lang="en">
+            {siteConfig.email}
+          </p>
           <div style={{ marginTop: "18px" }}>
             <button
               className="btn btn-ghost btn-sm"

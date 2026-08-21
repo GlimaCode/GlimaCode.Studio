@@ -221,8 +221,7 @@ export const fa: Dictionary = {
     heading: "راه مستقیم‌تری می‌خواهید؟",
     body: "فرم را رها کنید — ایمیل بزنید یا پیام بدهید، ادامه‌اش با ما.",
     email: "ایمیل به استودیو",
-    linkedinAli: "علی در لینکدین",
-    linkedinMostafa: "مصطفی در لینکدین",
+    linkedin: "GlimaCode در لینکدین",
     github: "گیت‌هاب",
   },
 

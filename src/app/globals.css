@@ -1084,3 +1084,31 @@ html[lang]{
    horizontal overflow, because the overflow was inside the card rather than
    past the viewport. */
 .req-row .right{flex-wrap:wrap;row-gap:8px;justify-content:flex-end}
+
+/* ---------- The address, printed rather than linked ---------- */
+/* A mailto: link does nothing on a desktop with no registered mail handler,
+   and it fails silently — the click is consumed, sometimes after an account
+   chooser, and no window ever opens. A prospect meeting that concludes the
+   site is broken, and we never hear about it.
+
+   So the address appears as text next to the button. user-select:all makes a
+   single click take the whole thing, which is what anyone reading it wants;
+   a partial email address is never the goal. Monospace because it is an
+   identifier, and LTR in both locales for the same reason.
+
+   It appears in two places on opposite backgrounds — the dark contact card
+   and the light confirmation panel — so the colour is stated per context.
+   Measured, because the first version set slate for both and only passed on
+   the dark card by accident: `.contact-card p` is more specific than
+   `.contact-address` and was quietly overriding it. Deleting that unrelated
+   rule would have dropped this to 2.91:1 with nothing to notice it. */
+.contact-address{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:13.5px;
+  user-select:all;-webkit-user-select:all;
+}
+/* Light panel: slate on white, 5.40:1. */
+.order-success .contact-address{color:var(--slate);margin:12px 0 0}
+/* Dark card: the same colour the card's own body copy uses, 8.93:1.
+   Stated rather than inherited, so it survives the rule above it changing. */
+.contact-card .contact-address{color:#B9C4D8;margin:14px auto 0}

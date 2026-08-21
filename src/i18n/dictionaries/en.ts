@@ -227,8 +227,8 @@ export const en = {
     heading: "Prefer a direct line?",
     body: "Skip the form — email or message us and we'll take it from there.",
     email: "Email the studio",
-    linkedinAli: "Ali on LinkedIn",
-    linkedinMostafa: "Mostafa on LinkedIn",
+    // Unused until siteConfig.linkedin is filled in with the studio page.
+    linkedin: "GlimaCode on LinkedIn",
     github: "GitHub",
   },
 
