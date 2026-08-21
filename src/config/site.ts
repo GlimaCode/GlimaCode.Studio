@@ -36,7 +36,7 @@ export type SiteConfig = {
    * only once the route behind it does.
    */
   features: {
-    /** Turn on with the dashboard in phase 4. */
+    /** The footer's team link. Off while the route did not exist. */
     dashboard: boolean;
     /**
      * Turn on once the portfolio migrations are applied and seeded. Until
@@ -63,7 +63,7 @@ export const siteConfig: SiteConfig = {
   availability: "Taking new projects",
   location: "Remote · UTC+3:30",
   features: {
-    dashboard: false,
+    dashboard: true,
     portfolio: true,
   },
 };

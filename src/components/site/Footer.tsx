@@ -12,8 +12,11 @@ export function Footer({ t }: { t: Dictionary }) {
           </span>{" "}
           — {t.footer.tagline}
         </span>
-        {/* The dashboard route does not exist yet, and the site is live, so
-            the link stays hidden rather than sending anyone to a 404. */}
+        {/* The only way in, and deliberately quiet. It leads to a sign-in
+            form, not a door: there is no public sign-up behind it and no
+            client accounts — membership is granted by hand in SQL. Anyone
+            who follows it without an account gets a form that will never
+            accept them, which is the intended outcome, not a gap. */}
         {siteConfig.features.dashboard ? (
           <Link href="/dashboard">{t.footer.teamAccess}</Link>
         ) : null}
