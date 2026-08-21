@@ -18,6 +18,10 @@
 --                              before phase 4 creates real accounts.
 --   authenticated, on-roster   the team
 --
+-- Both the portfolio (public marketing copy) and requests (other people's
+-- contact details and briefs) are covered, because they have different rules
+-- and only one of them is meant to be readable at all.
+--
 -- Expected: only the last one sees an unpublished row, and nobody but the
 -- team can write anything.
 
@@ -26,6 +30,7 @@ declare
   v_count      integer;
   v_flag       boolean;
   v_category   uuid;
+  v_request    uuid;
   v_stranger   constant uuid := '00000000-0000-0000-0000-0000000000ff';
   v_member     constant uuid := '00000000-0000-0000-0000-0000000000aa';
 begin
@@ -176,7 +181,85 @@ begin
      v_count || ' rows',
      case when v_count = 1 then 'PASS' else 'FAIL' end);
 
+  ------------------------------------------------- requests and delivery
+  -- The table holding strangers' contact details. An authenticated account
+  -- that is not on the roster is the case worth proving: anonymous access is
+  -- obviously blocked, while a valid session with no membership row is what
+  -- a loosely written policy lets through.
+  insert into public.requests
+    (name, email, description, project_type, budget, timeline, locale)
+  values
+    ('RLS probe', 'zz-rls-probe@example.invalid',
+     'Fixture for the access probe. Removed before this block finishes.',
+     'other', 'unsure', 'flexible', 'en')
+  returning id into v_request;
+
+  insert into public.notification_attempts (request_id, delivered, provider, error)
+  values (v_request, false, 'probe', 'fixture');
+
+  execute format(
+    'set local request.jwt.claims to %L',
+    json_build_object('sub', v_stranger, 'role', 'authenticated')::text
+  );
+  execute 'set local role authenticated';
+  select count(*) into v_count from public.requests;
+  execute 'reset role';
+  insert into rls_probe_results values
+    (12, 'authenticated, off-roster', 'read requests', '0 rows',
+     v_count || ' rows', case when v_count = 0 then 'PASS' else 'FAIL' end);
+
+  execute 'set local role authenticated';
+  select count(*) into v_count from public.notification_attempts;
+  execute 'reset role';
+  insert into rls_probe_results values
+    (13, 'authenticated, off-roster', 'read delivery log', '0 rows',
+     v_count || ' rows', case when v_count = 0 then 'PASS' else 'FAIL' end);
+
+  begin
+    execute 'set local role authenticated';
+    update public.requests set status = 'Won' where id = v_request;
+    get diagnostics v_count = row_count;
+    execute 'reset role';
+    insert into rls_probe_results values
+      (14, 'authenticated, off-roster', 'triage a request', '0 rows affected',
+       v_count || ' rows affected',
+       case when v_count = 0 then 'PASS' else 'FAIL' end);
+  exception when others then
+    execute 'reset role';
+    insert into rls_probe_results values
+      (14, 'authenticated, off-roster', 'triage a request', '0 rows affected',
+       'refused: ' || sqlerrm, 'PASS');
+  end;
+
+  execute 'set local role anon';
+  select count(*) into v_count from public.requests;
+  execute 'reset role';
+  insert into rls_probe_results values
+    (15, 'anon', 'read requests', '0 rows', v_count || ' rows',
+     case when v_count = 0 then 'PASS' else 'FAIL' end);
+
+  -- And the team, so the policies are not simply refusing everyone.
+  execute format(
+    'set local request.jwt.claims to %L',
+    json_build_object('sub', v_member, 'role', 'authenticated')::text
+  );
+  execute 'set local role authenticated';
+  select count(*) into v_count from public.requests where id = v_request;
+  execute 'reset role';
+  insert into rls_probe_results values
+    (16, 'authenticated, on-roster', 'read the request', '1 row',
+     v_count || ' rows', case when v_count = 1 then 'PASS' else 'FAIL' end);
+
+  execute 'set local role authenticated';
+  select count(*) into v_count from public.notification_attempts
+   where request_id = v_request;
+  execute 'reset role';
+  insert into rls_probe_results values
+    (17, 'authenticated, on-roster', 'read delivery log', '1 row',
+     v_count || ' rows', case when v_count = 1 then 'PASS' else 'FAIL' end);
+
   -------------------------------------------------------------- clean up
+  delete from public.requests where id = v_request;
   delete from public.portfolio_projects where slug like 'zz-rls-%';
   delete from public.team_members where user_id = v_member;
 end

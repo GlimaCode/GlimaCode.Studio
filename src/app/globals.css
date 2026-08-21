@@ -844,3 +844,107 @@ html[lang]{
 }
 .btn:disabled{opacity:.6;cursor:progress}
 .btn:disabled:hover{transform:none}
+
+/* ---------- Dashboard ---------- */
+/* Builds on the .dash-* and .req-* classes already in the ported stylesheet;
+   these are the additions the triage surfaces need. */
+.signin-wrap{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.signin-card{max-width:420px;width:100%}
+
+.dash-banner-warn{
+  background:#FDF0EE;border-color:#F3C9C2;color:var(--ink);
+}
+
+.req-link{display:block;text-decoration:none;color:inherit}
+.req-link:hover{border-color:var(--cobalt)}
+.req-link:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+
+.req-badge{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;border-radius:6px;padding:3px 8px;border:1px solid var(--line);
+  background:var(--paper);color:var(--slate);
+}
+.req-badge.s-new{background:var(--cobalt-soft);border-color:#CBD6FC;color:var(--cobalt)}
+.req-badge.s-reviewing{background:#FFF4E3;border-color:#F6DFB8;color:#8A5B12}
+.req-badge.s-replied{background:#EAF3FF;border-color:#C7DCF7;color:#1D4E86}
+.req-badge.s-won{background:#E7F7F1;border-color:#BFE7D8;color:#0F7355}
+.req-badge.s-lost{background:#F3F4F6;border-color:#E1E4EA;color:#6B7280}
+
+/* Delivery failures are loud on the list, not tucked inside the record. */
+.req-flag{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;border-radius:6px;padding:3px 8px;
+  background:#FDECEA;border:1px solid #F3C9C2;color:var(--red);
+}
+.req-locale{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11px;border-radius:6px;padding:3px 7px;
+  background:var(--ink);color:#fff;
+}
+.req-when{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;color:var(--slate);
+}
+
+.req-detail-grid{display:grid;grid-template-columns:1.6fr .8fr;gap:32px;align-items:start}
+.req-detail-name{font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;font-size:26px;font-weight:700}
+.req-detail-meta{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12.5px;color:var(--slate);margin:6px 0 22px;
+}
+.req-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 20px;margin-bottom:26px}
+.req-facts dt{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--slate);
+}
+.req-facts dd{font-size:14.5px;margin-top:3px}
+.req-facts a{color:var(--cobalt)}
+.req-section{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:15px;font-weight:600;margin:0 0 10px;
+}
+/* A brief may be Persian even though the interface is English. */
+.req-brief{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;font-size:15px;line-height:1.75;white-space:pre-wrap;
+  margin-bottom:26px;
+}
+.req-notes{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.req-notes textarea{
+  width:100%;min-height:90px;font-family:var(--font-plex-sans),var(--font-vazirmatn),sans-serif;
+  font-size:14.5px;background:var(--paper);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;line-height:1.6;resize:vertical;
+}
+.req-notes textarea:focus{outline:none;border-color:var(--cobalt);background:var(--card)}
+
+.req-side{
+  display:flex;flex-direction:column;gap:18px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow-1);position:sticky;top:88px;
+}
+.req-status-form{display:flex;flex-direction:column;gap:8px}
+.req-status-form label{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--slate);
+}
+.req-status-form select{
+  font-family:var(--font-plex-sans),var(--font-vazirmatn),sans-serif;font-size:14.5px;
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;min-height:42px;
+}
+.req-attempts ul{list-style:none;margin:10px 0 0;display:flex;flex-direction:column;gap:10px}
+.req-attempts li{
+  font-size:12.5px;line-height:1.5;border-inline-start:3px solid var(--line);
+  padding-inline-start:10px;
+}
+.req-attempts li.ok{border-color:var(--green)}
+.req-attempts li.bad{border-color:var(--red)}
+.req-attempt-error{color:var(--red);word-break:break-word}
+
+@media(max-width:900px){
+  .req-detail-grid{grid-template-columns:1fr}
+  .req-side{position:static}
+  .req-facts{grid-template-columns:1fr}
+}

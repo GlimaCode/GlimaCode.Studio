@@ -131,6 +131,11 @@ export async function POST(request: Request) {
 
   // ---- notify ------------------------------------------------------------
   // Past this point the brief is safe. Nothing below may fail the response.
+  let outcome: { delivered: boolean; provider: string; error?: string } = {
+    delivered: false,
+    provider: "none",
+    error: "notification did not run",
+  };
   try {
     const result = await notifyRequest({
       ticketId,
@@ -144,14 +149,39 @@ export async function POST(request: Request) {
       locale,
       sourceProjectSlug: asString(payload.sourceProjectSlug) || null,
     });
+    outcome = result;
     if (!result.delivered) {
       console.error(
         `[requests] ${ticketId} SAVED but NOT NOTIFIED via ${result.provider}: ${result.error ?? "no provider configured"}`,
       );
     }
   } catch (cause) {
+    const message = cause instanceof Error ? cause.message : String(cause);
+    outcome = { delivered: false, provider: "unknown", error: message };
+    console.error(`[requests] ${ticketId} SAVED but the notification threw:`, message);
+  }
+
+  // Record the outcome so the dashboard can show it. Append-only, and best
+  // effort: if this fails the request is still saved, and the absence of a
+  // record reads as "not delivered", which is the safe way to be wrong.
+  try {
+    const { error: logError } = await publicClient().rpc(
+      "record_notification_attempt",
+      {
+        p_ticket_id: ticketId,
+        p_delivered: outcome.delivered,
+        p_provider: outcome.provider,
+        p_error: outcome.error ?? null,
+      },
+    );
+    if (logError) {
+      console.error(
+        `[requests] ${ticketId} delivery outcome not recorded: ${logError.message}`,
+      );
+    }
+  } catch (cause) {
     console.error(
-      `[requests] ${ticketId} SAVED but the notification threw:`,
+      `[requests] ${ticketId} delivery outcome not recorded:`,
       cause instanceof Error ? cause.message : cause,
     );
   }
