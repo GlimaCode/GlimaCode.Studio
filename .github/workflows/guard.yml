@@ -83,6 +83,7 @@ jobs:
       # These read source, so they run before anything is built.
       - run: npm run verify:list-privacy
       - run: npm run verify:seo
+      - run: npm run verify:dashboard-shell
       - run: npm run i18n:pending
 
       # No database credentials here on purpose. Public pages must render

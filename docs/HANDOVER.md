@@ -119,6 +119,35 @@ not need a stranger's email address visible to whoever walks past.
 
 `npm run verify:list-privacy` fails the build if that select widens.
 
+### The ported stylesheet styles four elements by tag
+
+`nav`, `header`, `section` and `footer` carry bare element rules in the
+ported region of `globals.css`, with layout that only makes sense on a
+marketing page — `nav` is `position: fixed`, `header` is
+`padding: 150px 0 84px`.
+
+The dashboard loads the same stylesheet and wants none of it. Twice now, a
+dashboard or component file has reached for one of those tags for a perfectly
+good semantic reason and silently inherited the layout:
+
+- The portfolio filter used a `nav`, took `position: fixed`, and covered the
+  site header.
+- The dashboard title strip used a `header`, took the 150px padding, and
+  became a 297px sticky bar with a backdrop blur washing out the top third of
+  every dashboard page. It was introduced *by an accessibility fix*, passed
+  every axe check, survived a build, and appeared in screenshots that were
+  looked at and read as generous whitespace.
+
+Neither was caught by types, lint, axe, or a passing build. Both had the same
+one-line fix: keep the ARIA role, drop the element.
+
+`npm run verify:dashboard-shell` now fails the build on any of those tags in
+a dashboard file, and reads the forbidden set out of the stylesheet so a new
+bare rule tightens it automatically. Headings are exempt on purpose — the
+first version of that check failed the build over `<h1>`, whose ported rule
+carries a `max-width` the dashboard already overrides. A container is the
+problem; a heading is not.
+
 ### `html[lang]` redefines the font variables — delete this one day
 
 `src/app/globals.css`, near the bottom.
@@ -141,9 +170,10 @@ glyphs, not by reading the stylesheet.
 
 ### Small things, so nobody re-litigates them
 
-- **The category filter is a `div` with `role="navigation"`.** The ported
-  stylesheet styles `nav` by element with `position: fixed`, so a real `nav`
-  there leaves the flow and covers the header.
+- **The category filter is a `div` with `role="navigation"`, and the
+  dashboard title strip is a `div` with `role="banner"`.** Not a style
+  preference — see *The ported stylesheet styles four elements by tag* below.
+  Both are landmarks; neither may be the matching element.
 - **Project titles have no Persian.** `title_fa` is null on purpose — they are
   product names and stay in Latin script. The "showing English" notice is
   keyed off the prose, not the title, or every fully translated entry would
@@ -171,6 +201,7 @@ broke in a way that reading the code could not have caught.
 | `npm run verify:fonts` | Vazirmatn is reachable in every Latin stack, and every weight used has a real face | The Persian site rendered entirely in system Arial. Every structural check passed. Found only by asking the browser which font was drawing the glyphs. |
 | `npm run verify:list-privacy` | The triage list query never selects email, brief or notes | Nothing yet — written the moment the guarantee was made, because widening a select is a one-word change that looks harmless in isolation. |
 | `npm run verify:seo` | Every public route declares its own canonical and hreflang | Both work routes inherited the layout's canonical of `/{locale}`, which told search engines every case study was a duplicate of the home page. No error, no warning; the pages simply would never have ranked. |
+| `npm run verify:dashboard-shell` | No dashboard file uses an element the ported stylesheet lays out by tag | The portfolio filter as a `nav` (covered the header), then the dashboard title strip as a `header` (a 297px blurred bar over the top third of every page). Same bug twice, two phases apart. |
 | `npm run i18n:pending` | No dictionary key ships with placeholder copy | Machine-translated marketing copy is worse than none. This makes the gap a number instead of a hunt. |
 | `db/verify/rls_probe.sql` | 18 checks across three caller identities | The `GRANT INSERT (columns)` that restricted nothing. |
 | `scripts/verify-public-access.mjs` | The same guarantees over HTTP, through PostgREST, with only the public key | The SQL probe proves policies from inside the database. This proves the result from outside it. Not in `package.json`: it needs a live server and writes one tagged row it cannot delete — which is itself the proof. |

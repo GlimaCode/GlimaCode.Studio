@@ -44,10 +44,16 @@ export default async function RequestDetailPage({
 
   return (
     <>
-      {/* A banner landmark, not a div. It is the same strip on all three
-          routes, and without a landmark everything in it — the wordmark, the
-          section links — sits outside the page's structure entirely. */}
-      <header className="dash-top">
+      {/* A banner landmark, but a div carrying the role rather than a real
+          header element — the same reason the portfolio filter is a div
+          with a navigation role. The ported stylesheet styles `header` by
+          element with `padding:150px 0 84px`, and .dash-top sets no padding
+          of its own, so the real element here became a 297px sticky bar with
+          a backdrop blur, washing out the top third of every dashboard page.
+          role="banner" gives the landmark with none of the layout.
+          scripts/verify-dashboard-shell.mjs fails the build if this comes
+          back as an element. */}
+      <div className="dash-top" role="banner">
         <div className="dash-top-inner">
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — request
@@ -63,7 +69,7 @@ export default async function RequestDetailPage({
             </button>
           </form>
         </div>
-      </header>
+      </div>
 
       <main className="dash-body" id="main">
         {/* The reference is the page's identity, so it is the heading. */}
