@@ -102,60 +102,87 @@ async function post(path, payload, prefer) {
 }
 
 // ------------------------------------------------------------------- requests
+// After 008 the public role has no rights on the table at all. The only way
+// in is submit_request, whose signature is the security boundary.
 const marker = `probe-${Date.now().toString(36)}`;
 const brief = {
-  name: "Access probe",
-  email: `${marker}@example.invalid`,
-  company: marker,
-  description:
-    "Automated access check. Safe to delete. Confirms an anonymous caller can open a ticket and cannot read one.",
-  project_type: "other",
-  budget: "unsure",
-  timeline: "flexible",
-  locale: "en",
+  p_name: "Access probe",
+  p_email: `${marker}@example.invalid`,
+  p_company: marker,
+  p_description:
+    "Automated access check. Safe to delete. Confirms a visitor can open a ticket and cannot read one.",
+  p_project_type: "other",
+  p_budget: "unsure",
+  p_timeline: "flexible",
+  p_source_slug: null,
+  p_locale: "en",
 };
 
-{
-  // The insert must ask for nothing back. PostgREST returns the new row by
-  // default, which needs a SELECT right the anonymous role does not have —
-  // so the correct call is the one that returns minimal.
-  const { status, body } = await post("requests", brief, "return=minimal");
-  record("requests", "open a ticket (return=minimal)", "accepted, HTTP 201",
-    `HTTP ${status}${status >= 400 ? " " + body.slice(0, 90) : ""}`, status === 201);
+async function rpc(name, args) {
+  const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  const body = await response.text();
+  return { status: response.status, body };
 }
+
 {
-  const { status } = await post("requests", { ...brief, company: marker + "-repr" }, "return=representation");
-  record("requests", "insert asking for the row back", "refused, HTTP 4xx",
+  // Writing straight to the table must now be refused outright.
+  const { status } = await post("requests", {
+    name: "x", email: "x@example.invalid", description: "long enough to pass",
+    project_type: "other", budget: "unsure", timeline: "flexible",
+  }, "return=minimal");
+  record("requests", "insert straight into the table", "refused, HTTP 4xx",
     `HTTP ${status}`, status >= 400);
 }
+
+let ticket = null;
 {
-  // The assertion that matters. Having just written a row, try to read that
-  // exact row back. "I can read what I wrote" sounds reasonable and would
-  // mean reading every other visitor's brief.
-  const { status, body } = await get(`requests?select=id,email&company=eq.${marker}`);
+  const { status, body } = await rpc("submit_request", brief);
+  ticket = status === 200 ? body.replace(/^"|"$/g, "") : null;
+  record("requests", "open a ticket via submit_request", "a reference, HTTP 200",
+    `HTTP ${status}${ticket ? " " + ticket : " " + body.slice(0, 80)}`,
+    status === 200 && /^REQ-[0-9A-Z]{5}$/.test(ticket ?? ""));
+}
+{
+  // The assertion that matters, and now the sharpest version of it: the
+  // caller knows its own reference and still cannot read the row.
+  const query = ticket
+    ? `requests?select=id,email&ticket_id=eq.${encodeURIComponent(ticket)}`
+    : `requests?select=id,email&company=eq.${marker}`;
+  const { status, body } = await get(query);
   const count = Array.isArray(body) ? body.length : -1;
-  record("requests", "read back the row just written", "0 rows",
-    `${count} rows, HTTP ${status}`, status === 200 && count === 0);
+  // Either answer is correct, and refusal is the stronger one: since 008 the
+  // role has no select privilege at all, so the request is rejected before
+  // row-level security is consulted. Asserting only "200 with no rows" would
+  // fail against the safer outcome.
+  record("requests", "read back its own ticket", "no rows, by refusal or by filter",
+    Array.isArray(body) ? `${count} rows, HTTP ${status}` : `refused, HTTP ${status}`,
+    status >= 400 || (status === 200 && count === 0));
 }
 {
   const { status, body } = await get("requests?select=id");
   const count = Array.isArray(body) ? body.length : -1;
-  record("requests", "read any request", "0 rows",
-    `${count} rows, HTTP ${status}`, status === 200 && count === 0);
+  record("requests", "read any request", "no rows, by refusal or by filter",
+    Array.isArray(body) ? `${count} rows, HTTP ${status}` : `refused, HTTP ${status}`,
+    status >= 400 || (status === 200 && count === 0));
 }
 {
-  // Column grants, not just policies: the visitor must not be able to file a
-  // request that is already marked Won, or choose its reference.
-  const { status } = await post("requests",
-    { ...brief, company: marker + "-status", status: "Won" }, "return=minimal");
-  record("requests", "set status on insert", "refused, HTTP 4xx",
+  // There is no parameter for status, so the call cannot even be formed.
+  const { status } = await rpc("submit_request", { ...brief, p_status: "Won" });
+  record("requests", "smuggle a status through the call", "refused, HTTP 4xx",
     `HTTP ${status}`, status >= 400);
 }
 {
-  const { status } = await post("requests",
-    { ...brief, company: marker + "-ticket", ticket_id: "REQ-FAKED" }, "return=minimal");
-  record("requests", "choose own ticket id", "refused, HTTP 4xx",
-    `HTTP ${status}`, status >= 400);
+  const response = await fetch(`${url}/rest/v1/requests?ticket_id=eq.${encodeURIComponent(ticket ?? "REQ-00000")}`, {
+    method: "PATCH",
+    headers: { ...headers, "Content-Type": "application/json", Prefer: "return=minimal" },
+    body: JSON.stringify({ status: "Won" }),
+  });
+  record("requests", "change a request's status", "refused, HTTP 4xx",
+    `HTTP ${response.status}`, response.status >= 400);
 }
 
 // ------------------------------------------------------------------- report
