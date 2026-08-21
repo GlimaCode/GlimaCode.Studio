@@ -9,7 +9,8 @@
     "lint": "eslint",
     "i18n:pending": "node scripts/i18n-pending.mjs",
     "i18n:inventory": "node scripts/i18n-inventory.mjs",
-    "verify:fonts": "node scripts/verify-fonts.mjs"
+    "verify:fonts": "node scripts/verify-fonts.mjs",
+    "verify:list-privacy": "node scripts/verify-list-privacy.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

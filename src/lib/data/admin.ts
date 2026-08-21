@@ -81,8 +81,12 @@ export async function listRequests(): Promise<RequestListItem[]> {
 
   const { data, error } = await client
     .from("requests")
+    // Exactly what triage needs to decide what to open, and nothing else.
+    // No email address, no brief, no notes: this is a list someone may leave
+    // open on a screen, and none of that is needed to choose a row.
+    // scripts/verify-list-privacy.mjs fails the build if that changes.
     .select(
-      "ticket_id, name, company, project_type, budget, locale, status, created_at",
+      "id, ticket_id, name, company, project_type, budget, locale, status, created_at",
     )
     .order("created_at", { ascending: false });
 
@@ -105,17 +109,8 @@ export async function listRequests(): Promise<RequestListItem[]> {
     });
   }
 
-  // The view keys on the request id, which the list query does not select —
-  // so fetch the mapping once rather than widening the list query.
-  const { data: ids } = await client.from("requests").select("id, ticket_id");
-  const idByTicket = new Map<string, string>();
-  for (const row of ids ?? []) {
-    idByTicket.set(row.ticket_id as string, row.id as string);
-  }
-
   return (data ?? []).map((row) => {
-    const id = idByTicket.get(row.ticket_id as string);
-    const record = id ? byRequest.get(id) : undefined;
+    const record = byRequest.get(row.id as string);
     return {
       ticketId: row.ticket_id as string,
       name: row.name as string,
