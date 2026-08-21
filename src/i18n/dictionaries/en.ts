@@ -171,7 +171,6 @@ export const en = {
     heading: "Open a ticket",
     desc: "Tell us what you're building. We reply within 24 hours with honest thoughts on scope, timeline, and price.",
     cardTitle: "Project request",
-    idPrefix: "ID:",
     fields: {
       name: "Your name",
       email: "Email",
