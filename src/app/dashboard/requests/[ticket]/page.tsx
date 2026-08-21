@@ -38,12 +38,15 @@ export default async function RequestDetailPage({
 
   return (
     <>
-      <div className="dash-top">
+      {/* A banner landmark, not a div. It is the same strip on all three
+          routes, and without a landmark everything in it — the wordmark, the
+          section links — sits outside the page's structure entirely. */}
+      <header className="dash-top">
         <div className="dash-top-inner">
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — request
           </span>
-          <div className="tabs">
+          <div className="tabs" role="navigation" aria-label="Back to the request list">
             <Link className="tab" href="/dashboard">
               ← All requests
             </Link>
@@ -54,7 +57,7 @@ export default async function RequestDetailPage({
             </button>
           </form>
         </div>
-      </div>
+      </header>
 
       <main className="dash-body" id="main">
         {/* The reference is the page's identity, so it is the heading. */}

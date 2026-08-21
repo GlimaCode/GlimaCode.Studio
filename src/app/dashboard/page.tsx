@@ -97,7 +97,10 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <div className="dash-top">
+      {/* A banner landmark, not a div. It is the same strip on all three
+          routes, and without a landmark everything in it — the wordmark, the
+          section links — sits outside the page's structure entirely. */}
+      <header className="dash-top">
         <div className="dash-top-inner">
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — team dashboard
@@ -116,15 +119,15 @@ export default async function DashboardPage() {
             </button>
           </form>
         </div>
-      </div>
+      </header>
 
       <main className="dash-body" id="main">
         <h1 className="dash-h1">Requests</h1>
         {undelivered ? (
           <div className="dash-banner dash-banner-warn">
             {undelivered} request{undelivered === 1 ? "" : "s"} with no recorded
-            delivery. Nobody was emailed about {undelivered === 1 ? "it" : "them"}
-            — they are only here.
+            delivery. Nobody was emailed about{" "}
+            {undelivered === 1 ? "it" : "them"} — they are only here.
           </div>
         ) : null}
 

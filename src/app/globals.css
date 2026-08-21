@@ -890,7 +890,12 @@ html[lang]{
 .req-badge.s-reviewing{background:#FFF4E3;border-color:#F6DFB8;color:#8A5B12}
 .req-badge.s-replied{background:#EAF3FF;border-color:#C7DCF7;color:#1D4E86}
 .req-badge.s-won{background:#E7F7F1;border-color:#BFE7D8;color:#0F7355}
-.req-badge.s-lost{background:#F3F4F6;border-color:#E1E4EA;color:#6B7280}
+/* 4.39:1 at 11.5px — the only one of the five that missed. The muted
+   grey is the point of this badge, so it is deepened rather than
+   recoloured: #616874 reads the same and measures 5.10. It labels
+   "Lost" in triage and "hidden" in the portfolio list, and the
+   second of those is a state you have to be able to read. */
+.req-badge.s-lost{background:#F3F4F6;border-color:#E1E4EA;color:#616874}
 
 /* Delivery failures are loud on the list, not tucked inside the record. */
 .req-flag{
@@ -1057,3 +1062,25 @@ html[lang]{
   font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.4;
   max-width:none;
 }
+
+/* ---------- Tap targets on the ordering controls ---------- */
+/* The portfolio reorder arrows measured 25x19 — under the 24x24 minimum in
+   WCAG 2.2, and they are the one control on the dashboard most likely to be
+   used one-handed on a phone while looking at the live site on the same
+   screen. Nothing else on the dashboard is below the minimum: the inline
+   links in the request record are exempt as text in a sentence.
+
+   Sized rather than padded, so the arrow stays where it is and only the
+   hit area grows. */
+.icon-btn{
+  min-width:28px;min-height:28px;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+
+/* ---------- Row actions on a narrow screen ---------- */
+/* .req-row wraps; the action group inside it did not, so a row with one
+   extra badge — "no Persian" on top of "published" — pushed its buttons out
+   past the card edge at 375px. Found by screenshot: the document had no
+   horizontal overflow, because the overflow was inside the card rather than
+   past the viewport. */
+.req-row .right{flex-wrap:wrap;row-gap:8px;justify-content:flex-end}

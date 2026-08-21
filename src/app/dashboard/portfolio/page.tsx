@@ -15,7 +15,10 @@ export default async function PortfolioAdminPage() {
 
   return (
     <>
-      <div className="dash-top">
+      {/* A banner landmark, not a div. It is the same strip on all three
+          routes, and without a landmark everything in it — the wordmark, the
+          section links — sits outside the page's structure entirely. */}
+      <header className="dash-top">
         <div className="dash-top-inner">
           <span className="dash-title">
             &lt;<b>GlimaCode</b>/&gt; — portfolio
@@ -34,7 +37,7 @@ export default async function PortfolioAdminPage() {
             </button>
           </form>
         </div>
-      </div>
+      </header>
 
       <main className="dash-body" id="main">
         <h1 className="dash-h1">Portfolio</h1>
