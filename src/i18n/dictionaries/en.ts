@@ -27,10 +27,10 @@ export const en = {
   },
 
   hero: {
-    eyebrow: "we're a two-developer studio",
+    eyebrow: "we’re a two-developer studio",
     headline: "Web apps, built like",
     headlineAccent: "tickets on a board.",
-    sub: "We're **Ali** and **Mostafa** — a two-person React & Supabase studio. Every project gets a scoped plan, staged delivery, and a second developer reviewing every line before it ships.",
+    sub: "We’re **Ali** and **Mostafa** — a two-person React & Supabase studio. Every project gets a scoped plan, staged delivery, and a second developer reviewing every line before it ships.",
     ctaPrimary: "Start a project",
     ctaSecondary: "See our work",
     availability: "Taking new projects",
@@ -60,7 +60,7 @@ export const en = {
   work: {
     label: "Selected work",
     heading: "Projects, the way we run them: a board.",
-    desc: "We build work-management software for a living — so here's our portfolio in its native format.",
+    desc: "We build work-management software for a living — so here’s our portfolio in its native format.",
     columns: {
       shipped: "SHIPPED",
       in_progress: "IN PROGRESS",
@@ -78,7 +78,7 @@ export const en = {
     "PRJ-01": {
       title: "Listing Quality Auditor",
       description:
-        "A product-data quality auditor that reports what's wrong and proves it, without touching your catalogue. Rules live as data, so changing one takes an edit rather than a release. Zero dependencies, 13 tests.",
+        "A product-data quality auditor that reports what’s wrong and proves it, without touching your catalogue. Rules live as data, so changing one takes an edit rather than a release. Zero dependencies, 13 tests.",
     },
     "PRJ-02": {
       title: "Vehicle Catalog",
@@ -98,14 +98,14 @@ export const en = {
     "PRJ-05": {
       title: "Your project",
       description:
-        "Have an internal tool, dashboard, or MVP that needs to ship? This slot is open — send us the brief below and we'll scope it together.",
+        "Have an internal tool, dashboard, or MVP that needs to ship? This slot is open — send us the brief below and we’ll scope it together.",
     },
   },
 
   services: {
     label: "Services",
     heading: "Fixed scope. Clear timeline. Staged delivery.",
-    desc: "Three packaged services — or tell us what you need and we'll scope it as a custom ticket.",
+    desc: "Three packaged services — or tell us what you need and we’ll scope it as a custom ticket.",
     requestThis: "Request this",
     /** Unit word for the approximate day count on each card. */
     days: "days",
@@ -134,11 +134,11 @@ export const en = {
     steps: {
       analyze: {
         title: "Analyze",
-        body: "We review your brief against our capacity and skills — honestly. If we're not the right fit, we'll say so within 24 hours.",
+        body: "We review your brief against our capacity and skills — honestly. If we’re not the right fit, we’ll say so within 24 hours.",
       },
       kickoff: {
         title: "Kickoff",
-        body: "Scope, timeline, and price get fixed in writing before any code. You'll know exactly what's included — and what isn't.",
+        body: "Scope, timeline, and price get fixed in writing before any code. You’ll know exactly what’s included — and what isn’t.",
       },
       build: {
         title: "Build in stages",
@@ -169,7 +169,7 @@ export const en = {
   start: {
     label: "Start a project",
     heading: "Open a ticket",
-    desc: "Tell us what you're building. We reply within 24 hours with honest thoughts on scope, timeline, and price.",
+    desc: "Tell us what you’re building. We reply within 24 hours with honest thoughts on scope, timeline, and price.",
     cardTitle: "Project request",
     fields: {
       name: "Your name",
@@ -225,7 +225,7 @@ export const en = {
 
   contact: {
     heading: "Prefer a direct line?",
-    body: "Skip the form — email or message us and we'll take it from there.",
+    body: "Skip the form — email or message us and we’ll take it from there.",
     email: "Email the studio",
     // Unused until siteConfig.linkedin is filled in with the studio page.
     linkedin: "GlimaCode on LinkedIn",

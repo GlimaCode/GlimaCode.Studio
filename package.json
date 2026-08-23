@@ -12,7 +12,8 @@
     "verify:fonts": "node scripts/verify-fonts.mjs",
     "verify:list-privacy": "node scripts/verify-list-privacy.mjs",
     "verify:seo": "node scripts/verify-seo.mjs",
-    "verify:dashboard-shell": "node scripts/verify-dashboard-shell.mjs"
+    "verify:dashboard-shell": "node scripts/verify-dashboard-shell.mjs",
+    "verify:offscreen": "node scripts/verify-offscreen.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

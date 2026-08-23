@@ -17,13 +17,26 @@ export function formatNumber(value: number, locale: Locale): string {
  *
  * The unit word comes from the dictionary because Persian does not
  * pluralise the counted noun the way English does.
+ *
+ * The tilde and the number are wrapped in a directional isolate. Built as a
+ * plain string this function was already correct — and it rendered as "۵~"
+ * on the Persian page, which reads as "5 tilde". A tilde is a neutral
+ * character, so at the start of a run inside a right-to-left paragraph the
+ * bidirectional algorithm resolves it to the paragraph direction and puts it
+ * on the other side of the digits. FSI/PDI mark "~۵" as one isolated run and
+ * the tilde stays where it was written. Same mechanism as `pending()`, and
+ * first-strong rather than left-to-right so the digits still take the
+ * numbering system Intl chose for the locale.
  */
+const FSI = "⁨";
+const PDI = "⁩";
+
 export function formatApproxDays(
   days: number,
   unit: string,
   locale: Locale,
 ): string {
-  return `~${formatNumber(days, locale)} ${unit}`;
+  return `${FSI}~${formatNumber(days, locale)}${PDI} ${unit}`;
 }
 
 export function formatDateTime(value: Date | string, locale: Locale): string {

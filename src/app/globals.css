@@ -630,13 +630,22 @@
    Positioned with logical properties so it lands on the correct side in
    Persian without a second rule. */
 .skip-link{
-  position:absolute;inset-inline-start:-9999px;top:8px;z-index:100;
+  /* Parked ABOVE the page, not beside it. The first version used
+     `inset-inline-start:-9999px`, which resolves to the right-hand side in a
+     right-to-left page: on /fa the link sat at x=+11331, ten thousand pixels
+     past the viewport. It produced no scrollbar only because its container
+     happens to be position:fixed — a dependency nothing enforced and nothing
+     recorded. Moving it out of the block axis is direction-neutral: off-screen
+     by the same amount, in both locales, for the same reason.
+     scripts/verify-offscreen.mjs fails the build if a large negative logical
+     offset comes back. */
+  position:absolute;inset-inline-start:16px;bottom:calc(100% + 8px);z-index:100;
   padding:10px 16px;border-radius:8px;
   background:var(--cobalt);color:#fff;text-decoration:none;
   font-size:14px;font-weight:600;white-space:nowrap;
 }
 .skip-link:focus-visible,.skip-link:focus{
-  inset-inline-start:16px;
+  bottom:auto;top:8px;
   outline:2px solid var(--ink);outline-offset:2px;
 }
 
@@ -1115,3 +1124,44 @@ html[lang]{
 /* Dark card: the same colour the card's own body copy uses, 8.93:1.
    Stated rather than inherited, so it survives the rule above it changing. */
 .contact-card .contact-address{color:#B9C4D8;margin:14px auto 0}
+
+/* =====================================================================
+   Persian typography corrections.
+
+   Persian is a connected script. Latin display tracking — which the ported
+   design system applies generously, because it suits a mono label in caps —
+   pulls the joins between letters apart and makes a word look like loose
+   characters. Nothing errors, nothing overflows; the page just reads as
+   though nobody looked at it.
+
+   Measured, not assumed: 26 text nodes on /fa, 5 on /fa/work and 9 on a case
+   study rendered with 0.64px to 1.56px of tracking on Persian text.
+
+   Scoped with :lang(fa) rather than [dir="rtl"] on purpose. The rule is about
+   the script, not the direction, and the distinction is load-bearing here —
+   the tech chips, the wordmark and the SEC / GRID coordinates are all marked
+   lang="en" inside the Persian page, and they are Latin, so they keep the
+   tracking they were designed with.
+===================================================================== */
+
+/* Tracked out: mono labels in caps. text-transform is a no-op on Persian, so
+   these were getting the spacing of a style they never actually entered. */
+:lang(fa) .sec-label,
+:lang(fa) .field label,
+:lang(fa) .key .sub,
+:lang(fa) .pf-card-category,
+:lang(fa) .pf-meta-label,
+:lang(fa) .req-facts dt,
+:lang(fa) .req-status-form label{
+  letter-spacing:normal;
+}
+
+/* Tracked in: display headings. Negative tracking on a cursive script pushes
+   letters toward collision rather than merely looking tight. It survives at
+   Vazirmatn's current weights, which is luck rather than design. */
+:lang(fa) h1,
+:lang(fa) h2,
+:lang(fa) .sec-head h1,
+:lang(fa) .pf-detail-main h2{
+  letter-spacing:normal;
+}

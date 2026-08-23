@@ -31,5 +31,7 @@ export function pending(englishSource: string): string {
  * to crawlers and social cards as invisible noise.
  */
 export function stripIsolates(text: string): string {
-  return text.replace(/[⁦⁩]/g, "");
+  // U+2066..U+2069: LRI, RLI, FSI and PDI. formatApproxDays uses FSI, and a
+  // stripper that only knew about pending()’s two would silently leave it in.
+  return text.replace(/[⁦-⁩]/g, "");
 }
