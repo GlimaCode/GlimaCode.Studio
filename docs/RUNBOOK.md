@@ -213,10 +213,24 @@ exists.
 
 ### Turning delivery on
 
-Set three environment variables in the hosting project — `MAIL_PROVIDER`,
-`MAIL_FROM`, `MAIL_TO`, plus `MAIL_API_KEY` — and redeploy. No code changes:
-`src/lib/mail/` is written against a provider-agnostic interface for exactly
-this. Then submit a real request and confirm the flag does not appear.
+Set **four** environment variables in the hosting project — `MAIL_PROVIDER`,
+`MAIL_FROM`, `MAIL_TO` and `MAIL_API_KEY` — and redeploy. No code changes are
+needed *for a provider that is already implemented*, which today means Resend
+and nothing else: `src/lib/mail/index.ts` has two branches, `none` and
+`resend`. SMTP is not one of them and would need a client library — a
+dependency decision, in a project whose runtime dependencies are Next, React
+and Supabase.
+
+`MAIL_TO` takes one address. It is passed through as a single recipient, so a
+comma-separated pair is one malformed address and the send is rejected at
+runtime. Use an alias at the mail host to reach two people.
+
+Leave the variables unset on preview deployments, or every preview sends real
+mail.
+
+Then submit a real request and confirm the flag does not appear — and reply to
+the notification to confirm it addresses the visitor rather than you. The mail
+arriving proves the send worked; it does not prove `reply_to` did.
 
 ### When a send fails with a provider configured
 
@@ -232,6 +246,12 @@ history of a bad week stays legible after it is fixed.
 
 ## Contacts
 
-Studio address: `glimacode.studio@gmail.com`. A domain mailbox at
-`hello@glimacode.com` is planned; when it exists, changing
-`src/config/site.ts` is the only code change required.
+Studio address: `hello@glimacode.com`, on Zoho — MX, SPF and DKIM verified,
+inbound delivery confirmed 2026-08-21. It is set in `src/config/site.ts` and
+read from there by every surface that shows or sends to it, including the
+default notification recipient when `MAIL_TO` is unset.
+
+Notification delivery is deliberately still off (`MAIL_PROVIDER` unset, so
+`none`). Requests are triaged from the dashboard and every one carries the
+**not notified** flag, which is the true state rather than a fault. See
+*Turning delivery on* above.

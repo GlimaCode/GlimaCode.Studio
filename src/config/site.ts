@@ -15,8 +15,16 @@ export type SiteConfig = {
   /** Canonical production origin, no trailing slash. */
   url: string;
   /**
-   * Contact address. Switching to hello@glimacode.com once the domain
-   * mailbox is live is a one-line change here.
+   * The studio's public address. It reaches three visitor-facing surfaces —
+   * the "Email the studio" button, the address printed beneath it, and the
+   * one in the confirmation panel — and it is also the default notification
+   * recipient when MAIL_TO is unset, so changing it moves both.
+   *
+   * MAIL_TO, and this fallback, take exactly one address: the mail layer
+   * passes the value straight through as a single recipient, so a
+   * comma-separated pair is one malformed address and the provider rejects
+   * it. Two people on the notification means an alias at the mail host, not
+   * two addresses here.
    */
   email: string;
   /** GitHub organisation, not a personal profile. */
@@ -58,7 +66,7 @@ export const siteConfig: SiteConfig = {
   description:
     "Glimacode is a two-developer React and Supabase studio. Scoped plans, staged delivery, and a second developer reviewing every line before it ships.",
   url: "https://glimacode.com",
-  email: "glimacode.studio@gmail.com",
+  email: "hello@glimacode.com",
   github: "https://github.com/GlimaCode",
   linkedin: null,
   availability: "Taking new projects",

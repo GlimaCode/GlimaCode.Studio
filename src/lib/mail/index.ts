@@ -8,7 +8,13 @@
  *
  *   MAIL_PROVIDER   none | resend        (default: none)
  *   MAIL_FROM       sender address       e.g. "GlimaCode <onboarding@resend.dev>"
- *   MAIL_TO         recipient            (default: the studio address in config)
+ *   MAIL_TO         ONE recipient        (default: the studio address in config)
+ *
+ * MAIL_TO is a single address, not a list. It is passed through as one
+ * recipient, so "a@x, b@x" is one malformed address and the provider
+ * rejects the send — visibly, which is the right way to be wrong, but it
+ * fails at runtime rather than at deploy. To reach two people, use an alias
+ * at the mail host.
  *   MAIL_API_KEY    provider credential
  *
  * With no provider configured the message is logged and reported as not
