@@ -13,7 +13,8 @@
     "verify:list-privacy": "node scripts/verify-list-privacy.mjs",
     "verify:seo": "node scripts/verify-seo.mjs",
     "verify:dashboard-shell": "node scripts/verify-dashboard-shell.mjs",
-    "verify:offscreen": "node scripts/verify-offscreen.mjs"
+    "verify:offscreen": "node scripts/verify-offscreen.mjs",
+    "verify:copy-sync": "node scripts/verify-copy-sync.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

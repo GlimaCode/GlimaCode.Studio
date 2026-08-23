@@ -222,7 +222,7 @@ export function OrderForm({
           </div>
           <div className="field">
             <label htmlFor="budget">{t.start.fields.budget}</label>
-            <select id="budget" name="budget" defaultValue={DEFAULT_BUDGET}>
+            <select id="budget" name="budget" defaultValue={DEFAULT_BUDGET[locale]}>
               {BUDGETS.map((key) => (
                 <option value={key} key={key}>
                   {t.start.budgets[key]}

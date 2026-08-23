@@ -1,6 +1,7 @@
 import { sessionClient } from "@/lib/auth/session";
 import { en } from "@/i18n/dictionaries/en";
 import type { Locale } from "@/i18n/config";
+import { BUDGET_SCALE_EN } from "@/content/formOptions";
 import type {
   BudgetKey,
   ProjectTypeKey,
@@ -69,10 +70,31 @@ function firstOf<T>(value: unknown): T | null {
   return value as T;
 }
 
-/** Enum keys are stored, not labels. Triage always reads English. */
-function label(kind: "type" | "budget" | "timeline", key: string): string {
+/**
+ * Enum keys are stored, not labels. Triage always reads English.
+ *
+ * Budget is the exception that needs the submission locale. The two locales
+ * stopped being translations of each other when the Persian form moved from
+ * dollar bands to scope: a Persian visitor who picks the second tier sees
+ * "چند صفحه یا یک ابزار ساده" and never sees a number. Reading that row through
+ * the English dictionary would report "$300 – $700" — a figure they never saw,
+ * attributed to them, in the record we quote from when we reply.
+ *
+ * So a Persian row is glossed into English rather than translated into
+ * dollars. Which vocabulary you are reading is never in doubt: the list marks
+ * the row FA and the detail says "Reply in: Persian".
+ */
+function label(
+  kind: "type" | "budget" | "timeline",
+  key: string,
+  locale: Locale = "en",
+): string {
   if (kind === "type") return en.start.projectTypes[key as ProjectTypeKey] ?? key;
-  if (kind === "budget") return en.start.budgets[key as BudgetKey] ?? key;
+  if (kind === "budget") {
+    return locale === "fa"
+      ? BUDGET_SCALE_EN[key as BudgetKey] ?? key
+      : en.start.budgets[key as BudgetKey] ?? key;
+  }
   return en.start.timelines[key as TimelineKey] ?? key;
 }
 
@@ -116,7 +138,7 @@ export async function listRequests(): Promise<RequestListItem[]> {
       name: row.name as string,
       company: (row.company as string | null) ?? null,
       projectType: label("type", row.project_type as string),
-      budget: label("budget", row.budget as string),
+      budget: label("budget", row.budget as string, row.locale as Locale),
       locale: (row.locale as Locale) ?? "en",
       status: row.status as RequestStatus,
       createdAt: row.created_at as string,
@@ -170,7 +192,7 @@ export async function getRequest(ticketId: string): Promise<RequestDetail | null
     company: (data.company as string | null) ?? null,
     description: data.description as string,
     projectType: label("type", data.project_type as string),
-    budget: label("budget", data.budget as string),
+    budget: label("budget", data.budget as string, data.locale as Locale),
     timeline: label("timeline", data.timeline as string),
     locale: (data.locale as Locale) ?? "en",
     status: data.status as RequestStatus,

@@ -5,6 +5,7 @@ import type {
   ProjectTypeKey,
   TimelineKey,
 } from "@/content/formOptions";
+import { BUDGET_SCALE_EN } from "@/content/formOptions";
 import { sendMail, type MailResult } from "./index";
 
 /**
@@ -32,7 +33,13 @@ export async function notifyRequest(
   request: RequestNotification,
 ): Promise<MailResult> {
   const type = en.start.projectTypes[request.projectType];
-  const budget = en.start.budgets[request.budget];
+  // Same rule as the dashboard: a Persian submission is glossed into English,
+  // never converted into a dollar band the visitor was never shown. See
+  // BUDGET_SCALE_EN in content/formOptions.ts.
+  const budget =
+    request.locale === "fa"
+      ? BUDGET_SCALE_EN[request.budget]
+      : en.start.budgets[request.budget];
   const timeline = en.start.timelines[request.timeline];
   const language = request.locale === "fa" ? "Persian" : "English";
 

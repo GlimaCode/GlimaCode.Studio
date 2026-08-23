@@ -27,6 +27,23 @@ export type BoardProject = {
   shipped: boolean;
   /** Renders the call to action on the card. */
   ctaHref?: string;
+  /**
+   * The portfolio row this card mirrors, when it mirrors one.
+   *
+   * The board and the portfolio are separate surfaces on purpose: the board
+   * is what we are working on, the portfolio is what a client can have. But
+   * three cards restate a database row word for word, from the dictionary,
+   * and nothing kept the two copies together. The dashboard tells you
+   * "content is edited in the database" — so the first edit made there would
+   * have silently left the home page quoting the old text.
+   *
+   * Naming the relationship makes it checkable. npm run verify:copy-sync
+   * compares them, and the portfolio list flags a row whose copy has drifted.
+   *
+   * Undefined means the card has no portfolio row and is not expected to:
+   * PRJ-04 is this site, PRJ-05 is the open slot.
+   */
+  portfolioSlug?: string;
 };
 
 export const boardColumns: BoardColumn[] = [
@@ -38,18 +55,21 @@ export const boardColumns: BoardColumn[] = [
 export const boardProjects: BoardProject[] = [
   {
     ref: "PRJ-01",
+    portfolioSlug: "listing-quality-auditor",
     tech: ["Node.js", "Rules as data", "Zero deps", "Tested"],
     column: "shipped",
     shipped: true,
   },
   {
     ref: "PRJ-02",
+    portfolioSlug: "vehicle-catalog",
     tech: ["Node.js", "React", "SQLite", "Search"],
     column: "shipped",
     shipped: true,
   },
   {
     ref: "PRJ-03",
+    portfolioSlug: "title-batch-generator",
     tech: ["React", "TypeScript", "Vite", "CSV pipeline"],
     column: "shipped",
     shipped: true,

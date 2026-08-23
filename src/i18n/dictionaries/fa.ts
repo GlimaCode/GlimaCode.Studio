@@ -191,11 +191,18 @@ export const fa: Dictionary = {
       whitelabel: "White-label / ظرفیت آژانسی",
       other: "چیز دیگری",
     },
+    /**
+     * Scope, not currency. A dollar figure reads as a foreign-currency quote
+     * to an Iranian client, and it re-anchors the exact numbers the services
+     * cards deliberately dropped. These are the same five tiers the English
+     * form offers as bands — see BUDGET_SCALE_EN in content/formOptions.ts,
+     * which is how the dashboard reads them back.
+     */
     budgets: {
-      under300: "زیر ۳۰۰ دلار",
-      to700: "۳۰۰ تا ۷۰۰ دلار",
-      to1500: "۷۰۰ تا ۱٬۵۰۰ دلار",
-      over1500: "بیش از ۱٬۵۰۰ دلار",
+      under300: "یک صفحه یا یک قابلیت کوچک",
+      to700: "چند صفحه یا یک ابزار ساده",
+      to1500: "یک محصول کامل",
+      over1500: "پروژه‌ی بزرگ یا همکاری بلندمدت",
       unsure: "هنوز مطمئن نیستم",
     },
     timelines: {
