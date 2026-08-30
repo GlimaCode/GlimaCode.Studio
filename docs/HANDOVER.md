@@ -148,6 +148,86 @@ first version of that check failed the build over `<h1>`, whose ported rule
 carries a `max-width` the dashboard already overrides. A container is the
 problem; a heading is not.
 
+### Two tokens change role between the themes
+
+`src/app/globals.css`. The dark theme is not an inversion; two tokens do a
+different job in each theme and had to be split.
+
+**`--ink` was the text colour and also the fill behind seven white labels** —
+the header CTA, both avatars, the contact card, the active filter chip, the
+assignee tag and the locale badge on a request row. That works only while
+exactly one of the two themes is dark. Inverted, every one of them becomes a
+near-white block with white text on it. `--emph-bg` / `--emph-fg` now own that
+job. Six were found by reading the stylesheet; the seventh was found by
+looking at a screenshot, because a token that resolves cleanly is invisible to
+a contrast check.
+
+`verify:contrast` refuses `background: var(--ink)` in any code written below
+the dark-theme marker. The rules above it are the originals, which the dark
+section overrides rather than edits.
+
+**`--cobalt` is read as text and also filled behind white text.** On paper one
+value serves both. Lifted to `#6E8BFF` so it can be read on a dark ground, it
+measures 3.09 against white and can no longer carry a white label. Fills use
+`--cobalt-solid`, tuned the other way — dark enough for white at 5.29, light
+enough to read as a button against the page at 3.39. Thin rules and bars keep
+the brighter value; they carry no text.
+
+### The dark theme is stamped before paint, and the media query is the fallback
+
+An inline script in each layout writes `data-theme` on `<html>` before the
+first paint, so the common path needs one selector and there is no flash. The
+`@media (prefers-color-scheme: dark)` block is scoped to
+`:root:not([data-theme])` and exists only for the no-JavaScript path — it must
+never compete with a stamped choice.
+
+The control has three states, not two. "Follow the system" is the default, and
+a two-state switch turns every curious click into a permanent override with no
+way back.
+
+The two dark blocks — the stamped one and the media one — must carry the same
+token set. `verify:contrast` compares them, and caught them drifting when a
+token reached one and not the other.
+
+### The keyboard faces the viewer, and the depth is deliberate
+
+The prototype had it isometric — `rotateX(45deg) rotateZ(-13deg)`, a product
+shot from above and to one side. It is now front-on at 25 degrees with no
+twist.
+
+Less rotation means less depth from a transform, so the depth was rebuilt
+where it can be seen: perspective tightened from 1200px to 700px, a deeper
+base under the deck, taller walls under every cap, and a rim of light along
+each cap's top edge. The scroll parallax no longer rotates — on a square-on
+board a couple of degrees reads as a crooked keyboard rather than as movement.
+
+Keycaps read as objects because of a relationship, not a palette: face lit
+from above, the wall below it darker than the face, the deck darker again.
+Inverting the values for dark would put the light where the shadow belongs.
+
+### The blueprint grid is tuned to a loudness, not flipped
+
+Light measures 1.21:1 against its page. The dark value was chosen at 1.23 to
+match that, rather than at whatever an inversion produced — a naive flip gives
+bright lines on dark, which is louder than the original ever was on light.
+
+### /showcase is built and switched off
+
+`siteConfig.features.showcase`. The page is a laptop that opens onto a
+screenshot, and every published project currently has a null `cover_url` and an
+empty `gallery_urls`. A device that opens onto nothing tells a prospect we
+build things we cannot show, so the flag gates the route, the metadata and the
+link from `/work` together.
+
+Closed is 68 degrees, not 90. At a literal 90 the lid is edge-on to a viewer
+16 degrees above it, and an edge-on plane is a line: the laptop disappeared and
+left its base looking like a stray slab. 84 was still only six degrees off and
+came out as a hairline. A photograph would use 90; an interface that has to be
+understood at a glance should not.
+
+Which project is open lives in the URL hash rather than in component state, so
+the open lid is shareable and the back button works.
+
 ### `html[lang]` redefines the font variables — delete this one day
 
 `src/app/globals.css`, near the bottom.
@@ -202,6 +282,9 @@ broke in a way that reading the code could not have caught.
 | `npm run verify:list-privacy` | The triage list query never selects email, brief or notes | Nothing yet — written the moment the guarantee was made, because widening a select is a one-word change that looks harmless in isolation. |
 | `npm run verify:seo` | Every public route declares its own canonical and hreflang | Both work routes inherited the layout's canonical of `/{locale}`, which told search engines every case study was a duplicate of the home page. No error, no warning; the pages simply would never have ranked. |
 | `npm run verify:dashboard-shell` | No dashboard file uses an element the ported stylesheet lays out by tag | The portfolio filter as a `nav` (covered the header), then the dashboard title strip as a `header` (a 297px blurred bar over the top third of every page). Same bug twice, two phases apart. |
+| `npm run verify:contrast` | 31 colour pairs meet their threshold in BOTH themes, and `--ink` is never used as a fill in new code | Adding a second theme doubles every chance of the four contrast failures the light theme shipped with. It caught the action keycap label at 4.39 in dark — measured by hand against the wrong background — and the two dark token blocks drifting apart. |
+| `npm run verify:offscreen` | No large negative *logical* inset parks something off-screen | The skip link used `inset-inline-start:-9999px`, which resolves to the RIGHT in a right-to-left page: on `/fa` it sat at x=+11331. No scrollbar appeared only because its container happened to be `position: fixed`. |
+| `npm run verify:copy-sync` | The three home-board cards still match the portfolio rows they mirror | The same copy lives in the dictionary and in the database with nothing holding them together, and the dashboard tells you content is edited in the database. It found real drift within minutes of being written. Not in CI: the guard workflow has no database credentials on purpose. |
 | `npm run i18n:pending` | No dictionary key ships with placeholder copy | Machine-translated marketing copy is worse than none. This makes the gap a number instead of a hunt. |
 | `db/verify/rls_probe.sql` | 18 checks across three caller identities | The `GRANT INSERT (columns)` that restricted nothing. |
 | `scripts/verify-public-access.mjs` | The same guarantees over HTTP, through PostgREST, with only the public key | The SQL probe proves policies from inside the database. This proves the result from outside it. Not in `package.json`: it needs a live server and writes one tagged row it cannot delete — which is itself the proof. |
@@ -268,6 +351,23 @@ amber 1.71 → 4.88, and the `hidden`/`Lost` badge 4.39 → 5.10.
 graphical objects. They now carry `role="img"` and a translated label, so the
 state they encode is available as text and the dot is decoration beside it.
 Darkening them would make the board read as a warning panel.
+
+### Dark theme: what was measured
+
+31 pairs, both themes, re-measured on every build. The tightest is the header
+CTA's hover label at 4.53:1 against a 4.5 threshold, so there is very little
+room — a nudge to `--cobalt-solid-hover` will fail the build, and that is the
+guard working rather than a fragility to route around.
+
+Five pairs are exempt in writing, with the reason: the card border, the page
+grid, and the keycap edge are decorative in both themes and sit at 1.15–1.23
+by design, and the two 10px status dots carry `role="img"` and a translated
+label so the state they encode is available as text.
+
+Persian in dark is one weight step lighter than in light. It measured
+identical — same face, same weight, same size, confirmed through
+`CSS.getPlatformFontsForNode` — and read visibly heavier, because light text
+on a dark field blooms. Latin is untouched.
 
 ### The accessible-name fix that did not work
 
@@ -351,6 +451,19 @@ never by reading it:
 - A missing space in the dashboard banner — read past by two people who both
   supplied it mentally, and visible only in a screenshot at a width nobody
   had looked at.
+- The seventh place `--ink` was used as a fill — six were found by reading the
+  stylesheet, and the last one only by looking at the dashboard in dark, where
+  it was a white box with white text in it.
+- The closed laptop lid — geometrically correct at 90 degrees and, to a viewer
+  16 degrees above it, a horizontal line.
+
+And one that is worth more than the rest, because the tool itself was the
+thing that lied: the first version of `verify:contrast` took a string index
+from the raw stylesheet and applied it to a comment-stripped copy. The slice
+landed past the end, the scan read nothing, and it passed its own negative
+test by finding no code at all. A guard that reports success because it did
+nothing is worse than no guard. Break every check on purpose and watch it
+fail before believing it.
 
 There is a matching trap: a measurement can be true and useless. "No
 horizontal overflow at 375px" was correct — the document was exactly 375

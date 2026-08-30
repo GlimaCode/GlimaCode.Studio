@@ -57,6 +57,18 @@ src/lib/db/         Database client factory, the only import of the provider SDK
 src/lib/env.ts      Every environment variable the app reads
 ```
 
+## Themes
+
+Light and dark, defaulting to `prefers-color-scheme` with a three-state
+control beside the language switch: system, light, dark. The choice is stamped
+on `<html>` by an inline script before the first paint, so there is no flash;
+the media query in `globals.css` is the no-JavaScript fallback only.
+
+The dark theme extends the palette rather than inverting it — the page becomes
+the shade below ink and cards become ink itself, so the site reads as the
+contact card generalised. Two tokens split roles between the themes; see
+`docs/HANDOVER.md` before adding a colour.
+
 ## Portability
 
 The studio may need to move host or database provider at short notice, so the
@@ -159,6 +171,23 @@ recorded only when its fade finishes. Measured cold with a 4× CPU throttle:
 1440 ms as designed, 835 ms with a briefer fade, 590 ms with the rise but no
 fade. This is a design decision, not a defect, and it is written down here so
 the next person to run Lighthouse knows it was measured rather than missed.
+
+## Guards
+
+Nine checks, each written after something actually broke. `docs/HANDOVER.md`
+pairs every one with the defect it is a scar from. All but two run in CI.
+
+| Command | What it protects |
+|---|---|
+| `npm run verify:fonts` | Vazirmatn reachable in every Latin stack — runs *after* the build, because it reads the emitted CSS |
+| `npm run verify:contrast` | 31 colour pairs meet their threshold in both themes |
+| `npm run verify:offscreen` | No direction-dependent way of parking something off-screen |
+| `npm run verify:list-privacy` | The triage list never fetches an email, a brief or our notes |
+| `npm run verify:seo` | Every public route declares its own canonical and hreflang |
+| `npm run verify:dashboard-shell` | The dashboard never uses an element the ported stylesheet lays out by tag |
+| `npm run i18n:pending` | No dictionary key ships with placeholder copy |
+| `npm run verify:copy-sync` | The home board and the portfolio still say the same thing — needs database credentials, so it is local only |
+| `db/verify/rls_probe.sql` | 18 access checks across three caller identities, run in the SQL editor |
 
 ## Conventions
 
