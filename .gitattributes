@@ -1,0 +1,26 @@
+# Line endings.
+#
+# The repository grew with mixed endings and no rule: 47 tracked source files
+# with LF and 16 with CRLF, decided by whichever tool happened to write each
+# one. That is not a style question, it is a correctness one. Editing a CRLF
+# file with anything that writes LF turns a one-line change into a whole-file
+# diff, which buries the actual edit and destroys blame for that file. It has
+# happened here more than once, and once a search for a literal "\n" block
+# silently matched nothing in a CRLF file and a scripted edit did nothing at
+# all while reporting success.
+#
+# text=auto eol=lf: git normalises to LF in the repository and checks out LF
+# everywhere. Node, Next and every tool in this project are indifferent to it,
+# and Windows editors have handled LF for a decade.
+#
+# The commit that adds this also renormalises the 16 files that were CRLF.
+# Their content is unchanged — only the line endings — but it is its own
+# commit so the blame damage is isolated and explained rather than mixed into
+# a change someone will later try to read.
+* text=auto eol=lf
+
+# Binary, never touched.
+*.png binary
+*.jpg binary
+*.woff2 binary
+*.ico binary
