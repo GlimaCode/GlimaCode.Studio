@@ -27,6 +27,13 @@ export const fa: Dictionary = {
     skipToContent: "رفتن به محتوا",
   },
 
+  themeSwitch: {
+    label: "پوسته",
+    system: "هماهنگ با سیستم",
+    light: "روشن",
+    dark: "تاریک",
+  },
+
   localeSwitch: {
     switchTo: "تغییر زبان به",
   },

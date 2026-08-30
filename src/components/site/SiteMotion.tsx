@@ -263,10 +263,10 @@ export function SiteMotion({ locale }: { locale: Locale }) {
         const onScrollType = () => {
           const y = window.scrollY;
           if (floatEl && y < window.innerHeight * 1.2) {
-            floatEl.style.transform = `translateY(${y * 0.09}px) rotate(${Math.min(
-              y * 0.004,
-              2,
-            )}deg)`;
+            // Drift only. The board used to be isometric, where a couple of
+            // degrees of twist read as parallax; square-on it reads as the
+            // keyboard being crooked.
+            floatEl.style.transform = `translateY(${y * 0.09}px)`;
           }
           const now = performance.now();
           if (

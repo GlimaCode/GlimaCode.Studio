@@ -1,6 +1,7 @@
 import type { Dictionary, Locale } from "@/i18n";
 import { Logo } from "./Logo";
 import { LocaleSwitch } from "./LocaleSwitch";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 /**
  * The site header.
@@ -47,6 +48,7 @@ export function Nav({
           <a href={href("process")}>{t.nav.process}</a>
           <a href={href("team")}>{t.nav.team}</a>
           <LocaleSwitch locale={locale} t={t} />
+          <ThemeSwitch labels={t.themeSwitch} />
           <a className="nav-cta" href={href("start")}>
             {t.nav.cta}
           </a>

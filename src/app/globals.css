@@ -696,6 +696,47 @@
   .nav-links a.locale-switch{display:inline-block}
 }
 
+/* ---------- Persian on a dark ground ---------- */
+/* Light text on a dark field blooms: the strokes spread and the counters
+   close, so the same weight reads heavier than it does on paper. Vazirmatn is
+   generous to begin with, and at 800 the Persian headline came out visibly
+   denser in dark than the Latin one does — measured identical (same face,
+   same weight, same size, confirmed through CSS.getPlatformFontsForNode) and
+   different to look at, which is the whole reason this was checked by eye.
+   One step down in dark only, and only for Persian: Latin is unaffected and
+   the light theme is untouched. */
+html[data-theme="dark"]:lang(fa) h1{font-weight:700}
+html[data-theme="dark"]:lang(fa) h2{font-weight:600}
+html[data-theme="dark"]{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+@media (prefers-color-scheme:dark){
+  html:not([data-theme]):lang(fa) h1{font-weight:700}
+  html:not([data-theme]):lang(fa) h2{font-weight:600}
+  html:not([data-theme]){-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+}
+
+/* ---------- Theme control ---------- */
+/* Sized and bordered to match .locale-switch exactly: the two controls sit
+   next to each other and reading as a pair is the point. It is a button, not
+   a link — it changes state rather than going anywhere — so it needs the
+   font reset a button does not inherit. */
+.theme-switch{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12.5px;line-height:1;
+  color:var(--slate);background:transparent;cursor:pointer;
+  border:1px solid var(--line);border-radius:8px;
+  /* Same box as the locale switch. min-height keeps it a 38px target on a
+     phone, where WCAG 2.2 wants 24 and this is the smallest control here. */
+  padding:7px 10px;min-width:38px;min-height:32px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:border-color var(--fast) ease, color var(--fast) ease,
+             background var(--fast) ease;
+}
+.theme-switch:hover{border-color:var(--cobalt);color:var(--cobalt);background:var(--card)}
+.theme-switch:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.theme-switch-icon{display:flex;width:15px;height:15px}
+/* The dashboard bar is denser than the site header. */
+.dash-top .theme-switch{padding:6px 9px;min-height:30px}
+
 /* ---------- Right-to-left ---------- */
 /* Overrides rather than logical properties in the block above, so the
    left-to-right rendering is byte-for-byte what it was before Persian
@@ -1164,4 +1205,441 @@ html[lang]{
 :lang(fa) .sec-head h1,
 :lang(fa) .pf-detail-main h2{
   letter-spacing:normal;
+}
+
+
+/* =====================================================================
+   DARK THEME
+
+   Built from the dark half of the brand that already existed — the contact
+   card, the keyboard's extruded base, the ink tokens — rather than from a new
+   palette. In dark, the page becomes the shade below ink and cards become ink
+   itself, so the whole site reads as the contact card generalised.
+
+   HOW IT IS SELECTED
+
+   An inline script in each layout stamps data-theme on <html> before the first
+   paint: the stored choice if there is one, otherwise what the system asks
+   for. So the common path needs exactly one selector and there is no flash.
+   The media query below is the no-JavaScript path only — it is scoped to
+   :root:not([data-theme]), so it never competes with a stamped choice.
+
+   WHY THE VALUES LIVE IN --dk-*
+
+   CSS has no way to share a declaration block between a selector and a media
+   query, so the remapping has to appear twice. Keeping the values in one
+   place means the duplication is mechanical: two lists of `--x: var(--dk-x)`,
+   and nothing to keep in step by hand.
+
+   CONTRAST
+
+   Every pair that carries meaning was measured before being written, not
+   after. scripts/verify-contrast.mjs re-measures both themes from this file
+   on every build, so a colour cannot pass in one theme and fail in the other.
+===================================================================== */
+
+:root{
+  /* ---- new role tokens, light values ----
+     These are the values already in the stylesheet, named. Adding the name
+     changes nothing about the light theme; it gives the dark theme somewhere
+     to differ. */
+
+  /* The brand blue does two jobs that need different values on a dark ground:
+     it is read as text, and it is filled behind white text. On paper one value
+     serves both. */
+  --cobalt-solid:#2547F4;
+  --cobalt-solid-hover:#1C39D8;
+
+  /* The inverted emphasis panel: contact card, avatars, the active filter
+     chip. In light it is dark-on-light. --ink used to do this job as well as
+     being the text colour, which works only while one of them is dark. */
+  --emph-bg:#16233B;
+  --emph-fg:#FFFFFF;
+  --emph-muted:#B9C4D8;
+  --emph-line:#3A4A68;
+
+  /* Page texture. Tuned to a measured loudness rather than inherited from
+     --line, so the dark value can match how quiet this is instead of how
+     light it is. Light measures 1.21:1 against the page. */
+  --grid-line:#DDE3EC;
+  --grid-line-emph:rgba(255,255,255,.5);
+
+  /* Translucent chrome: the nav and the dashboard bar. The page colour at
+     alpha, so it is the same idea in both themes. */
+  --chrome-bg:rgba(247,248,250,.82);
+  --chrome-bg-solid:rgba(247,248,250,.9);
+
+  --line-strong:#C8D2E4;
+  --focus-ring:rgba(37,71,244,.14);
+
+  /* Status badges. Five states, each a tint, a border and a label. */
+  --badge-new-bg:#E8ECFE;      --badge-new-bd:#CBD6FC;      --badge-new-fg:#2547F4;
+  --badge-review-bg:#FFF4E3;   --badge-review-bd:#F6DFB8;   --badge-review-fg:#8A5B12;
+  --badge-replied-bg:#EAF3FF;  --badge-replied-bd:#C7DCF7;  --badge-replied-fg:#1D4E86;
+  --badge-won-bg:#E7F7F1;      --badge-won-bd:#BFE7D8;      --badge-won-fg:#0F7355;
+  --badge-lost-bg:#F3F4F6;     --badge-lost-bd:#E1E4EA;     --badge-lost-fg:#616874;
+
+  /* Failure tints: the form's error panel, and the "not notified" flag that
+     the whole notification design depends on being read. */
+  --tint-danger-bg:#FDF0EE;    --tint-danger-bd:#F3C9C2;
+  --tint-flag-bg:#FDECEA;
+
+  /* The keyboard. Keycaps read as physical objects because the face is a
+     gradient, the edge below it is darker than the face, and the board is
+     darker still. That relationship is what has to survive, not the values. */
+  --board-top:#EDF0F5;    --board-bottom:#E2E7EF;   --board-inset:rgba(255,255,255,.8);
+  --key-top:#FFFFFF;      --key-bottom:#F1F4F8;     --key-edge:#C9D2E2;
+  --key-act-top:#EFF3FF;  --key-act-bottom:#E3E9FE; --key-act-edge:#A9BAF3;  --key-act-bd:#C7D3FB;
+  --key-act-hover-top:#E7EDFF; --key-act-hover-bottom:#D8E1FE;
+  /* The action keycap needs its own label: the face is lighter than the
+     --cobalt-soft tint, so the accent that passes on the tint does not
+     pass on the cap. Light keeps the brand blue; dark lifts it. */
+  --key-act-label:#2547F4;
+  --key-lit-top:#3D5BFF;  --key-lit-bottom:#2547F4; --key-lit-edge:#16309F;  --key-lit-bd:#1C39D8;
+  --key-shadow:rgba(22,35,59,.16);        --key-shadow-deep:rgba(22,35,59,.18);
+  --key-act-shadow:rgba(37,71,244,.18);   --key-act-shadow-deep:rgba(37,71,244,.25);
+  --key-lit-shadow:rgba(37,71,244,.4);    --key-lit-shadow-deep:rgba(37,71,244,.35);
+  --board-shadow:rgba(22,35,59,.28);
+  --scrim:rgba(22,35,59,.5);
+
+  /* Label colour for a fill that is bright in BOTH themes: amber. */
+  --on-bright:#16233B;
+
+  /* The header's call to action. In light it is the ink block that is the
+     loudest thing in the nav. Reusing --emph-bg in dark inverted that: the
+     emphasis panel is only 1.43:1 against the dark page, so the one control
+     meant to stand out became the quietest thing there. Dark gives it the
+     brand fill instead, which is what "stands out" means on a dark ground. */
+  --nav-cta-bg:#16233B;  --nav-cta-bg-hover:#2547F4;
+
+  /* Front-on depth cues. */
+  --key-rim:rgba(255,255,255,.9);   --key-rim-lit:rgba(255,255,255,.35);
+  --key-well:rgba(22,35,59,.22);
+
+  /* ---- dark values, defined once ---- */
+  --dk-paper:#0E1728;
+  --dk-card:#16233B;
+  --dk-ink:#E8EDF7;
+  --dk-slate:#9CAAC4;
+  --dk-line:#2B3B58;
+  --dk-line-strong:#3E5171;
+  --dk-cobalt:#6E8BFF;
+  --dk-cobalt-soft:#182647;
+  --dk-cobalt-solid:#3A5CF0;
+  --dk-cobalt-solid-hover:#4A6AF2;
+  --dk-signal:#FFC46B;
+  --dk-green:#3DD9A0;
+  --dk-red:#FF7B67;
+  --dk-red-text:#FF9385;
+  --dk-green-text:#4FDCA6;
+  --dk-signal-deep:#FFC46B;
+
+  --dk-emph-bg:#24344E;
+  --dk-emph-fg:#E8EDF7;
+  --dk-emph-muted:#A9B6CE;
+  --dk-emph-line:#3E5171;
+
+  --dk-grid-line:#1C2941;
+  --dk-grid-line-emph:rgba(255,255,255,.22);
+  --dk-chrome-bg:rgba(14,23,40,.86);
+  --dk-chrome-bg-solid:rgba(14,23,40,.92);
+  --dk-focus-ring:rgba(110,139,255,.22);
+
+  --dk-badge-new-bg:#182647;     --dk-badge-new-bd:#2C3F6E;     --dk-badge-new-fg:#8FA6FF;
+  --dk-badge-review-bg:#2E2413;  --dk-badge-review-bd:#4A3A1C;  --dk-badge-review-fg:#FFC46B;
+  --dk-badge-replied-bg:#14263D; --dk-badge-replied-bd:#25405F; --dk-badge-replied-fg:#8FC4FF;
+  --dk-badge-won-bg:#102A22;     --dk-badge-won-bd:#1D4536;     --dk-badge-won-fg:#4FDCA6;
+  --dk-badge-lost-bg:#1D2331;    --dk-badge-lost-bd:#2E3648;    --dk-badge-lost-fg:#A2ADBF;
+
+  --dk-tint-danger-bg:#2C1719;   --dk-tint-danger-bd:#4A2624;
+  --dk-tint-flag-bg:#33191A;
+
+  --dk-board-top:#1A2740;    --dk-board-bottom:#121D31;  --dk-board-inset:rgba(255,255,255,.06);
+  --dk-key-top:#26364F;      --dk-key-bottom:#1B2840;    --dk-key-edge:#0A1120;
+  --dk-key-act-top:#1E2C56;  --dk-key-act-bottom:#172243; --dk-key-act-edge:#0D1733; --dk-key-act-bd:#2C3F6E;
+  --dk-key-act-hover-top:#26356B; --dk-key-act-hover-bottom:#1C2A52;
+  --dk-key-act-label:#8FA6FF;
+  --dk-key-lit-top:#4A6AF2;  --dk-key-lit-bottom:#3A5CF0; --dk-key-lit-edge:#101A3C; --dk-key-lit-bd:#2C3F6E;
+  --dk-key-shadow:rgba(0,0,0,.5);          --dk-key-shadow-deep:rgba(0,0,0,.55);
+  --dk-key-act-shadow:rgba(0,0,0,.5);      --dk-key-act-shadow-deep:rgba(0,0,0,.55);
+  --dk-key-lit-shadow:rgba(58,92,240,.35); --dk-key-lit-shadow-deep:rgba(58,92,240,.4);
+  --dk-board-shadow:rgba(0,0,0,.55);
+  --dk-scrim:rgba(4,8,16,.72);
+  --dk-on-bright:#0E1728;
+  --dk-nav-cta-bg:#3A5CF0;  --dk-nav-cta-bg-hover:#4A6AF2;
+  --dk-key-rim:rgba(255,255,255,.10); --dk-key-rim-lit:rgba(255,255,255,.28);
+  --dk-key-well:rgba(0,0,0,.6);
+
+  --dk-shadow-1:0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.35);
+  --dk-shadow-2:0 2px 4px rgba(0,0,0,.45), 0 14px 34px rgba(0,0,0,.5);
+}
+
+/* The remap. Duplicated for the no-script path below; see the header. */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:var(--dk-paper); --card:var(--dk-card); --ink:var(--dk-ink);
+  --slate:var(--dk-slate); --line:var(--dk-line); --line-strong:var(--dk-line-strong);
+  --cobalt:var(--dk-cobalt); --cobalt-soft:var(--dk-cobalt-soft);
+  --cobalt-solid:var(--dk-cobalt-solid); --cobalt-solid-hover:var(--dk-cobalt-solid-hover);
+  --signal:var(--dk-signal); --green:var(--dk-green); --red:var(--dk-red);
+  --red-text:var(--dk-red-text); --green-text:var(--dk-green-text);
+  --signal-deep:var(--dk-signal-deep);
+  --emph-bg:var(--dk-emph-bg); --emph-fg:var(--dk-emph-fg);
+  --emph-muted:var(--dk-emph-muted); --emph-line:var(--dk-emph-line);
+  --grid-line:var(--dk-grid-line); --grid-line-emph:var(--dk-grid-line-emph);
+  --chrome-bg:var(--dk-chrome-bg); --chrome-bg-solid:var(--dk-chrome-bg-solid);
+  --focus-ring:var(--dk-focus-ring);
+  --badge-new-bg:var(--dk-badge-new-bg); --badge-new-bd:var(--dk-badge-new-bd); --badge-new-fg:var(--dk-badge-new-fg);
+  --badge-review-bg:var(--dk-badge-review-bg); --badge-review-bd:var(--dk-badge-review-bd); --badge-review-fg:var(--dk-badge-review-fg);
+  --badge-replied-bg:var(--dk-badge-replied-bg); --badge-replied-bd:var(--dk-badge-replied-bd); --badge-replied-fg:var(--dk-badge-replied-fg);
+  --badge-won-bg:var(--dk-badge-won-bg); --badge-won-bd:var(--dk-badge-won-bd); --badge-won-fg:var(--dk-badge-won-fg);
+  --badge-lost-bg:var(--dk-badge-lost-bg); --badge-lost-bd:var(--dk-badge-lost-bd); --badge-lost-fg:var(--dk-badge-lost-fg);
+  --tint-danger-bg:var(--dk-tint-danger-bg); --tint-danger-bd:var(--dk-tint-danger-bd);
+  --tint-flag-bg:var(--dk-tint-flag-bg);
+  --board-top:var(--dk-board-top); --board-bottom:var(--dk-board-bottom); --board-inset:var(--dk-board-inset);
+  --key-top:var(--dk-key-top); --key-bottom:var(--dk-key-bottom); --key-edge:var(--dk-key-edge);
+  --key-act-top:var(--dk-key-act-top); --key-act-bottom:var(--dk-key-act-bottom);
+  --key-act-edge:var(--dk-key-act-edge); --key-act-bd:var(--dk-key-act-bd);
+  --key-act-hover-top:var(--dk-key-act-hover-top); --key-act-hover-bottom:var(--dk-key-act-hover-bottom);
+  --key-act-label:var(--dk-key-act-label);
+  --key-lit-top:var(--dk-key-lit-top); --key-lit-bottom:var(--dk-key-lit-bottom);
+  --key-lit-edge:var(--dk-key-lit-edge); --key-lit-bd:var(--dk-key-lit-bd);
+  --key-shadow:var(--dk-key-shadow); --key-shadow-deep:var(--dk-key-shadow-deep);
+  --key-act-shadow:var(--dk-key-act-shadow); --key-act-shadow-deep:var(--dk-key-act-shadow-deep);
+  --key-lit-shadow:var(--dk-key-lit-shadow); --key-lit-shadow-deep:var(--dk-key-lit-shadow-deep);
+  --board-shadow:var(--dk-board-shadow); --scrim:var(--dk-scrim); --on-bright:var(--dk-on-bright);
+  --key-rim:var(--dk-key-rim); --key-rim-lit:var(--dk-key-rim-lit); --key-well:var(--dk-key-well);
+  --nav-cta-bg:var(--dk-nav-cta-bg); --nav-cta-bg-hover:var(--dk-nav-cta-bg-hover);
+  --shadow-1:var(--dk-shadow-1); --shadow-2:var(--dk-shadow-2);
+}
+
+/* No-JavaScript path only: scoped so a stamped choice always wins. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    color-scheme:dark;
+    --paper:var(--dk-paper); --card:var(--dk-card); --ink:var(--dk-ink);
+    --slate:var(--dk-slate); --line:var(--dk-line); --line-strong:var(--dk-line-strong);
+    --cobalt:var(--dk-cobalt); --cobalt-soft:var(--dk-cobalt-soft);
+    --cobalt-solid:var(--dk-cobalt-solid); --cobalt-solid-hover:var(--dk-cobalt-solid-hover);
+    --signal:var(--dk-signal); --green:var(--dk-green); --red:var(--dk-red);
+    --red-text:var(--dk-red-text); --green-text:var(--dk-green-text);
+    --signal-deep:var(--dk-signal-deep);
+    --emph-bg:var(--dk-emph-bg); --emph-fg:var(--dk-emph-fg);
+    --emph-muted:var(--dk-emph-muted); --emph-line:var(--dk-emph-line);
+    --grid-line:var(--dk-grid-line); --grid-line-emph:var(--dk-grid-line-emph);
+    --chrome-bg:var(--dk-chrome-bg); --chrome-bg-solid:var(--dk-chrome-bg-solid);
+    --focus-ring:var(--dk-focus-ring);
+    --badge-new-bg:var(--dk-badge-new-bg); --badge-new-bd:var(--dk-badge-new-bd); --badge-new-fg:var(--dk-badge-new-fg);
+    --badge-review-bg:var(--dk-badge-review-bg); --badge-review-bd:var(--dk-badge-review-bd); --badge-review-fg:var(--dk-badge-review-fg);
+    --badge-replied-bg:var(--dk-badge-replied-bg); --badge-replied-bd:var(--dk-badge-replied-bd); --badge-replied-fg:var(--dk-badge-replied-fg);
+    --badge-won-bg:var(--dk-badge-won-bg); --badge-won-bd:var(--dk-badge-won-bd); --badge-won-fg:var(--dk-badge-won-fg);
+    --badge-lost-bg:var(--dk-badge-lost-bg); --badge-lost-bd:var(--dk-badge-lost-bd); --badge-lost-fg:var(--dk-badge-lost-fg);
+    --tint-danger-bg:var(--dk-tint-danger-bg); --tint-danger-bd:var(--dk-tint-danger-bd);
+    --tint-flag-bg:var(--dk-tint-flag-bg);
+    --board-top:var(--dk-board-top); --board-bottom:var(--dk-board-bottom); --board-inset:var(--dk-board-inset);
+    --key-top:var(--dk-key-top); --key-bottom:var(--dk-key-bottom); --key-edge:var(--dk-key-edge);
+    --key-act-top:var(--dk-key-act-top); --key-act-bottom:var(--dk-key-act-bottom);
+    --key-act-edge:var(--dk-key-act-edge); --key-act-bd:var(--dk-key-act-bd);
+    --key-act-hover-top:var(--dk-key-act-hover-top); --key-act-hover-bottom:var(--dk-key-act-hover-bottom);
+    --key-act-label:var(--dk-key-act-label);
+    --key-lit-top:var(--dk-key-lit-top); --key-lit-bottom:var(--dk-key-lit-bottom);
+    --key-lit-edge:var(--dk-key-lit-edge); --key-lit-bd:var(--dk-key-lit-bd);
+    --key-shadow:var(--dk-key-shadow); --key-shadow-deep:var(--dk-key-shadow-deep);
+    --key-act-shadow:var(--dk-key-act-shadow); --key-act-shadow-deep:var(--dk-key-act-shadow-deep);
+    --key-lit-shadow:var(--dk-key-lit-shadow); --key-lit-shadow-deep:var(--dk-key-lit-shadow-deep);
+    --board-shadow:var(--dk-board-shadow); --scrim:var(--dk-scrim); --on-bright:var(--dk-on-bright);
+    --key-rim:var(--dk-key-rim); --key-rim-lit:var(--dk-key-rim-lit); --key-well:var(--dk-key-well);
+    --nav-cta-bg:var(--dk-nav-cta-bg); --nav-cta-bg-hover:var(--dk-nav-cta-bg-hover);
+    --shadow-1:var(--dk-shadow-1); --shadow-2:var(--dk-shadow-2);
+  }
+}
+
+/* =====================================================================
+   Rules re-declared to read from the tokens above.
+
+   The ported region hard-codes 52 distinct colours inline. Rather than edit
+   it — the boundary comment promises it is unchanged, and that promise is
+   what makes it auditable — the rules that need to differ between themes are
+   restated here with the same selectors, so source order decides.
+
+   In the light theme every value below is identical to the value it replaces.
+   That is checked by screenshot, not asserted.
+===================================================================== */
+
+/* ---------- page texture ---------- */
+body{
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+}
+.contact-card::before{
+  background-image:
+    linear-gradient(var(--grid-line-emph) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-emph) 1px, transparent 1px);
+}
+
+/* ---------- translucent chrome ---------- */
+nav{background:var(--chrome-bg)}
+.dash-top{background:var(--chrome-bg-solid)}
+
+/* ---------- the emphasis panel ----------
+   --ink was doing two jobs: the text colour and this background. They only
+   coincide while exactly one of the two themes is dark. */
+.contact-card{background:var(--emph-bg)}
+.contact-card h2{color:var(--emph-fg)}
+.contact-card p{color:var(--emph-muted)}
+.contact-card .contact-address{color:var(--emph-muted)}
+.contact-card .btn-outline{color:var(--emph-fg);border-color:var(--emph-line)}
+.contact-card .btn-outline:hover{border-color:var(--emph-fg)}
+.member.alt .avatar{background:var(--emph-bg);color:var(--emph-fg)}
+.assignee.both{background:var(--emph-bg);color:var(--emph-fg)}
+.pf-chip.active{background:var(--emph-bg);border-color:var(--emph-bg);color:var(--emph-fg)}
+.nav-cta{background:var(--nav-cta-bg);color:#fff!important}
+
+/* ---------- cobalt as a fill, behind white text ----------
+   The brand blue is lifted in dark so it can be READ against the page. That
+   same lifted value cannot carry white text: #6E8BFF under white measures
+   3.09. Every fill with a white label therefore uses --cobalt-solid, which is
+   tuned the other way — dark enough for white at 5.29, light enough to read
+   as a button against the page at 3.39. Thin rules and bars keep --cobalt:
+   they carry no text and the brighter value suits them. */
+::selection{background:var(--cobalt-solid);color:#fff}
+.btn-primary{background:var(--cobalt-solid);color:#fff}
+.btn-primary:hover{background:var(--cobalt-solid-hover)}
+.nav-cta:hover{background:var(--nav-cta-bg-hover)}
+.service:hover .icon{background:var(--cobalt-solid);color:#fff}
+.member .avatar{background:var(--cobalt-solid);color:#fff}
+.assignee.ali{background:var(--cobalt-solid)}
+.skip-link{background:var(--cobalt-solid);color:#fff}
+
+/* Amber is bright in both themes, so its label is dark in both. */
+.assignee.mostafa{background:var(--signal);color:var(--on-bright)}
+
+/* ---------- borders and focus ---------- */
+.ticket:hover .chip{border-color:var(--line-strong)}
+.req-item:hover{border-color:var(--line-strong)}
+.field input:focus,.field select:focus,.field textarea:focus{
+  box-shadow:0 0 0 3px var(--focus-ring);
+}
+
+/* ---------- status badges ---------- */
+.req-badge.s-new{background:var(--badge-new-bg);border-color:var(--badge-new-bd);color:var(--badge-new-fg)}
+.req-badge.s-reviewing{background:var(--badge-review-bg);border-color:var(--badge-review-bd);color:var(--badge-review-fg)}
+.req-badge.s-replied{background:var(--badge-replied-bg);border-color:var(--badge-replied-bd);color:var(--badge-replied-fg)}
+.req-badge.s-won{background:var(--badge-won-bg);border-color:var(--badge-won-bd);color:var(--badge-won-fg)}
+.req-badge.s-lost{background:var(--badge-lost-bg);border-color:var(--badge-lost-bd);color:var(--badge-lost-fg)}
+
+/* ---------- failure tints ---------- */
+.order-problem{background:var(--tint-danger-bg);border-color:var(--tint-danger-bd)}
+.req-flag{background:var(--tint-flag-bg);border-color:var(--tint-danger-bd)}
+/* The banner that counts undelivered requests. Missed on the first pass: it
+   kept its light pink fill on the dark page, with --ink text on top of it,
+   which in dark is near-white. The loudest thing in the dashboard became the
+   only unreadable one. */
+.dash-banner-warn{
+  background:var(--tint-danger-bg);
+  border-color:var(--tint-danger-bd);
+  color:var(--red-text);
+}
+.dash-banner{border-color:var(--badge-new-bd)}
+
+/* The locale badge on a request row. Same role flip as the six fills above:
+   --ink is the text colour, and using it as a background gives a white box
+   with white text the moment the theme inverts. */
+.req-locale{background:var(--emph-bg);color:var(--emph-fg)}
+
+/* ---------- overlays ---------- */
+.overlay{background:var(--scrim)}
+
+/* ---------- the keyboard: geometry ----------
+   The prototype set the board isometric — rotateX(45deg) rotateZ(-13deg) —
+   which reads as a product shot seen from above and to one side. Front-on
+   instead: the Z twist is gone, the X tilt drops to the angle a keyboard
+   actually sits at when you are looking down at your own desk, and the
+   perspective tightens so the far edge converges harder. Less rotation, more
+   depth: the board is squarer to the viewer and reads as a thicker object
+   rather than a flatter one.
+
+   Tighter perspective is what buys the 3D back. At 1200px the projection is
+   nearly orthographic and the only depth cue was the tilt; at 760px the
+   near edge is visibly wider than the far one. */
+.kbd-scene{
+  perspective:700px;
+  /* Above the board's centre, so we look slightly down onto the deck the
+     way a person sitting at it would. */
+  perspective-origin:50% 32%;
+}
+.kbd-board{
+  transform:rotateX(25deg);
+}
+
+/* Depth. Front-on hides the side walls the isometric view used to show, so
+   the extrusion has to do that work: a taller base under the board and a
+   taller wall under every keycap. */
+.kbd-board{
+  box-shadow:
+    0 36px 0 -6px var(--key-edge),
+    0 40px 0 -4px var(--key-well),
+    0 62px 90px var(--board-shadow),
+    inset 0 1px 0 var(--board-inset);
+}
+/* Three cues per cap, because front-on there is no visible side face:
+     the wall      — the offset block below the cap
+     the rim       — a hairline of light along the cap's top edge
+     the contact   — a tight shadow where the wall meets the deck */
+.key{
+  box-shadow:
+    0 7px 0 var(--key-edge),
+    0 8px 0 var(--key-well),
+    0 12px 18px var(--key-shadow),
+    inset 0 1px 0 var(--key-rim);
+}
+.key.action{
+  box-shadow:
+    0 7px 0 var(--key-act-edge),
+    0 8px 0 var(--key-well),
+    0 12px 18px var(--key-act-shadow),
+    inset 0 1px 0 var(--key-rim);
+}
+.key.lit{
+  box-shadow:
+    0 7px 0 var(--key-lit-edge),
+    0 8px 0 var(--key-well),
+    0 12px 22px var(--key-lit-shadow),
+    inset 0 1px 0 var(--key-rim-lit);
+}
+/* Pressed still travels the full height of the wall, so the key bottoms out
+   against the deck instead of hovering. */
+.key.pressed,.key.action:active{
+  transform:translateY(6px);
+  box-shadow:0 1px 0 var(--key-edge), 0 3px 6px var(--key-shadow-deep);
+}
+.key.action.pressed,.key.action:active{box-shadow:0 1px 0 var(--key-act-edge), 0 3px 6px var(--key-act-shadow-deep)}
+.key.lit.pressed{box-shadow:0 1px 0 var(--key-lit-edge), 0 3px 6px var(--key-lit-shadow-deep)}
+
+/* ---------- the keyboard: colour ----------
+   Keycaps read as objects because of a relationship, not a palette: the face
+   is a gradient lit from above, the 5px offset below it is DARKER than the
+   face so it reads as a side wall, and the board is darker again. Inverting
+   the values would put the light where the shadow belongs and the caps would
+   flatten. The dark theme keeps the relationship and moves the stack down.
+   Selectors and shadow order mirror the ported rules exactly. */
+.kbd-board{
+  background:linear-gradient(180deg,var(--board-top),var(--board-bottom));
+}
+.key{
+  background:linear-gradient(180deg,var(--key-top),var(--key-bottom));
+}
+.key.action{
+  background:linear-gradient(180deg,var(--key-act-top),var(--key-act-bottom));
+  color:var(--key-act-label);
+  border-color:var(--key-act-bd);
+}
+.key.action:hover{background:linear-gradient(180deg,var(--key-act-hover-top),var(--key-act-hover-bottom))}
+.key.lit{
+  background:linear-gradient(180deg,var(--key-lit-top),var(--key-lit-bottom));
+  border-color:var(--key-lit-bd);
+}
+@media(max-width:960px){
+  .kbd-mini .key{box-shadow:0 5px 0 var(--key-act-edge), 0 8px 12px var(--key-act-shadow)}
 }

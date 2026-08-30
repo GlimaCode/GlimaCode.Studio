@@ -21,6 +21,13 @@ export const en = {
     skipToContent: "Skip to content",
   },
 
+  themeSwitch: {
+    label: "Theme",
+    system: "Following your system",
+    light: "Light",
+    dark: "Dark",
+  },
+
   localeSwitch: {
     /** Accessible label on the switcher, e.g. "Switch to فارسی". */
     switchTo: "Switch to",

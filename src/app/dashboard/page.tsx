@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { currentUser, currentTeamMember } from "@/lib/auth/session";
+import { ThemeSwitch } from "@/components/site/ThemeSwitch";
 import { signOut } from "@/lib/auth/actions";
 import { listRequests, type RequestListItem } from "@/lib/data/admin";
 import { SignInForm } from "@/components/dashboard/SignInForm";
@@ -119,6 +120,16 @@ export default async function DashboardPage() {
               Portfolio
             </Link>
           </div>
+          {/* The dashboard interface is English by decision, so these
+              labels are literal rather than dictionary lookups. */}
+          <ThemeSwitch
+            labels={{
+              label: "Theme",
+              system: "Following your system",
+              light: "Light",
+              dark: "Dark",
+            }}
+          />
           <form action={signOut}>
             <button className="btn btn-ghost btn-sm" type="submit">
               Sign out

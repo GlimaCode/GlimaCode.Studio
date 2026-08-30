@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { currentTeamMember } from "@/lib/auth/session";
+import { ThemeSwitch } from "@/components/site/ThemeSwitch";
 import { signOut } from "@/lib/auth/actions";
 import { getRequest, REQUEST_STATUSES } from "@/lib/data/admin";
 import { setRequestStatus, saveRequestNotes } from "../../actions";
@@ -63,6 +64,16 @@ export default async function RequestDetailPage({
               ← All requests
             </Link>
           </div>
+          {/* The dashboard interface is English by decision, so these
+              labels are literal rather than dictionary lookups. */}
+          <ThemeSwitch
+            labels={{
+              label: "Theme",
+              system: "Following your system",
+              light: "Light",
+              dark: "Dark",
+            }}
+          />
           <form action={signOut}>
             <button className="btn btn-ghost btn-sm" type="submit">
               Sign out

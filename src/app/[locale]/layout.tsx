@@ -11,6 +11,7 @@ import {
 import { siteConfig } from "@/config/site";
 import { stripIsolates } from "@/i18n/pending";
 import { localeAlternates } from "@/lib/seo/alternates";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { fontVariables } from "../fonts";
 import "../globals.css";
 
@@ -102,7 +103,13 @@ export async function generateMetadata({
 }
 
 export const viewport: Viewport = {
-  themeColor: "#F7F8FA",
+  // The colour the browser paints around the page — the address bar on
+  // mobile, the window chrome on some desktops. It has to follow the theme or
+  // a dark page sits in a white frame.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F8FA" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E1728" },
+  ],
 };
 
 export default async function LocaleLayout({
@@ -120,6 +127,11 @@ export default async function LocaleLayout({
       className={fontVariables}
     >
       <head>
+        {/* Stamps data-theme before the first paint. Inline and synchronous
+            for the same reason the hero reveal is: from a component it would
+            run after hydration, and the page would paint in one theme and
+            swap to the other in front of the visitor. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <noscript>
           <style dangerouslySetInnerHTML={{ __html: NO_SCRIPT_FALLBACK }} />
         </noscript>
