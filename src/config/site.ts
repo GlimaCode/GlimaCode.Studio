@@ -57,6 +57,19 @@ export type SiteConfig = {
      * empty grid against a table that does not exist yet.
      */
     portfolio: boolean;
+    /**
+     * The device showcase at /showcase.
+     *
+     * It is a frame around screenshots, and there are no screenshots yet:
+     * every published project has a null cover_url and an empty
+     * gallery_urls. Turning it on before there is something to put in it
+     * would put an empty laptop in front of a prospect, which is worse than
+     * no page at all.
+     *
+     * Flip this the day the first cover image lands. The route, the link
+     * from /work and the metadata all follow from it.
+     */
+    showcase: boolean;
   };
 };
 
@@ -74,6 +87,8 @@ export const siteConfig: SiteConfig = {
   features: {
     dashboard: true,
     portfolio: true,
+    // No screenshots in the database yet. See the type above.
+    showcase: false,
   },
 };
 

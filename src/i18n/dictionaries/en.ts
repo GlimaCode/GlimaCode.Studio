@@ -239,6 +239,24 @@ export const en = {
     github: "GitHub",
   },
 
+  showcase: {
+    label: "Showcase",
+    heading: "See it running",
+    desc: "Pick a project and it opens on the screen. Screenshots, not mockups — this is what the thing actually looks like.",
+    open: "Open",
+    close: "Close the lid",
+    openLid: "Open the lid",
+    pick: "Choose a project",
+    nowShowing: "Now showing",
+    shotOf: "Screenshot of",
+    shotCount: "Screen",
+    prev: "Previous screen",
+    next: "Next screen",
+    readCase: "Read the case study",
+    startLike: "Request something like this",
+    empty: "Nothing to show here yet.",
+  },
+
   portfolio: {
     label: "Selected work",
     heading: "Work we have shipped",

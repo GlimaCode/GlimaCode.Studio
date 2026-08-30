@@ -1643,3 +1643,226 @@ nav{background:var(--chrome-bg)}
 @media(max-width:960px){
   .kbd-mini .key{box-shadow:0 5px 0 var(--key-act-edge), 0 8px 12px var(--key-act-shadow)}
 }
+
+
+/* =====================================================================
+   The device showcase at /showcase.
+
+   A laptop that starts closed and opens onto a screenshot. On a phone the
+   laptop is the wrong object, so the same markup becomes a phone frame and
+   the shot fills it edge to edge.
+
+   The frame is built from elements rather than shipped as an image: a PNG
+   mockup would be a second asset in two themes and two resolutions, it could
+   not take the page's own colours, and the screen would not be a real box
+   that a real image sits inside.
+
+   Depth follows the keyboard's rule, because they are the same studio and
+   the same light: the lid is lit from above, the edge below a surface is
+   darker than the surface, and the deck is darker again.
+===================================================================== */
+
+:root{
+  --sc-shell:#DDE3EC;      /* the laptop's body, seen as lid back and base */
+  --sc-shell-edge:#C2CBDA;
+  --sc-bezel:#16233B;      /* the black surround the screen sits in */
+  --sc-screen:#0E1728;     /* what shows before an image loads */
+  --sc-mark:rgba(255,255,255,.34);
+}
+:root[data-theme="dark"]{
+  --sc-shell:#2A3B57;
+  --sc-shell-edge:#1B2840;
+  --sc-bezel:#080E1A;
+  --sc-screen:#060B14;
+  --sc-mark:rgba(255,255,255,.22);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    --sc-shell:#2A3B57;
+    --sc-shell-edge:#1B2840;
+    --sc-bezel:#080E1A;
+    --sc-screen:#060B14;
+    --sc-mark:rgba(255,255,255,.22);
+  }
+}
+
+.sc{
+  display:grid;grid-template-columns:minmax(220px,300px) 1fr;
+  gap:44px;align-items:start;margin-top:8px;
+}
+
+/* ---------- the chooser ---------- */
+.sc-picker-label{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11.5px;color:var(--slate);text-transform:uppercase;
+  letter-spacing:.1em;margin-bottom:12px;
+}
+.sc-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.sc-item{
+  width:100%;text-align:inherit;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;display:flex;flex-direction:column;gap:4px;
+  font-family:inherit;color:var(--ink);
+  transition:border-color var(--fast) ease, transform var(--fast) var(--ease),
+             box-shadow var(--fast) ease;
+}
+.sc-item:hover{border-color:var(--cobalt);transform:translateY(-2px);box-shadow:var(--shadow-1)}
+.sc-item:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+.sc-item.active{border-color:var(--cobalt);box-shadow:var(--shadow-1)}
+.sc-item-cat{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11px;color:var(--cobalt);text-transform:uppercase;letter-spacing:.1em;
+}
+.sc-item-title{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:16px;font-weight:600;
+}
+.sc-item-hint{font-size:12.5px;color:var(--slate)}
+
+/* ---------- the stage ---------- */
+.sc-stage{display:flex;flex-direction:column;align-items:center;gap:22px}
+
+/* The laptop. Perspective on the stage so the lid rotates in depth rather
+   than squashing, and the same tight value the keyboard uses so the two
+   objects sit in the same room. */
+.sc-laptop{
+  width:100%;max-width:560px;
+  perspective:1500px;perspective-origin:50% 20%;
+  display:flex;flex-direction:column;align-items:center;
+}
+/* The whole machine is seen from slightly above, the way one sits on a desk
+   in front of you. Without this the closed lid is a panel viewed edge-on —
+   geometrically correct and visually a horizontal line. Tilting the assembly
+   is what makes "closed" read as a slab with a lid on top of it. */
+.sc-rig{
+  width:100%;transform:rotateX(16deg);transform-style:preserve-3d;
+  display:flex;flex-direction:column;align-items:center;
+}
+
+.sc-lid{
+  position:relative;width:100%;aspect-ratio:16/10;
+  transform-origin:50% 100%;
+  transform-style:preserve-3d;
+  /* Closed. Not exactly 90 degrees: at 90 the panel is edge-on to a viewer
+     who is only 16 degrees above it, and an edge-on plane is a line — the
+     lid vanished and left the base looking like a stray slab. Even 84 was
+     only six degrees off edge-on and came out as a dark line.
+
+     So closed is stylised rather than literal: far enough over to read as
+     shut, open enough that the object is still a laptop and the animation
+     has somewhere to travel from. A photograph would use 90; an interface
+     that has to communicate in one glance should not. */
+  transform:rotateX(68deg);
+  transition:transform .85s cubic-bezier(.22,1,.28,1);
+}
+.sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-11deg)}
+
+.sc-bezel{
+  position:absolute;inset:0;
+  background:var(--sc-bezel);
+  border-radius:12px 12px 4px 4px;
+  padding:12px 12px 20px;
+  backface-visibility:hidden;
+  box-shadow:0 18px 40px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.sc-screen{
+  position:relative;width:100%;height:100%;
+  background:var(--sc-screen);
+  border-radius:4px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.sc-shot{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.sc-screen-empty{
+  color:var(--slate);font-size:13px;padding:20px;text-align:center;
+}
+.sc-camera{
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.28);
+}
+
+/* The back of the lid: what you look at while it is shut. */
+.sc-lid-back{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--sc-shell-edge),var(--sc-shell));
+  border-radius:12px 12px 4px 4px;
+  /* Flipped about the horizontal axis, not the vertical one: the lid folds
+     about a horizontal hinge, so this is the face that ends up pointing at
+     the viewer when it is shut. */
+  transform:rotateX(180deg);
+  backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+}
+.sc-mark{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:22px;color:var(--sc-mark);letter-spacing:.06em;
+}
+
+/* The base. A wedge, thicker at the hinge, with the trackpad notch. */
+.sc-base{
+  position:relative;width:104%;height:22px;
+  background:linear-gradient(180deg,var(--sc-shell),var(--sc-shell-edge));
+  border-radius:3px 3px 12px 12px;
+  box-shadow:0 22px 40px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.45);
+  display:flex;align-items:flex-start;justify-content:center;
+}
+.sc-hinge{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:36%;height:3px;border-radius:0 0 4px 4px;
+  background:var(--sc-shell-edge);
+}
+.sc-notch{
+  position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  width:14%;height:4px;border-radius:4px;background:var(--sc-shell-edge);
+}
+
+/* ---------- gallery paging and the caption ---------- */
+.sc-shots{display:flex;align-items:center;gap:12px}
+.sc-shots-count{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12.5px;color:var(--slate);min-width:52px;text-align:center;
+}
+.sc-meta{max-width:56ch;text-align:center}
+.sc-meta-title{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  font-size:18px;font-weight:600;display:flex;flex-direction:column;gap:4px;
+  align-items:center;
+}
+.sc-meta-eyebrow{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11px;font-weight:400;color:var(--cobalt);
+  text-transform:uppercase;letter-spacing:.1em;
+}
+.sc-meta-summary{color:var(--slate);font-size:15px;margin-top:8px}
+.sc-meta-actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+
+/* ---------- phone, not laptop ----------
+   Below 900px the laptop stops being the right object: it would be a wide
+   frame shown on a tall screen, and the screenshot inside it would be
+   thumbnail-sized. The same markup becomes a phone and the shot fills it. */
+@media(max-width:900px){
+  .sc{grid-template-columns:1fr;gap:30px}
+  .sc-laptop{max-width:300px;perspective:1000px}
+  .sc-lid{
+    aspect-ratio:9/19;
+    transform-origin:50% 50%;
+    /* A phone does not fold, so "closed" is the screen being off rather than
+       the lid being down. It swings in from the side instead. */
+    transform:rotateY(-92deg);
+  }
+  .sc-laptop[data-open="true"] .sc-lid{transform:rotateY(0deg)}
+  .sc-bezel{border-radius:26px;padding:10px}
+  .sc-lid-back{border-radius:26px}
+  .sc-screen{border-radius:18px}
+  .sc-shot{object-fit:cover}
+  .sc-camera{top:4px;width:44px;height:5px;border-radius:4px}
+  .sc-base{display:none}
+}
+
+/* ---------- reduced motion ---------- */
+/* The lid still opens — that is the state, not the decoration — but it stops
+   travelling. Someone who asked for less movement gets the screenshot, not a
+   swinging panel. */
+@media (prefers-reduced-motion:reduce){
+  .sc-lid{transition:none}
+}
