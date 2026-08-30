@@ -714,6 +714,9 @@ html[data-theme="dark"]{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothi
   html:not([data-theme]){-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 }
 
+/* The link from the portfolio index into the showcase. */
+.pf-showcase-link{margin-top:18px}
+
 /* ---------- Theme control ---------- */
 /* Sized and bordered to match .locale-switch exactly: the two controls sit
    next to each other and reading as a pair is the point. It is a button, not

@@ -99,6 +99,17 @@ export default async function WorkIndexPage({
               <p className="sec-label">{t.portfolio.label}</p>
               <h1>{t.portfolio.heading}</h1>
               <p className="sec-desc">{t.portfolio.desc}</p>
+              {/* The way into the showcase. Gated on the same flag as the
+                  route: a link to a 404 is worse than no link, and this is
+                  the page someone is on when they want to see the work
+                  rather than read about it. */}
+              {siteConfig.features.showcase ? (
+                <p className="pf-showcase-link">
+                  <Link className="btn btn-ghost btn-sm" href={`/${locale}/showcase`}>
+                    {t.showcase.heading}
+                  </Link>
+                </p>
+              ) : null}
             </div>
 
             {categories.length > 1 ? (

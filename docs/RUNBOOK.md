@@ -244,6 +244,48 @@ arriving proves the send worked; it does not prove `reply_to` did.
 Attempts are append-only. Nothing overwrites the record of a failure, so the
 history of a bad week stays legible after it is fixed.
 
+## Turning the showcase on
+
+`/showcase` is a laptop that opens onto a screenshot. It is gated behind
+`siteConfig.features.showcase`, which is `false`, because every published
+project currently has a null `cover_url` and an empty `gallery_urls`. With the
+flag off the route is a 404 and nothing links to it — that is the whole point,
+since an empty laptop tells a prospect we build things we cannot show.
+
+### To look at it before there are screenshots
+
+Locally only. Set the flag to `true` in `src/config/site.ts`, run the dev
+server, and open `/en/showcase`. Do not commit that change: it deploys, and
+the page would be live and empty.
+
+```
+npm run dev
+```
+
+Screens will be blank because there are no images. To see the frame with real
+pixels in it, point the shots at something that exists — the Open Graph route
+renders a real PNG per project:
+
+```ts
+// src/app/[locale]/showcase/page.tsx, temporarily
+shots: [`/${locale}/work/${project.slug}/opengraph-image`]
+```
+
+Revert both edits afterwards. `git status` should be clean before you push.
+
+### To turn it on for real
+
+1. Add a cover image to each project you want shown — `cover_url` on the row,
+   and `gallery_urls` for any extra screens. Anything without at least one
+   image is left out of the showcase rather than shown as an empty screen.
+2. Set `showcase: true` in `src/config/site.ts`.
+3. Deploy. The route, its metadata, its hreflang pair, and the link from
+   `/work` all follow from the flag; there is nothing else to switch on.
+
+Images are served as-is, so put them somewhere with a stable URL and size them
+for a 16:10 screen. The frame crops from the top, so the important part of a
+screenshot should be at the top of the image.
+
 ## Contacts
 
 Studio address: `hello@glimacode.com`, on Zoho — MX, SPF and DKIM verified,
