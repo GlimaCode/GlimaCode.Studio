@@ -208,10 +208,25 @@ Inverting the values for dark would put the light where the shadow belongs.
 ### The hero line cycles eleven languages, and which eleven was measured
 
 `src/i18n/greetings.ts` holds the table; `Hero.tsx` renders the visitor's own
-language server-side, and `SiteMotion.tsx` turns it over every 3.2 seconds,
-setting `lang` and `dir` with each turn. The whole sentence changes, not just
-the greeting word: one word in another language reads as a flourish, a whole
-sentence reads as a studio that works in more than one.
+language server-side, and `SiteMotion.tsx` takes it round, setting `lang` and
+`dir` with each turn. The whole sentence changes, not just the greeting word:
+one word in another language reads as a flourish, a whole sentence reads as a
+studio that works in more than one.
+
+**It is a tour, not a metronome.** Each language holds 3.2 seconds except the
+visitor's own, which holds 5 — so the line goes round all eleven, comes home,
+rests, and goes again. That is why the rotation is a self-scheduling
+`setTimeout` rather than a `setInterval`: the delay is decided per step by
+which language is on screen, and an interval cannot vary. Timed with a
+MutationObserver on both locales: `en -> es -> fr -> ar -> ru -> pt -> de ->
+it -> tr -> id -> fa -> en`, eleven distinct languages, others at 3.203s and
+home at 5.004s.
+
+Note what this does not do: the rotation is still perpetual, so the WCAG 2.2.2
+position is unchanged from before this feature existed — there is no
+pause control, and the three-word version that shipped first had none either.
+Ali was shown that and chose the rest-and-repeat shape knowingly. Adding a
+control later is `REST_MS`, `STEP_MS` and a button.
 
 **Chinese, Japanese and Hindi are missing on purpose, and the reason is
 measured.** The site loads IBM Plex Mono and Vazirmatn, which between them

@@ -65,11 +65,25 @@ export function SiteMotion({ locale }: { locale: Locale }) {
     //    flash of something they did not ask for.
     const greetingEl = document.getElementById("greeting");
     if (greetingEl && GREETINGS.length > 1) {
-      let index = startIndex(document.documentElement.lang.slice(0, 2));
+      // Where the tour starts and where it rests: the language of the page the
+      // visitor actually landed on, which the server already rendered.
+      const home = startIndex(document.documentElement.lang.slice(0, 2));
+      let index = home;
       const pending = new Set<number>();
       let interval = 0;
       greetingEl.style.transition = "opacity .22s ease";
 
+      // The tour goes round once and then rests on the visitor's own language
+      // before going round again, so each step cannot share one interval: the
+      // language they came for is held longer than the ones they did not.
+      // Self-scheduling rather than setInterval, so the delay is decided per
+      // step by which language is currently on screen.
+      const STEP_MS = 3200;
+      const REST_MS = 5000;
+
+      const schedule = () => {
+        interval = window.setTimeout(turn, index === home ? REST_MS : STEP_MS);
+      };
       const turn = () => {
         index = (index + 1) % GREETINGS.length;
         const next = GREETINGS[index];
@@ -82,16 +96,17 @@ export function SiteMotion({ locale }: { locale: Locale }) {
           pending.delete(timer);
         }, 220);
         pending.add(timer);
+        schedule();
       };
       const stopTurning = () => {
-        if (interval) window.clearInterval(interval);
+        if (interval) window.clearTimeout(interval);
         interval = 0;
         pending.forEach((timer) => window.clearTimeout(timer));
         pending.clear();
         greetingEl.style.opacity = "1";
       };
       const startTurning = () => {
-        if (!interval) interval = window.setInterval(turn, 3200);
+        if (!interval) schedule();
       };
       // Read live, not once at mount. Every other perpetual animation here is
       // CSS and stops the instant the setting is turned on; this one is a
