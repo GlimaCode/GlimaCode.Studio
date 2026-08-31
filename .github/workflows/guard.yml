@@ -86,6 +86,7 @@ jobs:
       - run: npm run verify:dashboard-shell
       - run: npm run verify:offscreen
       - run: npm run verify:contrast
+      - run: npm run verify:greeting-fonts
       - run: npm run i18n:pending
 
       # No database credentials here on purpose. Public pages must render

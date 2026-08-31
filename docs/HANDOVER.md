@@ -205,6 +205,69 @@ Keycaps read as objects because of a relationship, not a palette: face lit
 from above, the wall below it darker than the face, the deck darker again.
 Inverting the values for dark would put the light where the shadow belongs.
 
+### The hero line cycles eleven languages, and which eleven was measured
+
+`src/i18n/greetings.ts` holds the table; `Hero.tsx` renders the visitor's own
+language server-side, and `SiteMotion.tsx` turns it over every 3.2 seconds,
+setting `lang` and `dir` with each turn. The whole sentence changes, not just
+the greeting word: one word in another language reads as a flourish, a whole
+sentence reads as a studio that works in more than one.
+
+**Chinese, Japanese and Hindi are missing on purpose, and the reason is
+measured.** The site loads IBM Plex Mono and Vazirmatn, which between them
+cover Latin, Cyrillic and Arabic script — not Greek, which is worth saying
+because IBM Plex *Sans* has a Greek face and Plex *Mono* does not. Asked with CDP's
+`CSS.getPlatformFontsForNode` which face actually drew each candidate, Chrome
+answered NSimSun for Chinese, MS Gothic for Japanese and Nirmala UI for Hindi:
+system fonts, different on every platform, and absent altogether on a machine
+with no CJK or Devanagari installed, where the line becomes empty boxes.
+Shipping them properly means a CJK webfont, and those are megabytes against an
+LCP element that is not to be touched. `verify:greeting-fonts` now fails the
+build if anyone adds one without solving that.
+
+Two smaller things that were also measured rather than assumed. The `lang` on
+each turn is what stops a screen reader reading Turkish in an English voice.
+The `dir` is what keeps the em dash on the correct side for the two
+right-to-left entries — an em dash between neutral characters is placed by the
+surrounding direction, and this stylesheet has been bitten by that three times
+already.
+
+And the eyebrow reserves room. Every one of the eleven fits on one line down to
+720px, so nothing is reserved there; below it the longest wrap to two, so two
+lines are held (`min-height: 54px`). Without that the headline moved 20px every
+time a longer language came round — a layout shift on a timer, happening while
+somebody is reading. Verified by walking all eleven strings through the element
+at 1280 and 375 and checking the headline's top never changes.
+
+### Ones and zeroes on the grid
+
+`src/components/site/GridBits.tsx`, mounted as a child of `<body>` in the
+locale layout. Digits ride the 48px grid the body paints, are pushed away by
+the pointer, and settle back onto the line they were on.
+
+- **A canvas, not elements.** Ninety absolutely positioned spans animated per
+  frame is ninety style recalculations per frame; one canvas is one. Measured
+  cost of the loop: 16.6ms median frame with it running, 16.5ms with the canvas
+  detached — both at the vsync cap, so the difference is unmeasurable.
+- **`z-index: -1` on a fixed child of body** paints it above the body's grid
+  and below every piece of content, with `pointer-events: none` so it can never
+  take a click.
+- **Document space, drawn minus `scrollY`.** The body's grid scrolls with the
+  page and a fixed canvas does not; without the offset the digits slide off the
+  lines the moment the page moves.
+- **The canvas is never created under `prefers-reduced-motion`.** Not slowed,
+  not static. The loop also stops when the tab is hidden.
+- **Canvas text does not wait for webfonts.** Setting `ctx.font` to a family
+  that has not loaded yet silently draws in something else, and the first
+  frames of a cold load came out as tofu boxes. It re-reads on
+  `document.fonts.ready`. Found by screenshotting during a cold load, which is
+  the only moment it exists.
+
+Every claim above about position and behaviour was checked by sampling the
+painted canvas: every inked pixel sits within 7px of a grid line; ink within
+30px of a held pointer goes to zero while the same ink stays within 150px; and
+after the pointer leaves, all of it is back on the lines and still moving.
+
 ### The blueprint grid is tuned to a loudness, not flipped
 
 Light measures 1.21:1 against its page. The dark value was chosen at 1.23 to
@@ -362,6 +425,7 @@ broke in a way that reading the code could not have caught.
 | `npm run verify:contrast` | 31 colour pairs meet their threshold in BOTH themes, and `--ink` is never used as a fill in new code | Adding a second theme doubles every chance of the four contrast failures the light theme shipped with. It caught the action keycap label at 4.39 in dark — measured by hand against the wrong background — and the two dark token blocks drifting apart. |
 | `npm run verify:offscreen` | No large negative *logical* inset parks something off-screen | The skip link used `inset-inline-start:-9999px`, which resolves to the RIGHT in a right-to-left page: on `/fa` it sat at x=+11331. No scrollbar appeared only because its container happened to be `position: fixed`. |
 | `npm run verify:copy-sync` | The three home-board cards still match the portfolio rows they mirror | The same copy lives in the dictionary and in the database with nothing holding them together, and the dashboard tells you content is edited in the database. It found real drift within minutes of being written. Not in CI: the guard workflow has no database credentials on purpose. |
+| `npm run verify:greeting-fonts` | Every language in the rotating hero line uses only scripts IBM Plex Mono or Vazirmatn can draw | Adding a language is one line in a table, which is exactly the kind of change nobody thinks about type for. Chrome reported NSimSun, MS Gothic and Nirmala UI for Chinese, Japanese and Hindi — system fonts, different on every machine and missing entirely on some. |
 | `npm run i18n:pending` | No dictionary key ships with placeholder copy | Machine-translated marketing copy is worse than none. This makes the gap a number instead of a hunt. |
 | `db/verify/rls_probe.sql` | 18 checks across three caller identities | The `GRANT INSERT (columns)` that restricted nothing. |
 | `scripts/verify-public-access.mjs` | The same guarantees over HTTP, through PostgREST, with only the public key | The SQL probe proves policies from inside the database. This proves the result from outside it. Not in `package.json`: it needs a live server and writes one tagged row it cannot delete — which is itself the proof. |
@@ -544,6 +608,24 @@ never by reading it:
   Filming at 115ms intervals showed the lid reaching ninety per cent of its
   travel in the first frame. The whole of "it comes from behind" was "it does
   not appear to move at all". Anything that animates gets filmed now.
+- **A test that passed by firing the event the browser never sends.** GridBits
+  listened for `pointerleave` on `window`. That event does not bubble and
+  window is never its target, so the listener was dead: once the cursor left
+  the window the digits stayed pushed at the last known point forever, a
+  permanent hole in the grid, and on touch a permanent dead zone at the last
+  tap. The check that was supposed to catch it did
+  `window.dispatchEvent(new Event("pointerleave"))` and watched everything
+  settle back — proving only that the handler worked if something called it.
+  A synthetic event tests the handler; only a real one tests the wiring. It
+  was found by an adversarial review that moved the mouse instead, and
+  measured 942 off-grid pixels still displaced afterwards.
+- **A guard that claimed a script neither font has.** `verify-greeting-fonts`
+  listed Greek as covered, on the assumption that IBM Plex covers it. The
+  family that does is IBM Plex *Sans*; the eyebrow's stack is Plex *Mono* and
+  Vazirmatn, and enumerating the emitted `@font-face` rules shows no
+  U+370-3FF face in either. A Greek greeting would have rendered in the
+  platform's generic monospace and the guard would have said OK — the exact
+  failure it exists to prevent, written into the guard on its first day.
 - The phone at 92 degrees: past edge-on, so a hairline. Nobody sees a hairline
   and thinks "I should tap that".
 

@@ -34,7 +34,6 @@ export const en = {
   },
 
   hero: {
-    eyebrow: "we’re a two-developer studio",
     headline: "Web apps, built like",
     headlineAccent: "tickets on a board.",
     sub: "We’re **Ali** and **Mostafa** — a two-person React & Supabase studio. Every project gets a scoped plan, staged delivery, and a second developer reviewing every line before it ships.",

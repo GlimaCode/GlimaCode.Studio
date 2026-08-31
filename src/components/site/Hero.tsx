@@ -1,8 +1,10 @@
 import type { Dictionary, Locale } from "@/i18n";
+import { GREETINGS, greetingLine, startIndex } from "@/i18n/greetings";
 import { renderRich } from "@/i18n/rich";
 import { Keyboard, KeyboardMini } from "@/components/keyboard/Keyboard";
 
 export function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
+  const first = GREETINGS[startIndex(locale)];
   return (
     <header id="top">
       <span className="crosshair" style={{ top: "18%", right: "12%" }}>
@@ -23,12 +25,20 @@ export function Hero({ t, locale }: { t: Dictionary; locale: Locale }) {
       <div className="wrap">
         <div className="hero-grid">
           <div className="hero-text">
+            {/* The whole line cycles through eleven languages, not just the
+                greeting word — see i18n/greetings.ts for which eleven and why.
+                Server-rendered in the visitor's own language, so it is correct
+                before any script runs and correct forever if none does. */}
             <p className="eyebrow">
-              <span
-                className="fade-up d1"
-                style={{ display: "inline-flex", gap: "10px" }}
-              >
-                <span id="greeting">Hello</span> — {t.hero.eyebrow}
+              <span className="fade-up d1">
+                <span
+                  id="greeting"
+                  lang={first.lang}
+                  dir={first.dir}
+                  className="greeting"
+                >
+                  {greetingLine(first)}
+                </span>
               </span>
             </p>
             <h1>

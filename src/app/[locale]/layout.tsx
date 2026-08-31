@@ -12,6 +12,7 @@ import { siteConfig } from "@/config/site";
 import { stripIsolates } from "@/i18n/pending";
 import { localeAlternates } from "@/lib/seo/alternates";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { GridBits } from "@/components/site/GridBits";
 import { fontVariables } from "../fonts";
 import "../globals.css";
 
@@ -144,6 +145,9 @@ export default async function LocaleLayout({
           noise; suppressing it here keeps a real one visible when it appears.
           Only this element's own attributes are exempted, not its children. */}
       <body suppressHydrationWarning>
+        {/* Behind the content and above the body's grid. Renders nothing
+            under prefers-reduced-motion. */}
+        <GridBits />
         {children}
         <script dangerouslySetInnerHTML={{ __html: REVEAL_HERO }} />
       </body>

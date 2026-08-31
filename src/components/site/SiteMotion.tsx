@@ -9,8 +9,7 @@ import {
   type KeyAction,
 } from "@/components/keyboard/keys";
 import { LOCALE_COOKIE, bcp47, type Locale } from "@/i18n/config";
-
-const GREETINGS = ["Hello", "Hallo", "سلام"];
+import { GREETINGS, greetingLine, startIndex } from "@/i18n/greetings";
 
 function isKeyAction(value: string): value is KeyAction {
   return Object.prototype.hasOwnProperty.call(KEY_MAP, value);
@@ -35,7 +34,8 @@ export function SiteMotion({ locale }: { locale: Locale }) {
   const router = useRouter();
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reduced = motion.matches;
     const cleanups: Array<() => void> = [];
     let disposed = false;
 
@@ -53,24 +53,55 @@ export function SiteMotion({ locale }: { locale: Locale }) {
     //    See REVEAL_HERO in src/app/layout.tsx.
 
     // 2) Cycling multilingual greeting
+    //
+    //    The whole line turns over, not just the greeting word, and each turn
+    //    carries its own lang and dir: lang so a screen reader changes voice
+    //    instead of reading Turkish in an English one, dir because two of the
+    //    eleven are right-to-left and an em dash between neutral characters
+    //    lands on the wrong side without it.
+    //
+    //    It starts on the visitor's own language, which the server already
+    //    rendered, so the first turn is the second language rather than a
+    //    flash of something they did not ask for.
     const greetingEl = document.getElementById("greeting");
-    if (!reduced && greetingEl) {
-      let index = 0;
+    if (greetingEl && GREETINGS.length > 1) {
+      let index = startIndex(document.documentElement.lang.slice(0, 2));
       const pending = new Set<number>();
+      let interval = 0;
       greetingEl.style.transition = "opacity .22s ease";
-      const interval = window.setInterval(() => {
+
+      const turn = () => {
         index = (index + 1) % GREETINGS.length;
+        const next = GREETINGS[index];
         greetingEl.style.opacity = "0";
         const timer = window.setTimeout(() => {
-          greetingEl.textContent = GREETINGS[index];
+          greetingEl.textContent = greetingLine(next);
+          greetingEl.setAttribute("lang", next.lang);
+          greetingEl.setAttribute("dir", next.dir);
           greetingEl.style.opacity = "1";
           pending.delete(timer);
         }, 220);
         pending.add(timer);
-      }, 2600);
-      cleanups.push(() => {
-        window.clearInterval(interval);
+      };
+      const stopTurning = () => {
+        if (interval) window.clearInterval(interval);
+        interval = 0;
         pending.forEach((timer) => window.clearTimeout(timer));
+        pending.clear();
+        greetingEl.style.opacity = "1";
+      };
+      const startTurning = () => {
+        if (!interval) interval = window.setInterval(turn, 3200);
+      };
+      // Read live, not once at mount. Every other perpetual animation here is
+      // CSS and stops the instant the setting is turned on; this one is a
+      // timer, and without the subscription it would keep going until reload.
+      const syncMotion = () => (motion.matches ? stopTurning() : startTurning());
+      syncMotion();
+      motion.addEventListener("change", syncMotion);
+      cleanups.push(() => {
+        stopTurning();
+        motion.removeEventListener("change", syncMotion);
       });
     }
 

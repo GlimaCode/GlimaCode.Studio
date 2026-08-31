@@ -1722,6 +1722,53 @@ nav{background:var(--chrome-bg)}
 }
 .sc-item-hint{font-size:12.5px;color:var(--slate)}
 
+/* ---------- ones and zeroes on the grid ----------
+   z-index -1 puts the canvas above the body's background grid and below every
+   piece of content. It is a direct child of body so nothing traps it in a
+   stacking context, and it is inert to the pointer so it can never take a
+   click that belonged to a link underneath. The component itself does not
+   render at all under prefers-reduced-motion; this rule only has to place it.
+   See components/site/GridBits.tsx. */
+.grid-bits{
+  position:fixed;inset:0;z-index:-1;
+  display:block;pointer-events:none;
+}
+/* The blueprint texture is a background-image, which browsers leave out of a
+   print by default. A canvas is content, so it prints — a page of scattered
+   cobalt digits over whatever was on screen when the print began. */
+@media print{
+  .grid-bits{display:none}
+}
+
+/* ---------- the eyebrow, which changes language ----------
+   It used to hold two short words and now holds a whole sentence that is a
+   different length in each of eleven languages. Two consequences.
+
+   It has to be allowed to wrap, or the longest of them runs off the side of a
+   phone. And where it can wrap, it has to hold the room whether or not the
+   current language needs it — otherwise the headline below moves every time a
+   longer language comes round, which is a layout shift on a timer, happening
+   while somebody is reading.
+
+   Measured rather than guessed: every one of the eleven fits on one line down
+   to 720px, so no reservation is needed there and none is made. Below that the
+   longest wrap to two, so two lines are held.
+
+   In em, not the px it was measured in. The measurement was 54px against a
+   13px font, and those only stay in proportion while the font does — full-page
+   zoom scales both, but text-only enlargement and a browser minimum font size
+   scale the text and not a px reservation, which brings the timed layout shift
+   straight back for the people most likely to be hurt by it. */
+/* The text is the flex item, so it needs to be shrinkable, or it keeps its
+   full intrinsic width and the wrap pushes the whole item onto its own row —
+   which leaves the rule stranded on a line by itself. flex:1 1 auto with
+   min-width:0 lets it share the first line with the rule and wrap inside. */
+.eyebrow{flex-wrap:wrap}
+.eyebrow > span{flex:1 1 auto;min-width:0}
+@media(max-width:720px){
+  .eyebrow{min-height:4.16em;align-content:center}
+}
+
 /* ---------- the stage ---------- */
 .sc-stage{display:flex;flex-direction:column;align-items:center;gap:22px}
 
