@@ -211,13 +211,34 @@ Light measures 1.21:1 against its page. The dark value was chosen at 1.23 to
 match that, rather than at whatever an inversion produced — a naive flip gives
 bright lines on dark, which is louder than the original ever was on light.
 
-### /showcase is built and switched off
+### /showcase falls back three deep, and that is why it is on
 
-`siteConfig.features.showcase`. The page is a laptop that opens onto a
-screenshot, and every published project currently has a null `cover_url` and an
-empty `gallery_urls`. A device that opens onto nothing tells a prospect we
-build things we cannot show, so the flag gates the route, the metadata and the
-link from `/work` together.
+`siteConfig.features.showcase`. The laptop shows, in order of how much it
+proves:
+
+1. **The running page**, in an iframe, if the project is deployed and permits
+   framing.
+2. **Screenshots**, from `cover_url` and `gallery_urls`.
+3. **The repository**, as GitHub's own social card, with the whole screen
+   linking to it.
+
+The third tier is what let the page go live. It was gated while it could only
+show screenshots and there were none; a device opening onto nothing tells a
+prospect we build things we cannot show. Every published project has a
+`repo_url`, so the laptop now always opens onto something real.
+
+**"Show the GitHub page" cannot mean an iframe of it.** github.com sends both
+`X-Frame-Options: deny` and `frame-ancestors 'none'` — it will never render in
+a frame, anywhere. What is shown instead is the PNG GitHub generates for link
+previews, carrying the repository name, description, language and star count.
+It rate-limits: one of three repositories answered 429 during testing, so an
+`onError` falls back to a plain card of our own. An image reports its own
+failure; an iframe does not, which is the whole reason tier 1 is decided on
+the server.
+
+The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
+screen is 16:10, and the sides that `cover` crops are where the repository
+name and its description live.
 
 Closed is 68 degrees, not 90. At a literal 90 the lid is edge-on to a viewer
 16 degrees above it, and an edge-on plane is a line: the laptop disappeared and

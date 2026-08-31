@@ -40,7 +40,47 @@ export type ShowcaseProject = {
    * cannot be asked. Null means fall back to the screenshots.
    */
   liveUrl: string | null;
+  /** Last resort: the repository, shown as a card you can click through. */
+  repoUrl: string | null;
 };
+
+/**
+ * GitHub's own social card for a repository.
+ *
+ * The obvious reading of "show the GitHub page" is an iframe of it, and that
+ * is impossible: github.com sends both `X-Frame-Options: deny` and
+ * `frame-ancestors 'none'`. It will never render in a frame, on any site.
+ *
+ * This is the image GitHub generates for link previews — the repository name,
+ * its description, its language and star count, drawn by GitHub. It is a plain
+ * PNG, so no framing rule applies, and wrapping it in a link gets the visitor
+ * where they were going.
+ *
+ * It can rate-limit: one of three repositories answered 429 during testing. An
+ * image reports its own failure, unlike an iframe, so `onError` falls back to
+ * a card of our own rather than a broken picture.
+ */
+function githubCardImage(repoUrl: string): string | null {
+  try {
+    const url = new URL(repoUrl);
+    if (!url.hostname.endsWith("github.com")) return null;
+    const path = url.pathname.replace(/^\/|\/$/g, "");
+    if (path.split("/").length !== 2) return null;
+    // The leading segment is GitHub's cache key; any value works.
+    return `https://opengraph.githubassets.com/1/${path}`;
+  } catch {
+    return null;
+  }
+}
+
+/** "GlimaCode/vehicle-catalog", for the fallback card and the link label. */
+function repoLabel(repoUrl: string): string {
+  try {
+    return new URL(repoUrl).pathname.replace(/^\/|\/$/g, "");
+  } catch {
+    return repoUrl;
+  }
+}
 
 /**
  * The width the live page is rendered at before being scaled into the screen.
@@ -104,6 +144,9 @@ export function Showcase({
   const hash = useSyncExternalStore(subscribeHash, readHash, noHash);
   const activeSlug = projects.some((p) => p.slug === hash) ? hash : null;
   const [shotIndex, setShotIndex] = useState(0);
+  // Repositories whose GitHub card would not load — rate limited, renamed,
+  // made private. Tracked per slug so one failure does not hide the others.
+  const [cardFailed, setCardFailed] = useState<string[]>([]);
   const screenId = useId();
 
   /**
@@ -231,6 +274,44 @@ export function Showcase({
                     loading="lazy"
                     decoding="async"
                   />
+                ) : active?.repoUrl ? (
+                  /* Neither deployed nor photographed: the repository, as a
+                     card that goes there when clicked. */
+                  <a
+                    className="sc-repo"
+                    href={active.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {githubCardImage(active.repoUrl) &&
+                    !cardFailed.includes(active.slug) ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={githubCardImage(active.repoUrl) as string}
+                        alt={`${t.showcase.repoOf} ${active.title}`}
+                        className="sc-repo-card"
+                        loading="lazy"
+                        decoding="async"
+                        onError={() =>
+                          setCardFailed((failed) =>
+                            failed.includes(active.slug)
+                              ? failed
+                              : [...failed, active.slug],
+                          )
+                        }
+                      />
+                    ) : (
+                      <span className="sc-repo-plain">
+                        <span className="sc-repo-mark" aria-hidden="true">
+                          {"</>"}
+                        </span>
+                        <span className="sc-repo-path" lang="en" dir="ltr">
+                          {repoLabel(active.repoUrl)}
+                        </span>
+                        <span className="sc-repo-cta">{t.showcase.openRepo}</span>
+                      </span>
+                    )}
+                  </a>
                 ) : isOpen ? (
                   <div className="sc-screen-empty">{t.showcase.empty}</div>
                 ) : null}
@@ -249,7 +330,9 @@ export function Showcase({
           </div>
         </div>
 
-        {active?.liveUrl ? null : shots.length > 1 ? (
+        {active?.liveUrl || (!shots.length && active?.repoUrl)
+          ? null
+          : shots.length > 1 ? (
           <div className="sc-shots">
             <button
               type="button"
@@ -282,6 +365,8 @@ export function Showcase({
                 {t.showcase.nowShowing}
                 {active.liveUrl ? (
                   <span className="sc-live-badge">{t.showcase.liveBadge}</span>
+                ) : !shots.length && active.repoUrl ? (
+                  <span className="sc-repo-badge">{t.showcase.repoBadge}</span>
                 ) : null}
               </span>
               <span lang="en" dir="ltr">

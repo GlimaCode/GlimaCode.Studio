@@ -1850,6 +1850,41 @@ nav{background:var(--chrome-bg)}
   color:var(--badge-won-fg);letter-spacing:.06em;
 }
 
+/* The repository, when there is nothing running and nothing photographed.
+   A link filling the screen, so the whole thing is the target rather than a
+   small button inside a picture. */
+.sc-repo{
+  position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
+  text-decoration:none;background:var(--sc-screen);
+}
+/* contain, not cover. GitHub's card is 2:1 and the laptop screen is 16:10,
+   so cover crops the sides — and the sides are where the repository name and
+   its description are. A letterbox is the correct answer when the picture is
+   information rather than scenery. */
+.sc-repo-card{width:100%;height:100%;object-fit:contain;display:block}
+.sc-repo:focus-visible{outline:2px solid var(--cobalt);outline-offset:-3px}
+/* Our own card, for when GitHub's rate-limits or the repository moves. An
+   image reports its own failure, unlike a frame, so this is reachable. */
+.sc-repo-plain{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:24px;text-align:center;
+}
+.sc-repo-mark{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:26px;color:var(--cobalt);letter-spacing:.06em;
+}
+.sc-repo-path{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:14px;color:var(--emph-fg);word-break:break-all;
+}
+.sc-repo-cta{font-size:13px;color:var(--cobalt)}
+.sc-repo-badge{
+  margin-inline-start:8px;padding:2px 7px;border-radius:5px;
+  background:var(--badge-new-bg);border:1px solid var(--badge-new-bd);
+  color:var(--badge-new-fg);letter-spacing:.06em;
+}
+
 /* ---------- gallery paging and the caption ---------- */
 .sc-shots{display:flex;align-items:center;gap:12px}
 .sc-shots-count{

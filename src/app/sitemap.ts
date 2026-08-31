@@ -65,6 +65,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  // Gated on the same flag as the route. A sitemap that lists a 404 is worse
+  // than one that lists less: it is a promise to a crawler that we then break.
+  if (siteConfig.features.showcase) {
+    for (const locale of LOCALES) {
+      entries.push({
+        url: `${siteConfig.url}/${locale}/showcase`,
+        changeFrequency: "monthly",
+        priority: 0.8,
+        alternates: alternatesFor("/showcase"),
+      });
+    }
+  }
+
   // One database read, shared by both locales: the row is the same, only the
   // language of the rendering differs.
   const projects = await listSitemapProjects();

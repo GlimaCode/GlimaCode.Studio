@@ -73,6 +73,7 @@ export default async function ShowcasePage({ params }: PageParams) {
         categoryLabel: project.categoryLabel,
         shots,
         liveUrl: check?.embeddable ? project.liveUrl : null,
+        repoUrl: project.repoUrl,
         // Kept so a blank frame is diagnosable from the served HTML rather
         // than by guessing. Rendered nowhere.
         liveReason: check?.reason ?? null,
@@ -80,8 +81,17 @@ export default async function ShowcasePage({ params }: PageParams) {
     }),
   );
 
+  /**
+   * Three ways to show a project, in order of how much they prove: the running
+   * page, then screenshots of it, then the repository. Only a project with
+   * none of the three is left out — and a published project with no live URL,
+   * no image and no repository has nothing to show anywhere on the site.
+   */
   const showable: ShowcaseProject[] = resolved.filter(
-    (project) => project.liveUrl !== null || project.shots.length > 0,
+    (project) =>
+      project.liveUrl !== null ||
+      project.shots.length > 0 ||
+      project.repoUrl !== null,
   );
 
   return (

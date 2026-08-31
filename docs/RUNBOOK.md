@@ -244,47 +244,41 @@ arriving proves the send worked; it does not prove `reply_to` did.
 Attempts are append-only. Nothing overwrites the record of a failure, so the
 history of a bad week stays legible after it is fixed.
 
-## Turning the showcase on
+## Improving how a project shows in the showcase
 
-`/showcase` is a laptop that opens onto a screenshot. It is gated behind
-`siteConfig.features.showcase`, which is `false`, because every published
-project currently has a null `cover_url` and an empty `gallery_urls`. With the
-flag off the route is a 404 and nothing links to it — that is the whole point,
-since an empty laptop tells a prospect we build things we cannot show.
+`/showcase` is live. The laptop shows one of three things per project, and it
+picks the first that is available:
 
-### To look at it before there are screenshots
+| Tier | Needs | What the visitor sees |
+|---|---|---|
+| 1 | `live_url` on the row, and that site permits framing | The running page, in the laptop and in the phone at its own mobile width |
+| 2 | `cover_url`, plus `gallery_urls` for extra screens | The screenshots, with paging |
+| 3 | `repo_url` | GitHub's card for the repository, clicking through to it |
 
-Locally only. Set the flag to `true` in `src/config/site.ts`, run the dev
-server, and open `/en/showcase`. Do not commit that change: it deploys, and
-the page would be live and empty.
+Every published project has a repository, so nothing ever shows an empty
+screen. Moving a project up a tier is a data change, not a deploy.
 
-```
-npm run dev
-```
+### Adding a live page
 
-Screens will be blank because there are no images. To see the frame with real
-pixels in it, point the shots at something that exists — the Open Graph route
-renders a real PNG per project:
+Set `live_url` on the row. That is all — the site checks on the server whether
+the URL answers and permits framing, caches the answer for an hour, and falls
+back to the tier below if it does not. Nothing breaks if the site later goes
+down; it quietly returns to screenshots or the repository card.
 
-```ts
-// src/app/[locale]/showcase/page.tsx, temporarily
-shots: [`/${locale}/work/${project.slug}/opengraph-image`]
-```
+A client's site is usually the wrong thing to embed: their analytics will count
+our visitors, and their page changing changes our showcase. Prefer screenshots
+for client work and live pages for our own.
 
-Revert both edits afterwards. `git status` should be clean before you push.
+### Adding screenshots
 
-### To turn it on for real
+`cover_url` is the one the lid opens onto; `gallery_urls` are the rest.
+Serve them from somewhere with a stable URL and size them for a 16:10 screen.
+The frame crops from the top, so put the important part at the top.
 
-1. Add a cover image to each project you want shown — `cover_url` on the row,
-   and `gallery_urls` for any extra screens. Anything without at least one
-   image is left out of the showcase rather than shown as an empty screen.
-2. Set `showcase: true` in `src/config/site.ts`.
-3. Deploy. The route, its metadata, its hreflang pair, and the link from
-   `/work` all follow from the flag; there is nothing else to switch on.
+### Turning the page off
 
-Images are served as-is, so put them somewhere with a stable URL and size them
-for a 16:10 screen. The frame crops from the top, so the important part of a
-screenshot should be at the top of the image.
+`showcase: false` in `src/config/site.ts` hides the route, its metadata and
+the link from `/work` together. There is nothing else to switch.
 
 ## Contacts
 

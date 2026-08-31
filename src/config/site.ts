@@ -60,14 +60,15 @@ export type SiteConfig = {
     /**
      * The device showcase at /showcase.
      *
-     * It is a frame around screenshots, and there are no screenshots yet:
-     * every published project has a null cover_url and an empty
-     * gallery_urls. Turning it on before there is something to put in it
-     * would put an empty laptop in front of a prospect, which is worse than
-     * no page at all.
+     * It was off while it could only show screenshots and there were none.
+     * It now falls back three deep — the running page, then screenshots of
+     * it, then the repository as a card you can click through — and every
+     * published project has a repository, so the laptop always opens onto
+     * something real.
      *
-     * Flip this the day the first cover image lands. The route, the link
-     * from /work and the metadata all follow from it.
+     * Off would now hide a working page rather than protect anyone from an
+     * empty one. Turn it off again only if the portfolio ever holds a
+     * project with no live URL, no image and no repository.
      */
     showcase: boolean;
   };
@@ -87,8 +88,7 @@ export const siteConfig: SiteConfig = {
   features: {
     dashboard: true,
     portfolio: true,
-    // No screenshots in the database yet. See the type above.
-    showcase: false,
+    showcase: true,
   },
 };
 
