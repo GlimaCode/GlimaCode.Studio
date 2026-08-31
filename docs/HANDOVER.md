@@ -240,39 +240,67 @@ The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
 name and its description live.
 
-### The laptop closes at 90 degrees, and the road to that number was long
+### The laptop took four passes, and the last one is two ideas
 
 `.sc-lid` is `rotateX(90deg)` shut and `rotateX(-11deg)` open, inside a
-`.sc-rig` tilted 16 degrees. That is the whole thing, and it is worth knowing
-what it cost, because the temptation to change it will come back.
+`.sc-rig` tilted 16 degrees. `.sc-base` is a horizontal surface 350px deep,
+laid at `--rake: 90deg`, occupying exactly the footprint the shut lid covers.
+That is the whole machine. It is worth knowing what each part is for, because
+every one of them was arrived at by getting it wrong first.
 
-It shipped at 68 degrees first, on the reasoning that 90 leaves the lid only
-16 degrees off edge-on and would all but disappear. Measured, that is true:
-the lid projects 29px and all of it falls below the base bar's top edge, so a
-shut machine is the base bar, its hinge line and its shadow. The error was
-thinking that mattered. A closed laptop seen from the front is mostly its
-front edge, and the object reads correctly without the lid doing any of the
-work. What 68 actually does is stop short of the face change — under 90 the
-sum of lid and rig still points the screen at you, so the machine reads as
-folded all the way back. Ali saw it as 270 degrees open and closing to 90,
-which is precisely what it was.
+**Ninety degrees, because the face has to change.** It shipped at 68, on the
+reasoning that 90 leaves the lid 16 degrees off edge-on and it would all but
+vanish. Measured, the vanishing is real — the shut lid projects 29px — and it
+does not matter, because a closed laptop seen from the front is mostly its
+front edge. What 68 actually does is stop short of the face change: under 90
+the sum of lid and rig still points the screen at the viewer, so the machine
+reads as folded all the way back. Ali saw it as 270 degrees open and closing
+to 90, which is precisely what it was. Raising it instead is the other trap —
+the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, and it grows as
+a flared trapezoid below the machine.
 
-Raising the angle to give the lid presence is the obvious repair and it is
-wrong: the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, and it
-grows as a flared trapezoid below the machine. That is the shape the deck
-rebuild had, and the one Ali called weird.
+**A deck, because a lid has to lift off something.** With 90 in place the
+angles were right and the motion still was not: opening, the lid thinned to
+nothing at the hinge line and grew again above it, which reads as a screen
+rising from behind the machine rather than lifting off a keyboard. Ali caught
+that too. The lid must pass through edge-on — shut shows the shell, open
+shows the screen, so the normal has to flip — and that is fine in life
+because the body stays where it is while the lid swings. Here the body was a
+22px bar and there was nothing to stay.
 
-Between those two there was a rebuild that gave the machine a real deck,
-hinged the lid off it, and used literal angles throughout. It was
-geometrically honest and it looked wrong: at `perspective: 1600px` on a
-560px object every receding plane flares into a funnel, and a deck as deep as
-the screen is tall turns the machine into a wedge. It was reverted whole. The
-lesson is not "do not model it properly" but that on this page the laptop is
-mostly seen face-on, and the parts of it that recede should be small enough
-that the perspective never gets to show off. The 22px base bar is that.
+So `.sc-base` stopped being a bar and became a surface, laid in the same
+plane the shut lid occupies. At `--rake: 90deg` it is exactly edge-on and its
+own geometry contributes no height at all; every pixel of it on screen comes
+from the perspective, which is what keeps a 350px-deep deck from becoming the
+wedge that sank the third pass. Shut, it is a slim plate under a slim lid.
+Open, it is a body with a trackpad on it. Through the travel it does not
+move, and that is the entire point of it.
+
+Two consequences worth knowing:
+
+- `margin-bottom` cancels the deck's layout height exactly —
+  `calc(-1 * var(--deck) * (1 - cos(var(--rake))))`, which at rake 90 is the
+  full depth. The drawing and the layout cannot drift apart, but the deck
+  then paints past its own box, so `.sc-laptop` reserves `--overhang: 34px`
+  for it. That 34 is measured, not derived: no CSS expression knows how far a
+  perspective projection reaches. Re-measure it if `--deck` or the
+  perspective changes.
+- The shut lid carries `translateZ(8px)`. Coplanar faces z-fight and without
+  it the lid disappears into the deck. Eight is enough to separate them and
+  small enough not to read as ajar on an object that is 50px tall when shut.
+
+The third pass is worth naming because it will look like the obvious fix
+again. It gave the machine a real deck, hinged the lid off it and used
+literal angles throughout — geometrically honest, and it looked wrong: at
+`perspective: 1600px` on a 560px object every receding plane flares into a
+funnel, and a deck as deep as the screen is tall turns the machine into a
+wedge. Reverted whole. What survived from it was the idea of a deck, not the
+construction; the difference is that this deck is edge-on, so the perspective
+never gets to show off. A front lip was tried too and removed: sitting 350px
+nearer the eye it is magnified 30% and reads as a second, wider plate.
 
 None of the angles were worked out on paper. Each was settled by rendering
-the lid at a list of them and looking at the pictures. Three times the
+the lid at a list of them and looking at the pictures. Four times the
 reasoning and the render disagreed, and the render was right every time —
 including about which way a positive `rotateX` tips a plane, which is the
 sort of thing one is sure about right up until the screenshot arrives.
