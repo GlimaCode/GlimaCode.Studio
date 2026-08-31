@@ -1754,23 +1754,43 @@ nav{background:var(--chrome-bg)}
   position:relative;width:100%;aspect-ratio:16/10;
   transform-origin:50% 100%;
   transform-style:preserve-3d;
-  /* Shut: folded down onto the keyboard panel, showing its shell.
+  /* Closed. Ninety degrees, which is to say actually closed.
 
-     Ninety, because the sum of this and the rig's 16 decides which face you
-     see. Under 90 the screen still points at the viewer and the machine reads
-     as folded all the way back — it shipped at 68 once and Ali saw it as 270
-     degrees open, which is what it was. Above 90 the lid spreads into a
-     flared trapezoid below the machine: 70px at 98 degrees, 112 at 106, 202
-     at 124. */
+     This shipped at 68 first, on the reasoning that at 90 the lid all but
+     disappears. That part was right — measured, the lid projects 29px and
+     every one of them falls below the base bar's top edge, so what you
+     actually see when the machine is shut is the base bar, its hinge line
+     and its shadow. The lid contributes a sliver.
+
+     That is not a problem, it is what a closed laptop looks like from the
+     front: mostly its front edge. The mistake was treating the lid's own
+     visibility as the thing to preserve. Rescuing it costs the object its
+     shape — the lid grows to 70px at 98 degrees, 112 at 106 and 202 at 124,
+     and it grows as a flared trapezoid spreading below the machine. Ali
+     called that shape weird when a rebuild produced it, and he was right.
+
+     Nor may the angle go the other way. The sum of this and the rig's 16
+     decides which face is presented: under 90 the total is under 106 and you
+     are still looking at the screen, so the machine reads as folded all the
+     way back. That is what 68 did, and Ali read it in one glance as 270
+     degrees open. 90 is the only value that is both shut and shaped like a
+     laptop. Do not move it in either direction. */
   transform:rotateX(90deg);
-  /* Symmetric ease-in-out, not the sharp ease-out the rest of the site uses,
-     and slower. The site's curve puts ninety per cent of the travel in the
-     first hundred milliseconds — filmed, the lid did not lift, it appeared,
-     which is half the reason the movement read as a screen arriving from
-     somewhere rather than a hinge turning. This one is half way through the
-     swing at half the time, which is the only way the middle of it is seen at
-     all. A lid has weight at both ends. */
-  transition:transform .8s cubic-bezier(.45,.05,.55,.95);
+  /* Symmetric ease-in-out, and slower, which is the only thing this machine
+     needed that was not an angle.
+
+     The site's house curve, cubic-bezier(.22,1,.28,1), puts ninety per cent of
+     the travel in its first hundred milliseconds. Filmed at 115ms intervals
+     the lid was already open in the first frame after the click: it did not
+     come up, it appeared, and a thing that appears has to have come from
+     somewhere — which is what "the screen rises from behind" describes. The
+     angles were never the fault.
+
+     This curve is half way through the swing at half the time, so the lid is
+     seen lifting off the front of the machine and settling back onto it. It
+     is the only place on the site that departs from the house curve, and it
+     should stay departed. */
+  transition:transform .9s cubic-bezier(.45,.05,.55,.95);
 }
 .sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-11deg)}
 
@@ -1815,52 +1835,22 @@ nav{background:var(--chrome-bg)}
   font-size:22px;color:var(--sc-mark);letter-spacing:.06em;
 }
 
-/* The keyboard panel.
-
-   Flat, and not rotated at all — that is the whole idea. Three attempts put
-   this surface into the third dimension, laid it at a rake and let the
-   perspective draw it, and each came out a wedge, a funnel or a tray. A
-   laptop seen from the front does not need its keyboard drawn in
-   perspective. It needs it drawn as a rectangle.
-
-   What makes it read as opening is its height, not its angle. Shut, the panel
-   is 13px: the front edge of a closed machine, which is all there is to see
-   of a closed machine. Open, it is 62px and the keys and the trackpad inside
-   it come into view, the way they do when a real lid lifts off them. The
-   panel never distorts, so it cannot look like anything but a keyboard. */
+/* The base. A wedge, thicker at the hinge, with the trackpad notch. */
 .sc-base{
-  position:relative;width:100%;
-  height:13px;
-  transition:height .8s cubic-bezier(.45,.05,.55,.95);
-  overflow:hidden;
+  position:relative;width:104%;height:22px;
   background:linear-gradient(180deg,var(--sc-shell),var(--sc-shell-edge));
   border-radius:3px 3px 12px 12px;
   box-shadow:0 22px 40px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.45);
+  display:flex;align-items:flex-start;justify-content:center;
 }
-.sc-laptop[data-open="true"] .sc-base{height:62px}
-/* The hinge strip, along the panel's back edge under the screen. */
 .sc-hinge{
-  position:absolute;top:0;left:32%;right:32%;
-  height:3px;border-radius:0 0 4px 4px;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:36%;height:3px;border-radius:0 0 4px 4px;
   background:var(--sc-shell-edge);
 }
-/* The keys. A grid rather than forty elements: two repeating gradients cross
-   to leave the gaps between caps, and the panel's overflow clips them away
-   entirely while it is shut. */
-.sc-keys{
-  position:absolute;top:9px;left:7%;right:7%;height:26px;
-  border-radius:3px;
-  background:
-    repeating-linear-gradient(90deg,
-      var(--sc-shell-edge) 0 5.4%, transparent 5.4% 6.6%),
-    repeating-linear-gradient(180deg,
-      transparent 0 1px, var(--sc-shell-edge) 1px 6px, transparent 6px 7px);
-  opacity:.5;
-}
 .sc-notch{
-  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
-  width:22%;height:13px;border-radius:3px;
-  background:var(--sc-shell-edge);opacity:.45;
+  position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  width:14%;height:4px;border-radius:4px;background:var(--sc-shell-edge);
 }
 
 /* The live page, laid out wide and scaled into the screen. */
@@ -1989,5 +1979,5 @@ nav{background:var(--chrome-bg)}
    travelling. Someone who asked for less movement gets the screenshot, not a
    swinging panel. */
 @media (prefers-reduced-motion:reduce){
-  .sc-lid,.sc-base{transition:none}
+  .sc-lid{transition:none}
 }

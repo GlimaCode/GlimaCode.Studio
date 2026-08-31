@@ -240,13 +240,14 @@ The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
 name and its description live.
 
-### The laptop: one thing in 3D, everything else flat
+### The laptop is a lid, a 22px bar and one transition curve
 
-Only `.sc-lid` is rotated. It is `rotateX(90deg)` shut and `rotateX(-11deg)`
-open, inside a `.sc-rig` tilted 16 degrees. `.sc-base` is the keyboard panel
-and it is a plain rectangle that is never rotated at all; what makes it read
-as opening is its **height**, 13px shut and 62px open, animated alongside the
-lid. That is the whole machine, and it took five passes to get there.
+`.sc-lid` is `rotateX(90deg)` shut and `rotateX(-11deg)` open, inside a
+`.sc-rig` tilted 16 degrees, above a `.sc-base` that is a 22px bar. There is
+no keyboard, no deck, and nothing in the third dimension but the lid. It took
+six passes to arrive back at almost exactly the object it started as, and the
+value of writing that down is that four of those passes will look like good
+ideas again.
 
 **Ninety degrees, because the face has to change.** It shipped at 68, on the
 reasoning that 90 leaves the lid 16 degrees off edge-on and it would all but
@@ -255,43 +256,40 @@ matter, because a closed laptop seen from the front is mostly its front edge.
 What 68 does is stop short of the face change: under 90 the sum of lid and
 rig still points the screen at the viewer, so the machine reads as folded all
 the way back. Ali saw it as 270 degrees open. Raising it is the other trap:
-the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, and it grows as
-a flared trapezoid below the machine.
+the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, as a flared
+trapezoid spreading below the machine.
 
-**The panel is flat because every attempt to put it in 3D failed.** Three
-passes laid this surface down at a rake and let the perspective draw it — as
-a deck as deep as the screen, as a shallow deck, as an edge-on deck whose
-extent came entirely from the projection. They came out a wedge, a funnel and
-a tray, in that order, and Ali rejected each on sight. The lesson is the one
-in the heading: a laptop seen from the front does not need its keyboard drawn
-in perspective, it needs it drawn as a rectangle. A front lip was tried too,
-and removed — 350px nearer the eye it is magnified 30% and reads as a second,
-wider plate.
+**The curve was the fault, not the geometry, and it took filming to see.**
+Three separate passes tried to fix the movement by adding a body for the lid
+to lift off — a deck as deep as the screen, a shallow deck, an edge-on deck
+drawn entirely by the perspective. Wedge, funnel, tray. A flat keyboard panel
+that grew in height. Ali rejected all four on sight, and each time the real
+complaint was that the lid did not appear to travel.
 
-**Height, not angle, is what opens it.** Shut, the panel is 13px: the front
-edge of a closed machine, which is all there is to see of one. Open, it is
-62px, and `overflow: hidden` means the key grid and trackpad inside it are
-revealed as it grows, the way they are when a real lid lifts off them. The
-panel cannot distort, so it cannot look like anything but a keyboard, and it
-solves the problem the decks were there to solve: something stays put and
-grows while the lid swings through edge-on, so the lid reads as lifting off
-it rather than as a screen rising from behind.
+It did not. The site's house curve, `cubic-bezier(.22,1,.28,1)`, puts ninety
+per cent of the travel in its first hundred milliseconds. Filmed at 115ms
+intervals, the lid was already open in the first frame after the click. It
+did not come up, it appeared — and a thing that appears has to have come from
+somewhere, which is what "the screen rises from behind" was describing. The
+lid now uses `.9s cubic-bezier(.45,.05,.55,.95)`: half way through the swing
+at half the time. Filmed again, in both directions, it lifts off the front of
+the machine and settles back onto it.
 
-**The easing was half the problem and nobody had looked at it.** The site's
-`cubic-bezier(.22,1,.28,1)` puts ninety per cent of the travel in the first
-hundred milliseconds. Filmed at 100ms intervals, the lid did not lift, it
-appeared — which is exactly what "the screen comes from behind" describes.
-The lid and the panel now share `.8s cubic-bezier(.45,.05,.55,.95)`, which is
-half way through the swing at half the time. This is the only place on the
-site that departs from the house curve, and it should stay departed.
+This is the only place on the site that departs from the house curve, and it
+should stay departed. It is also the only change from the version before all
+of this: one declaration.
 
-The keys are two crossed `repeating-linear-gradient`s rather than forty
-elements. The panel's `overflow: hidden` clips them to nothing while it is
-shut, so there is no separate show-and-hide to keep in step.
+**What not to try again.** A deck, in any of its forms — at
+`perspective: 1500px` on a 560px object every plane that recedes flares into
+a funnel, and the parts of this machine that recede have to be small enough
+that the perspective never gets to show off. The 22px bar is that. A front
+lip: 350px nearer the eye it is magnified 30% and reads as a second, wider
+plate. Drawing a keyboard: at this scale the panel is 40px tall and any key
+detail in it becomes a band.
 
 None of the angles were worked out on paper. Each was settled by rendering
-the lid at a list of them and looking at the pictures, and the last fault was
-found by filming the transition rather than screenshotting its two ends. Four
+the lid at a list of them and looking, and the fault that mattered was found
+only by filming the transition rather than screenshotting its two ends. Four
 times the reasoning and the render disagreed, and the render was right every
 time — including about which way a positive `rotateX` tips a plane, which is
 the sort of thing one is sure about right up until the screenshot arrives.
@@ -533,20 +531,19 @@ never by reading it:
 - The seventh place `--ink` was used as a fill — six were found by reading the
   stylesheet, and the last one only by looking at the dashboard in dark, where
   it was a white box with white text in it.
-- The laptop, five times over, every rejection from Ali and every one in a
+- The laptop, six times over, every rejection from Ali and every one in a
   single glance. Stylised to 68 degrees to avoid a vanishing act that did not
   happen, and it read as folded all the way back. Rebuilt with a real deck,
-  and the rebuild was uglier than the bug. Fixed to 90 with no body, and the
-  lid appeared from behind the machine instead of lifting. Given an edge-on
-  deck, and that read as a tray. It ended with the one part that had never
-  been tried: not drawing the keyboard in perspective at all. Correct geometry
-  and a good-looking object are different properties, and only one of them can
-  be checked by reasoning.
-- The transition curve, which nobody had looked at because two screenshots of
-  the two end states look identical whatever the easing is. Filming it at
-  100ms intervals showed the lid reaching ninety per cent of its travel in the
-  first frame. Half of "it comes from behind" was "it does not appear to
-  move at all".
+  uglier than the bug. Fixed to 90 with no body, and the lid appeared rather
+  than lifted. An edge-on deck: a tray. A flat keyboard panel: not what he
+  asked for either. The answer was one transition curve, and the object he
+  wanted was the one he already had. Four of those six passes were me adding
+  geometry to fix a timing problem.
+- The transition curve itself, which went unexamined through all of it because
+  two screenshots of the two end states look identical whatever the easing is.
+  Filming at 115ms intervals showed the lid reaching ninety per cent of its
+  travel in the first frame. The whole of "it comes from behind" was "it does
+  not appear to move at all". Anything that animates gets filmed now.
 - The phone at 92 degrees: past edge-on, so a hairline. Nobody sees a hairline
   and thinks "I should tap that".
 
