@@ -1725,40 +1725,82 @@ nav{background:var(--chrome-bg)}
 /* ---------- the stage ---------- */
 .sc-stage{display:flex;flex-direction:column;align-items:center;gap:22px}
 
-/* The laptop. Perspective on the stage so the lid rotates in depth rather
-   than squashing, and the same tight value the keyboard uses so the two
-   objects sit in the same room. */
+/* The laptop.
+   =============================================================================
+   A clamshell needs a deck for the lid to close onto, and the first version had
+   none: the lid and a 22px "base" bar were siblings in one plane, tilted
+   together. Folding the lid landed it beside the body rather than on it, so
+   "closed" read as a machine folded all the way back — which is what it
+   geometrically was. No choice of angle fixes that, and the 68 degrees it used
+   was the compromise that hid it.
+
+   So there are two planes now. The deck lies flat and its back edge is the
+   hinge; the lid hangs off that edge. Closed is the lid lying face down on the
+   deck, open is the lid at a right angle to it, and both are the literal
+   angles rather than stylised ones.
+
+   The three sizes are locked to each other rather than chosen: the lid is
+   16:10 of the width, so it is 62.5% of the width tall; the deck is as deep as
+   the lid is tall, the way a laptop's is; and the box is 16:15, which is
+   exactly the lid standing upright plus the deck laid out in front of it. */
 .sc-laptop{
+  position:relative;
   width:100%;max-width:560px;
-  perspective:1500px;perspective-origin:50% 20%;
-  display:flex;flex-direction:column;align-items:center;
+  /* Both halves are transformed, so neither contributes its rendered size to
+     layout and the box has to be told how tall it is. 15/16 of the width is
+     the lid upright (10/16) plus the deck receding in front of it. */
+  aspect-ratio:16/15;
+  perspective:1600px;
+  /* Where the eye is. It has to be above the deck for the deck to have a
+     visible top surface at all, and the deck starts at 66.7%, so anything
+     above that works; 40% also puts it level with the middle of an open
+     screen, which is what keeps the screen from keystoning.
+
+     Moving it as the lid opens was tried and abandoned: raising the eye
+     towards the top of the box flattens the deck rather than revealing it,
+     because the deck slopes towards the viewer and a higher eye is closer to
+     its plane, not further from it. One position serves both states. */
+  perspective-origin:50% 40%;
 }
-/* The whole machine is seen from slightly above, the way one sits on a desk
-   in front of you. Without this the closed lid is a panel viewed edge-on —
-   geometrically correct and visually a horizontal line. Tilting the assembly
-   is what makes "closed" read as a slab with a lid on top of it. */
-.sc-rig{
-  width:100%;transform:rotateX(16deg);transform-style:preserve-3d;
-  display:flex;flex-direction:column;align-items:center;
+
+/* The deck. Its top edge is the hinge; it recedes towards the viewer. */
+.sc-deck{
+  position:absolute;left:0;right:0;
+  top:66.667%;height:66.667%;
+  transform-origin:50% 0%;
+  transform:rotateX(-72deg);
+  transform-style:preserve-3d;
+  background:linear-gradient(180deg,var(--sc-shell-edge),var(--sc-shell));
+  border-radius:3px 3px 14px 14px;
+  box-shadow:0 30px 44px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.5);
+}
+/* The front lip, so the body has thickness rather than being a sheet of
+   paper. Stood up at the deck's near edge. */
+.sc-deck::after{
+  content:"";position:absolute;left:0;right:0;top:100%;height:15px;
+  transform-origin:50% 0%;transform:rotateX(72deg);
+  background:linear-gradient(180deg,var(--sc-shell),var(--sc-shell-edge));
+  border-radius:0 0 8px 8px;
 }
 
 .sc-lid{
-  position:relative;width:100%;aspect-ratio:16/10;
+  position:absolute;left:0;right:0;bottom:100%;
+  aspect-ratio:16/10;
+  /* Hinged on its own bottom edge, which is the deck's back edge. */
   transform-origin:50% 100%;
   transform-style:preserve-3d;
-  /* Closed. Not exactly 90 degrees: at 90 the panel is edge-on to a viewer
-     who is only 16 degrees above it, and an edge-on plane is a line — the
-     lid vanished and left the base looking like a stray slab. Even 84 was
-     only six degrees off edge-on and came out as a dark line.
+  /* Shut: folded all the way over onto the deck, screen down, shell up.
 
-     So closed is stylised rather than literal: far enough over to read as
-     shut, open enough that the object is still a laptop and the animation
-     has somewhere to travel from. A photograph would use 90; an interface
-     that has to communicate in one glance should not. */
-  transform:rotateX(68deg);
+     The angles are large because they are absolute, not relative: the lid
+     starts coplanar with the deck pointing backwards, so lying face down on
+     it is half a turn away. Continuing past that half turn is what lifts the
+     screen towards the viewer; stopping short of it would raise the back of
+     the lid instead, which is the machine that was here before. */
+  transform:rotateX(-180deg);
   transition:transform .85s cubic-bezier(.22,1,.28,1);
 }
-.sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-11deg)}
+/* Open: a right angle to the deck. Ninety degrees of travel, no more. */
+.sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-270deg)}
 
 .sc-bezel{
   position:absolute;inset:0;
@@ -1801,22 +1843,21 @@ nav{background:var(--chrome-bg)}
   font-size:22px;color:var(--sc-mark);letter-spacing:.06em;
 }
 
-/* The base. A wedge, thicker at the hinge, with the trackpad notch. */
-.sc-base{
-  position:relative;width:104%;height:22px;
-  background:linear-gradient(180deg,var(--sc-shell),var(--sc-shell-edge));
-  border-radius:3px 3px 12px 12px;
-  box-shadow:0 22px 40px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.45);
-  display:flex;align-items:flex-start;justify-content:center;
-}
+/* Deck furniture. Both are flat on the deck rather than floating in front of
+   it, which is the point of having a deck at all: they foreshorten with it. */
 .sc-hinge{
   position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:36%;height:3px;border-radius:0 0 4px 4px;
+  width:38%;height:4px;border-radius:0 0 4px 4px;
   background:var(--sc-shell-edge);
 }
+.sc-keys{
+  position:absolute;top:14%;left:8%;right:8%;height:44%;
+  border-radius:6px;background:var(--sc-shell-edge);opacity:.55;
+}
 .sc-notch{
-  position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
-  width:14%;height:4px;border-radius:4px;background:var(--sc-shell-edge);
+  position:absolute;bottom:11%;left:50%;transform:translateX(-50%);
+  width:30%;height:26%;border-radius:5px;
+  background:var(--sc-shell-edge);opacity:.75;
 }
 
 /* The live page, laid out wide and scaled into the screen. */
@@ -1911,21 +1952,42 @@ nav{background:var(--chrome-bg)}
    thumbnail-sized. The same markup becomes a phone and the shot fills it. */
 @media(max-width:900px){
   .sc{grid-template-columns:1fr;gap:30px}
-  .sc-laptop{max-width:300px;perspective:1000px}
+  .sc-laptop{
+    max-width:300px;aspect-ratio:9/19;
+    perspective:1000px;perspective-origin:50% 50%;
+  }
+  /* No deck, no hinge, no lip: a phone is one slab. What is left of the deck
+     is the box the lid is positioned against. */
+  .sc-deck{
+    inset:0;top:0;height:100%;transform:none;
+    background:none;box-shadow:none;border-radius:0;
+  }
+  .sc-deck::after{display:none}
+  .sc-hinge,.sc-keys,.sc-notch{display:none}
   .sc-lid{
+    top:0;bottom:auto;
     aspect-ratio:9/19;
     transform-origin:50% 50%;
     /* A phone does not fold, so "closed" is the screen being off rather than
-       the lid being down. It swings in from the side instead. */
-    transform:rotateY(-92deg);
+       the lid being down. It swings in from the side instead.
+
+       125 degrees, not the 92 this started at: 92 is two degrees past edge-on,
+       and a plane two degrees from edge-on is a hairline. The phone was
+       invisible until it was tapped, which is a poor invitation to tap it.
+       125 leaves a back turned towards the viewer — an object, clearly not
+       facing you yet. */
+    transform:rotateY(-125deg);
   }
   .sc-laptop[data-open="true"] .sc-lid{transform:rotateY(0deg)}
+  /* rotateY is physical, so under RTL it swings in from the wrong side — the
+     one the eye is travelling away from. The mirror costs a line. */
+  [dir="rtl"] .sc-lid{transform:rotateY(125deg)}
+  [dir="rtl"] .sc-laptop[data-open="true"] .sc-lid{transform:rotateY(0deg)}
   .sc-bezel{border-radius:26px;padding:10px}
   .sc-lid-back{border-radius:26px}
   .sc-screen{border-radius:18px}
   .sc-shot{object-fit:cover}
   .sc-camera{top:4px;width:44px;height:5px;border-radius:4px}
-  .sc-base{display:none}
 }
 
 /* ---------- reduced motion ---------- */

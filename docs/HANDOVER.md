@@ -240,11 +240,48 @@ The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
 name and its description live.
 
-Closed is 68 degrees, not 90. At a literal 90 the lid is edge-on to a viewer
-16 degrees above it, and an edge-on plane is a line: the laptop disappeared and
-left its base looking like a stray slab. 84 was still only six degrees off and
-came out as a hairline. A photograph would use 90; an interface that has to be
-understood at a glance should not.
+### The laptop has two planes, and the first one did not
+
+The first build had the lid and a 22px "base" bar as siblings in one plane,
+tilted together. There was no deck, so there was nothing for the lid to close
+onto: folding it landed it beside the body rather than on it. Every angle was
+then a choice between a machine folded all the way back and a machine that had
+vanished edge-on, and the 68 degrees it shipped with was the compromise that
+hid the problem rather than fixed it. Ali read it in one look — open at 270,
+closing to 90 — which is exactly what it was.
+
+Two planes now. `.sc-deck` lies flat and its top edge is the hinge; `.sc-lid`
+lives inside it and hangs off that edge. Closed is `rotateX(-180deg)`, the lid
+face down on the deck; open is `rotateX(-270deg)`, a right angle to it. The
+numbers are large because they are absolute: the lid starts coplanar with the
+deck pointing backwards, so lying on it is half a turn away, and continuing
+past that half turn is what brings the screen up towards the viewer. Stopping
+short of it raises the back of the lid instead — the old machine, again.
+
+Three sizes are locked to each other rather than chosen. The lid is 16:10 of
+the width; the deck is as deep as the lid is tall; and the box is 16:15, which
+is the lid standing upright plus the deck laid out in front of it. Change one
+and the hinge stops landing where the deck ends.
+
+The eye is at `perspective-origin: 50% 40%` and does not move. It has to be
+above the deck, which begins at 66.7%, for the deck to have a visible top
+surface at all, and 40% also sits level with the middle of an open screen,
+which is what keeps the screen from keystoning. Animating it as the lid opens
+was tried and abandoned: raising the eye flattens the deck rather than
+revealing it, because the deck slopes towards the viewer and a higher eye is
+nearer its plane, not further from it.
+
+None of that was worked out on paper. Every sign in it was settled by
+rendering the lid at a list of angles and looking at the pictures; the
+reasoning above is the account written afterwards, and twice during the work
+the reasoning and the render disagreed and the render was right.
+
+The phone is 125 degrees closed, not the 92 it started at. 92 is two degrees
+past edge-on and a plane two degrees from edge-on is a hairline, so on a phone
+the object was invisible until it was tapped — a poor invitation to tap it.
+125 leaves a back turned towards the viewer. `rotateY` is physical, so RTL
+gets the mirrored sign, or the phone swings in from the side the eye is
+travelling away from.
 
 Which project is open lives in the URL hash rather than in component state, so
 the open lid is shareable and the back button works.
@@ -475,8 +512,15 @@ never by reading it:
 - The seventh place `--ink` was used as a fill — six were found by reading the
   stylesheet, and the last one only by looking at the dashboard in dark, where
   it was a white box with white text in it.
-- The closed laptop lid — geometrically correct at 90 degrees and, to a viewer
-  16 degrees above it, a horizontal line.
+- The closed laptop lid, twice. First as a panel that was geometrically
+  correct at 90 degrees and, to a viewer 16 degrees above it, a horizontal
+  line. Then — after that was papered over with 68 degrees — as a laptop with
+  no deck at all, which Ali spotted in one look and no amount of re-reading the
+  stylesheet would have. The angles it now uses were all found by rendering a
+  list of them and looking, after reasoning about rotation signs got the
+  direction wrong twice.
+- The phone at 92 degrees: past edge-on, so a hairline. Nobody sees a hairline
+  and thinks "I should tap that".
 
 And one that is worth more than the rest, because the tool itself was the
 thing that lied: the first version of `verify:contrast` took a string index
