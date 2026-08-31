@@ -1819,6 +1819,37 @@ nav{background:var(--chrome-bg)}
   width:14%;height:4px;border-radius:4px;background:var(--sc-shell-edge);
 }
 
+/* The live page, laid out wide and scaled into the screen. */
+.sc-live{
+  border:0;display:block;
+  /* .sc-screen is a flex container, so without this the 1280px layout width
+     is shrunk to fit before the scale is applied and the page lands in the
+     top-left quarter of the screen. The height was right and the width was
+     not, which is exactly what a flex main-axis shrink looks like. */
+  flex:none;
+  /* Out of flow as well, so the oversized box cannot push the frame around
+     while it is being scaled down into it.
+
+     PHYSICAL left, not inset-inline-start. The scale has a physical origin —
+     `transform-origin: top left` — and pairing it with a logical offset means
+     the two disagree the moment the page is right-to-left: the frame pinned
+     itself to the right edge and then scaled towards the left, pushing the
+     embedded page off the side. This is a scaling mechanic, not a reading
+     direction; the embedded page brings its own direction with it. Third time
+     a logical/physical mismatch has caused a bug here. */
+  position:absolute;top:0;left:0;
+  transform-origin:top left;
+  transition:opacity var(--med) ease;
+  /* The embedded site paints its own background; this is only what shows
+     while it loads. */
+  background:var(--sc-screen);
+}
+.sc-live-badge{
+  margin-inline-start:8px;padding:2px 7px;border-radius:5px;
+  background:var(--badge-won-bg);border:1px solid var(--badge-won-bd);
+  color:var(--badge-won-fg);letter-spacing:.06em;
+}
+
 /* ---------- gallery paging and the caption ---------- */
 .sc-shots{display:flex;align-items:center;gap:12px}
 .sc-shots-count{

@@ -249,6 +249,8 @@ export const fa: Dictionary = {
     pick: "یک پروژه انتخاب کنید",
     nowShowing: "در حال نمایش",
     shotOf: "تصویر از",
+    liveOf: "صفحه‌ی زنده‌ی",
+    liveBadge: "زنده",
     shotCount: "صفحه",
     prev: "صفحه‌ی قبل",
     next: "صفحه‌ی بعد",

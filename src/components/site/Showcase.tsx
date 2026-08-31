@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { Dictionary, Locale } from "@/i18n";
 
@@ -34,7 +34,29 @@ export type ShowcaseProject = {
   categoryLabel: string;
   /** Cover first, then the gallery. Empty means nothing to show. */
   shots: string[];
+  /**
+   * The deployed page, when there is one AND it permits being framed.
+   * Resolved on the server — see lib/data/embed.ts for why the browser
+   * cannot be asked. Null means fall back to the screenshots.
+   */
+  liveUrl: string | null;
 };
+
+/**
+ * The width the live page is rendered at before being scaled into the screen.
+ *
+ * An iframe sized to the laptop's ~540px would make the embedded site render
+ * its tablet layout, which is not the page anyone means when they say "show
+ * me the site". So it is laid out at a desktop width and scaled down, the way
+ * a real screen shows a real page.
+ *
+ * In the phone frame the opposite is true: a phone should show the mobile
+ * layout, at close to life size.
+ */
+const DESKTOP_EMBED_WIDTH = 1280;
+const PHONE_EMBED_WIDTH = 390;
+/** Below this the frame is a phone, matching the CSS breakpoint. */
+const PHONE_MAX = 420;
 
 /**
  * Which project is open lives in the URL hash, not in component state.
@@ -83,6 +105,37 @@ export function Showcase({
   const activeSlug = projects.some((p) => p.slug === hash) ? hash : null;
   const [shotIndex, setShotIndex] = useState(0);
   const screenId = useId();
+
+  /**
+   * The live page is laid out at a fixed width and scaled to fit, so the
+   * scale has to follow the screen's real size. A ResizeObserver rather than
+   * a breakpoint: the laptop is fluid between its minimum and its max-width,
+   * and a scale that is right only at two widths is wrong at every other one.
+   */
+  const screenRef = useRef<HTMLDivElement | null>(null);
+  const [screen, setScreen] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = screenRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setScreen({
+        w: entry.contentRect.width,
+        h: entry.contentRect.height,
+      });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const embedWidth =
+    screen.w > 0 && screen.w < PHONE_MAX ? PHONE_EMBED_WIDTH : DESKTOP_EMBED_WIDTH;
+  const embedScale = screen.w > 0 ? screen.w / embedWidth : 0;
+  /**
+   * Height follows the screen, not a fixed ratio. The laptop is 16:10 and the
+   * phone is nearly 9:19, so a single aspect left the phone's frame two thirds
+   * empty below the fold of the embedded page.
+   */
+  const embedHeight = embedScale > 0 ? screen.h / embedScale : 0;
 
   const active = projects.find((p) => p.slug === activeSlug) ?? null;
   const isOpen = active !== null;
@@ -142,8 +195,34 @@ export function Showcase({
           <div className="sc-rig">
           <div className="sc-lid">
             <div className="sc-bezel">
-              <div className="sc-screen" id={screenId} aria-live="polite">
-                {shot ? (
+              <div
+                className="sc-screen"
+                id={screenId}
+                aria-live="polite"
+                ref={screenRef}
+              >
+                {active?.liveUrl ? (
+                  /* The real page. sandbox without allow-top-navigation, so an
+                     embedded site cannot move the window it is sitting in;
+                     no-referrer so we do not announce every visitor to it. */
+                  <iframe
+                    key={active.slug}
+                    src={active.liveUrl}
+                    title={`${t.showcase.liveOf} ${active.title}`}
+                    className="sc-live"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                    style={{
+                      width: embedWidth,
+                      height: embedHeight,
+                      transform: `scale(${embedScale})`,
+                      // Hidden until measured, so it never flashes at full
+                      // size before the scale lands.
+                      opacity: embedScale ? 1 : 0,
+                    }}
+                  />
+                ) : shot ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={shot}
@@ -170,7 +249,7 @@ export function Showcase({
           </div>
         </div>
 
-        {shots.length > 1 ? (
+        {active?.liveUrl ? null : shots.length > 1 ? (
           <div className="sc-shots">
             <button
               type="button"
@@ -199,7 +278,12 @@ export function Showcase({
         {active ? (
           <div className="sc-meta">
             <p className="sc-meta-title">
-              <span className="sc-meta-eyebrow">{t.showcase.nowShowing}</span>
+              <span className="sc-meta-eyebrow">
+                {t.showcase.nowShowing}
+                {active.liveUrl ? (
+                  <span className="sc-live-badge">{t.showcase.liveBadge}</span>
+                ) : null}
+              </span>
               <span lang="en" dir="ltr">
                 {active.title}
               </span>

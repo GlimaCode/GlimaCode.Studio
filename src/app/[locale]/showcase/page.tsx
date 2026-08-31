@@ -5,6 +5,7 @@ import { stripIsolates } from "@/i18n/pending";
 import { siteConfig } from "@/config/site";
 import { localeAlternates } from "@/lib/seo/alternates";
 import { listPublishedProjects } from "@/lib/data/portfolio";
+import { checkEmbeddable } from "@/lib/data/embed";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { SiteMotion } from "@/components/site/SiteMotion";
@@ -43,21 +44,45 @@ export default async function ShowcasePage({ params }: PageParams) {
   const projects = await listPublishedProjects(locale);
 
   /**
-   * Cover first, then the gallery — the cover is the shot chosen to represent
-   * the project, so it is the one the lid should open onto. Projects with no
-   * image at all are left out rather than shown as an empty screen.
+   * The laptop prefers the real page. A project that is deployed and lets
+   * itself be framed opens live; everything else opens onto its screenshots.
+   *
+   * Embeddability is resolved here rather than in the browser because a
+   * cross-origin iframe cannot report its own failure — see lib/data/embed.ts.
+   * The checks run in parallel and are cached for an hour, so this costs one
+   * request per deployed project per hour and never blocks on a slow host for
+   * more than four seconds.
+   *
+   * Cover first, then the gallery: the cover is the shot chosen to represent
+   * the project, so it is the one the lid should open onto. A project with
+   * neither a live page nor a single image is left out rather than shown as
+   * an empty screen.
    */
-  const showable: ShowcaseProject[] = projects
-    .map((project) => ({
-      slug: project.slug,
-      title: project.title,
-      summary: project.summary,
-      categoryLabel: project.categoryLabel,
-      shots: [project.coverUrl, ...project.gallery].filter(
+  const resolved = await Promise.all(
+    projects.map(async (project) => {
+      const shots = [project.coverUrl, ...project.gallery].filter(
         (url): url is string => typeof url === "string" && url.length > 0,
-      ),
-    }))
-    .filter((project) => project.shots.length > 0);
+      );
+      const check = project.liveUrl
+        ? await checkEmbeddable(project.liveUrl, siteConfig.url)
+        : null;
+      return {
+        slug: project.slug,
+        title: project.title,
+        summary: project.summary,
+        categoryLabel: project.categoryLabel,
+        shots,
+        liveUrl: check?.embeddable ? project.liveUrl : null,
+        // Kept so a blank frame is diagnosable from the served HTML rather
+        // than by guessing. Rendered nowhere.
+        liveReason: check?.reason ?? null,
+      };
+    }),
+  );
+
+  const showable: ShowcaseProject[] = resolved.filter(
+    (project) => project.liveUrl !== null || project.shots.length > 0,
+  );
 
   return (
     <>

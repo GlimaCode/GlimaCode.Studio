@@ -249,6 +249,8 @@ export const en = {
     pick: "Choose a project",
     nowShowing: "Now showing",
     shotOf: "Screenshot of",
+    liveOf: "Live page of",
+    liveBadge: "Live",
     shotCount: "Screen",
     prev: "Previous screen",
     next: "Next screen",
