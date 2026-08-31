@@ -240,70 +240,61 @@ The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
 name and its description live.
 
-### The laptop took four passes, and the last one is two ideas
+### The laptop: one thing in 3D, everything else flat
 
-`.sc-lid` is `rotateX(90deg)` shut and `rotateX(-11deg)` open, inside a
-`.sc-rig` tilted 16 degrees. `.sc-base` is a horizontal surface 350px deep,
-laid at `--rake: 90deg`, occupying exactly the footprint the shut lid covers.
-That is the whole machine. It is worth knowing what each part is for, because
-every one of them was arrived at by getting it wrong first.
+Only `.sc-lid` is rotated. It is `rotateX(90deg)` shut and `rotateX(-11deg)`
+open, inside a `.sc-rig` tilted 16 degrees. `.sc-base` is the keyboard panel
+and it is a plain rectangle that is never rotated at all; what makes it read
+as opening is its **height**, 13px shut and 62px open, animated alongside the
+lid. That is the whole machine, and it took five passes to get there.
 
 **Ninety degrees, because the face has to change.** It shipped at 68, on the
 reasoning that 90 leaves the lid 16 degrees off edge-on and it would all but
-vanish. Measured, the vanishing is real — the shut lid projects 29px — and it
-does not matter, because a closed laptop seen from the front is mostly its
-front edge. What 68 actually does is stop short of the face change: under 90
-the sum of lid and rig still points the screen at the viewer, so the machine
-reads as folded all the way back. Ali saw it as 270 degrees open and closing
-to 90, which is precisely what it was. Raising it instead is the other trap —
+vanish. The vanishing is real — the shut lid projects 29px — and it does not
+matter, because a closed laptop seen from the front is mostly its front edge.
+What 68 does is stop short of the face change: under 90 the sum of lid and
+rig still points the screen at the viewer, so the machine reads as folded all
+the way back. Ali saw it as 270 degrees open. Raising it is the other trap:
 the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, and it grows as
 a flared trapezoid below the machine.
 
-**A deck, because a lid has to lift off something.** With 90 in place the
-angles were right and the motion still was not: opening, the lid thinned to
-nothing at the hinge line and grew again above it, which reads as a screen
-rising from behind the machine rather than lifting off a keyboard. Ali caught
-that too. The lid must pass through edge-on — shut shows the shell, open
-shows the screen, so the normal has to flip — and that is fine in life
-because the body stays where it is while the lid swings. Here the body was a
-22px bar and there was nothing to stay.
+**The panel is flat because every attempt to put it in 3D failed.** Three
+passes laid this surface down at a rake and let the perspective draw it — as
+a deck as deep as the screen, as a shallow deck, as an edge-on deck whose
+extent came entirely from the projection. They came out a wedge, a funnel and
+a tray, in that order, and Ali rejected each on sight. The lesson is the one
+in the heading: a laptop seen from the front does not need its keyboard drawn
+in perspective, it needs it drawn as a rectangle. A front lip was tried too,
+and removed — 350px nearer the eye it is magnified 30% and reads as a second,
+wider plate.
 
-So `.sc-base` stopped being a bar and became a surface, laid in the same
-plane the shut lid occupies. At `--rake: 90deg` it is exactly edge-on and its
-own geometry contributes no height at all; every pixel of it on screen comes
-from the perspective, which is what keeps a 350px-deep deck from becoming the
-wedge that sank the third pass. Shut, it is a slim plate under a slim lid.
-Open, it is a body with a trackpad on it. Through the travel it does not
-move, and that is the entire point of it.
+**Height, not angle, is what opens it.** Shut, the panel is 13px: the front
+edge of a closed machine, which is all there is to see of one. Open, it is
+62px, and `overflow: hidden` means the key grid and trackpad inside it are
+revealed as it grows, the way they are when a real lid lifts off them. The
+panel cannot distort, so it cannot look like anything but a keyboard, and it
+solves the problem the decks were there to solve: something stays put and
+grows while the lid swings through edge-on, so the lid reads as lifting off
+it rather than as a screen rising from behind.
 
-Two consequences worth knowing:
+**The easing was half the problem and nobody had looked at it.** The site's
+`cubic-bezier(.22,1,.28,1)` puts ninety per cent of the travel in the first
+hundred milliseconds. Filmed at 100ms intervals, the lid did not lift, it
+appeared — which is exactly what "the screen comes from behind" describes.
+The lid and the panel now share `.8s cubic-bezier(.45,.05,.55,.95)`, which is
+half way through the swing at half the time. This is the only place on the
+site that departs from the house curve, and it should stay departed.
 
-- `margin-bottom` cancels the deck's layout height exactly —
-  `calc(-1 * var(--deck) * (1 - cos(var(--rake))))`, which at rake 90 is the
-  full depth. The drawing and the layout cannot drift apart, but the deck
-  then paints past its own box, so `.sc-laptop` reserves `--overhang: 34px`
-  for it. That 34 is measured, not derived: no CSS expression knows how far a
-  perspective projection reaches. Re-measure it if `--deck` or the
-  perspective changes.
-- The shut lid carries `translateZ(8px)`. Coplanar faces z-fight and without
-  it the lid disappears into the deck. Eight is enough to separate them and
-  small enough not to read as ajar on an object that is 50px tall when shut.
-
-The third pass is worth naming because it will look like the obvious fix
-again. It gave the machine a real deck, hinged the lid off it and used
-literal angles throughout — geometrically honest, and it looked wrong: at
-`perspective: 1600px` on a 560px object every receding plane flares into a
-funnel, and a deck as deep as the screen is tall turns the machine into a
-wedge. Reverted whole. What survived from it was the idea of a deck, not the
-construction; the difference is that this deck is edge-on, so the perspective
-never gets to show off. A front lip was tried too and removed: sitting 350px
-nearer the eye it is magnified 30% and reads as a second, wider plate.
+The keys are two crossed `repeating-linear-gradient`s rather than forty
+elements. The panel's `overflow: hidden` clips them to nothing while it is
+shut, so there is no separate show-and-hide to keep in step.
 
 None of the angles were worked out on paper. Each was settled by rendering
-the lid at a list of them and looking at the pictures. Four times the
-reasoning and the render disagreed, and the render was right every time —
-including about which way a positive `rotateX` tips a plane, which is the
-sort of thing one is sure about right up until the screenshot arrives.
+the lid at a list of them and looking at the pictures, and the last fault was
+found by filming the transition rather than screenshotting its two ends. Four
+times the reasoning and the render disagreed, and the render was right every
+time — including about which way a positive `rotateX` tips a plane, which is
+the sort of thing one is sure about right up until the screenshot arrives.
 
 The phone is 125 degrees closed, not the 92 it started at. 92 is two degrees
 past edge-on and a plane two degrees from edge-on is a hairline, so on a phone
@@ -542,14 +533,20 @@ never by reading it:
 - The seventh place `--ink` was used as a fill — six were found by reading the
   stylesheet, and the last one only by looking at the dashboard in dark, where
   it was a white box with white text in it.
-- The closed laptop lid, three times over. First it was stylised to 68
-  degrees to avoid a vanishing act that turned out not to happen. Ali read
-  that in one glance as a machine folded all the way back, which no amount of
-  re-reading the stylesheet would have told me. Then it was rebuilt properly,
-  with a deck and literal angles, and the rebuild was uglier than the bug —
-  also Ali's call, also in one glance. It ended one number away from where it
-  started. Correct geometry and a good-looking object are different
-  properties, and only one of them can be checked by reasoning.
+- The laptop, five times over, every rejection from Ali and every one in a
+  single glance. Stylised to 68 degrees to avoid a vanishing act that did not
+  happen, and it read as folded all the way back. Rebuilt with a real deck,
+  and the rebuild was uglier than the bug. Fixed to 90 with no body, and the
+  lid appeared from behind the machine instead of lifting. Given an edge-on
+  deck, and that read as a tray. It ended with the one part that had never
+  been tried: not drawing the keyboard in perspective at all. Correct geometry
+  and a good-looking object are different properties, and only one of them can
+  be checked by reasoning.
+- The transition curve, which nobody had looked at because two screenshots of
+  the two end states look identical whatever the easing is. Filming it at
+  100ms intervals showed the lid reaching ninety per cent of its travel in the
+  first frame. Half of "it comes from behind" was "it does not appear to
+  move at all".
 - The phone at 92 degrees: past edge-on, so a hairline. Nobody sees a hairline
   and thinks "I should tap that".
 

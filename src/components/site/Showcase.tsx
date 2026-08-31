@@ -328,6 +328,7 @@ export function Showcase({
           </div>
           <div className="sc-base" aria-hidden="true">
             <span className="sc-hinge" />
+            <span className="sc-keys" />
             <span className="sc-notch" />
           </div>
           </div>

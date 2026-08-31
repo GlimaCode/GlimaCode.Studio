@@ -1737,26 +1737,9 @@ nav{background:var(--chrome-bg)}
    as deep as the screen is tall demonstrated it — it looked like a wedge and
    was reverted whole. Do not tighten this to match the keyboard. */
 .sc-laptop{
-  /* How deep the body is, how far it is laid down, and how far it paints past
-     its own box. Everything else about the machine follows from the first two:
-     the lid's shut angle and the layout height the rotation gives back. */
-  --deck:350px;
-  --rake:90deg;
-  --overhang:34px;
   width:100%;max-width:560px;
-  /* 3000, not the 1500 this had. The body below is a surface seen almost
-     edge-on, and at 1500 a surface that recedes converges hard enough to read
-     as a funnel rather than a machine — which is exactly what sank an earlier
-     attempt at this. Long perspective keeps its sides near parallel, the way
-     a product photograph taken from across the room does. */
   perspective:1500px;perspective-origin:50% 20%;
   display:flex;flex-direction:column;align-items:center;
-  /* The deck's layout height is cancelled to nothing (see .sc-base), so every
-     pixel it paints is overhang, and the caption below would sit in it. 34px
-     is measured, not derived: the deck is edge-on and only the perspective
-     gives it extent, which no CSS expression can work out. Re-measure it if
-     --deck or the perspective changes. */
-  padding-bottom:var(--overhang);
 }
 /* The whole machine is seen from slightly above, the way one sits on a desk
    in front of you. Without this the closed lid is a panel viewed edge-on —
@@ -1771,28 +1754,25 @@ nav{background:var(--chrome-bg)}
   position:relative;width:100%;aspect-ratio:16/10;
   transform-origin:50% 100%;
   transform-style:preserve-3d;
-  /* Shut: lying on the deck.
+  /* Shut: folded down onto the keyboard panel, showing its shell.
 
-     Derived, not chosen. 180 minus the rake is the only angle that puts the
-     lid in the same plane as the body it is closing onto; a degree either way
-     and it is ajar. Change --rake and this follows on its own.
-
-     Two earlier values are worth knowing about. 68 leaves the sum of this and
-     the rig's 16 under 90, which still points the screen at the viewer, so
-     the machine read as folded all the way back — Ali saw it as 270 degrees
-     open, and it was. 90 fixed the face but there was still nothing under the
-     lid: it lay against a 22px bar and, opening, it thinned to nothing at the
-     hinge line and grew again above it. That is not a lid lifting, it is a
-     screen rising from behind the machine, which is what Ali saw next. What
-     was missing both times was the deck. */
-  /* translateZ lifts it clear of the deck it is lying on: coplanar faces
-     z-fight and the shut lid disappears into the body. Enough to separate
-     them, small enough not to read as ajar — the whole machine is about
-     50px tall on screen when it is shut. */
-  transform:rotateX(calc(180deg - var(--rake))) translateZ(8px);
-  transition:transform .85s cubic-bezier(.22,1,.28,1);
+     Ninety, because the sum of this and the rig's 16 decides which face you
+     see. Under 90 the screen still points at the viewer and the machine reads
+     as folded all the way back — it shipped at 68 once and Ali saw it as 270
+     degrees open, which is what it was. Above 90 the lid spreads into a
+     flared trapezoid below the machine: 70px at 98 degrees, 112 at 106, 202
+     at 124. */
+  transform:rotateX(90deg);
+  /* Symmetric ease-in-out, not the sharp ease-out the rest of the site uses,
+     and slower. The site's curve puts ninety per cent of the travel in the
+     first hundred milliseconds — filmed, the lid did not lift, it appeared,
+     which is half the reason the movement read as a screen arriving from
+     somewhere rather than a hinge turning. This one is half way through the
+     swing at half the time, which is the only way the middle of it is seen at
+     all. A lid has weight at both ends. */
+  transition:transform .8s cubic-bezier(.45,.05,.55,.95);
 }
-.sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-11deg) translateZ(0)}
+.sc-laptop[data-open="true"] .sc-lid{transform:rotateX(-11deg)}
 
 .sc-bezel{
   position:absolute;inset:0;
@@ -1835,41 +1815,52 @@ nav{background:var(--chrome-bg)}
   font-size:22px;color:var(--sc-mark);letter-spacing:.06em;
 }
 
-/* The body. A surface rather than a bar, because the lid needs something to
-   lie on: without it, opening reads as the screen rising from behind the
-   machine instead of lifting off the keyboard.
+/* The keyboard panel.
 
-   Laid flat from its top edge, which is the hinge — the same line the lid
-   turns about. The negative margin hands back the layout height the rotation
-   does not use, so the caption underneath stays with the machine instead of
-   floating a deck's worth of empty space below it. Both numbers come from the
-   same two variables, so the drawing and the layout cannot drift apart. */
+   Flat, and not rotated at all — that is the whole idea. Three attempts put
+   this surface into the third dimension, laid it at a rake and let the
+   perspective draw it, and each came out a wedge, a funnel or a tray. A
+   laptop seen from the front does not need its keyboard drawn in
+   perspective. It needs it drawn as a rectangle.
+
+   What makes it read as opening is its height, not its angle. Shut, the panel
+   is 13px: the front edge of a closed machine, which is all there is to see
+   of a closed machine. Open, it is 62px and the keys and the trackpad inside
+   it come into view, the way they do when a real lid lifts off them. The
+   panel never distorts, so it cannot look like anything but a keyboard. */
 .sc-base{
-  /* The same width as the lid, not the 104% it had as a bar. It used to sit
-     below the screen where a wider base read as the machine flaring out; now
-     the shut lid lies on top of it, and 4% of deck showing past the lid on
-     each side reads as wings. */
   position:relative;width:100%;
-  height:var(--deck);
-  margin-bottom:calc(-1 * var(--deck) * (1 - cos(var(--rake))));
-  transform-origin:50% 0%;
-  transform:rotateX(calc(-1 * var(--rake)));
-  transform-style:preserve-3d;
-  background:linear-gradient(180deg,var(--sc-shell-edge),var(--sc-shell));
-  border-radius:3px 3px 9px 9px;
-  box-shadow:0 26px 42px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.45);
+  height:13px;
+  transition:height .8s cubic-bezier(.45,.05,.55,.95);
+  overflow:hidden;
+  background:linear-gradient(180deg,var(--sc-shell),var(--sc-shell-edge));
+  border-radius:3px 3px 12px 12px;
+  box-shadow:0 22px 40px var(--board-shadow), inset 0 1px 0 rgba(255,255,255,.45);
 }
-/* Deck furniture. All three foreshorten with the deck, which is the point of
-   the deck being a surface at all. */
+.sc-laptop[data-open="true"] .sc-base{height:62px}
+/* The hinge strip, along the panel's back edge under the screen. */
 .sc-hinge{
-  position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:38%;height:4px;border-radius:0 0 4px 4px;
+  position:absolute;top:0;left:32%;right:32%;
+  height:3px;border-radius:0 0 4px 4px;
   background:var(--sc-shell-edge);
 }
+/* The keys. A grid rather than forty elements: two repeating gradients cross
+   to leave the gaps between caps, and the panel's overflow clips them away
+   entirely while it is shut. */
+.sc-keys{
+  position:absolute;top:9px;left:7%;right:7%;height:26px;
+  border-radius:3px;
+  background:
+    repeating-linear-gradient(90deg,
+      var(--sc-shell-edge) 0 5.4%, transparent 5.4% 6.6%),
+    repeating-linear-gradient(180deg,
+      transparent 0 1px, var(--sc-shell-edge) 1px 6px, transparent 6px 7px);
+  opacity:.5;
+}
 .sc-notch{
-  position:absolute;bottom:16%;left:50%;transform:translateX(-50%);
-  width:24%;height:30%;border-radius:4px;
-  background:var(--sc-shell-edge);opacity:.55;
+  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:22%;height:13px;border-radius:3px;
+  background:var(--sc-shell-edge);opacity:.45;
 }
 
 /* The live page, laid out wide and scaled into the screen. */
@@ -1991,7 +1982,6 @@ nav{background:var(--chrome-bg)}
   .sc-shot{object-fit:cover}
   .sc-camera{top:4px;width:44px;height:5px;border-radius:4px}
   .sc-base{display:none}
-  .sc-laptop{--overhang:0px}
 }
 
 /* ---------- reduced motion ---------- */
@@ -1999,5 +1989,5 @@ nav{background:var(--chrome-bg)}
    travelling. Someone who asked for less movement gets the screenshot, not a
    swinging panel. */
 @media (prefers-reduced-motion:reduce){
-  .sc-lid{transition:none}
+  .sc-lid,.sc-base{transition:none}
 }
