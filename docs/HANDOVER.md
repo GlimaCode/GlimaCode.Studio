@@ -240,48 +240,50 @@ The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
 name and its description live.
 
-### The laptop has two planes, and the first one did not
+### The laptop closes at 90 degrees, and the road to that number was long
 
-The first build had the lid and a 22px "base" bar as siblings in one plane,
-tilted together. There was no deck, so there was nothing for the lid to close
-onto: folding it landed it beside the body rather than on it. Every angle was
-then a choice between a machine folded all the way back and a machine that had
-vanished edge-on, and the 68 degrees it shipped with was the compromise that
-hid the problem rather than fixed it. Ali read it in one look — open at 270,
-closing to 90 — which is exactly what it was.
+`.sc-lid` is `rotateX(90deg)` shut and `rotateX(-11deg)` open, inside a
+`.sc-rig` tilted 16 degrees. That is the whole thing, and it is worth knowing
+what it cost, because the temptation to change it will come back.
 
-Two planes now. `.sc-deck` lies flat and its top edge is the hinge; `.sc-lid`
-lives inside it and hangs off that edge. Closed is `rotateX(-180deg)`, the lid
-face down on the deck; open is `rotateX(-270deg)`, a right angle to it. The
-numbers are large because they are absolute: the lid starts coplanar with the
-deck pointing backwards, so lying on it is half a turn away, and continuing
-past that half turn is what brings the screen up towards the viewer. Stopping
-short of it raises the back of the lid instead — the old machine, again.
+It shipped at 68 degrees first, on the reasoning that 90 leaves the lid only
+16 degrees off edge-on and would all but disappear. Measured, that is true:
+the lid projects 29px and all of it falls below the base bar's top edge, so a
+shut machine is the base bar, its hinge line and its shadow. The error was
+thinking that mattered. A closed laptop seen from the front is mostly its
+front edge, and the object reads correctly without the lid doing any of the
+work. What 68 actually does is stop short of the face change — under 90 the
+sum of lid and rig still points the screen at you, so the machine reads as
+folded all the way back. Ali saw it as 270 degrees open and closing to 90,
+which is precisely what it was.
 
-Three sizes are locked to each other rather than chosen. The lid is 16:10 of
-the width; the deck is as deep as the lid is tall; and the box is 16:15, which
-is the lid standing upright plus the deck laid out in front of it. Change one
-and the hinge stops landing where the deck ends.
+Raising the angle to give the lid presence is the obvious repair and it is
+wrong: the lid grows to 70px at 98 degrees, 112 at 106, 202 at 124, and it
+grows as a flared trapezoid below the machine. That is the shape the deck
+rebuild had, and the one Ali called weird.
 
-The eye is at `perspective-origin: 50% 40%` and does not move. It has to be
-above the deck, which begins at 66.7%, for the deck to have a visible top
-surface at all, and 40% also sits level with the middle of an open screen,
-which is what keeps the screen from keystoning. Animating it as the lid opens
-was tried and abandoned: raising the eye flattens the deck rather than
-revealing it, because the deck slopes towards the viewer and a higher eye is
-nearer its plane, not further from it.
+Between those two there was a rebuild that gave the machine a real deck,
+hinged the lid off it, and used literal angles throughout. It was
+geometrically honest and it looked wrong: at `perspective: 1600px` on a
+560px object every receding plane flares into a funnel, and a deck as deep as
+the screen is tall turns the machine into a wedge. It was reverted whole. The
+lesson is not "do not model it properly" but that on this page the laptop is
+mostly seen face-on, and the parts of it that recede should be small enough
+that the perspective never gets to show off. The 22px base bar is that.
 
-None of that was worked out on paper. Every sign in it was settled by
-rendering the lid at a list of angles and looking at the pictures; the
-reasoning above is the account written afterwards, and twice during the work
-the reasoning and the render disagreed and the render was right.
+None of the angles were worked out on paper. Each was settled by rendering
+the lid at a list of them and looking at the pictures. Three times the
+reasoning and the render disagreed, and the render was right every time —
+including about which way a positive `rotateX` tips a plane, which is the
+sort of thing one is sure about right up until the screenshot arrives.
 
 The phone is 125 degrees closed, not the 92 it started at. 92 is two degrees
 past edge-on and a plane two degrees from edge-on is a hairline, so on a phone
 the object was invisible until it was tapped — a poor invitation to tap it.
-125 leaves a back turned towards the viewer. `rotateY` is physical, so RTL
-gets the mirrored sign, or the phone swings in from the side the eye is
-travelling away from.
+125 leaves a back turned towards the viewer. The laptop gets away with lying
+almost flat because it has a base to sit on; the phone has nothing but
+itself. `rotateY` is physical, so RTL gets the mirrored sign, or the phone
+swings in from the side the eye is travelling away from.
 
 Which project is open lives in the URL hash rather than in component state, so
 the open lid is shareable and the back button works.
@@ -512,13 +514,14 @@ never by reading it:
 - The seventh place `--ink` was used as a fill — six were found by reading the
   stylesheet, and the last one only by looking at the dashboard in dark, where
   it was a white box with white text in it.
-- The closed laptop lid, twice. First as a panel that was geometrically
-  correct at 90 degrees and, to a viewer 16 degrees above it, a horizontal
-  line. Then — after that was papered over with 68 degrees — as a laptop with
-  no deck at all, which Ali spotted in one look and no amount of re-reading the
-  stylesheet would have. The angles it now uses were all found by rendering a
-  list of them and looking, after reasoning about rotation signs got the
-  direction wrong twice.
+- The closed laptop lid, three times over. First it was stylised to 68
+  degrees to avoid a vanishing act that turned out not to happen. Ali read
+  that in one glance as a machine folded all the way back, which no amount of
+  re-reading the stylesheet would have told me. Then it was rebuilt properly,
+  with a deck and literal angles, and the rebuild was uglier than the bug —
+  also Ali's call, also in one glance. It ended one number away from where it
+  started. Correct geometry and a good-looking object are different
+  properties, and only one of them can be checked by reasoning.
 - The phone at 92 degrees: past edge-on, so a hairline. Nobody sees a hairline
   and thinks "I should tap that".
 

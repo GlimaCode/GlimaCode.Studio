@@ -230,20 +230,15 @@ export function Showcase({
         </ul>
       </div>
 
-      {/* The device. aria-hidden on the shell itself: the frame is scenery,
-          and everything a screen reader needs is in the chooser and in the
-          live region below. */}
+      {/* The device. The frame is scenery, but it is not aria-hidden: the
+          screen inside it holds the live region and, for a project with no
+          deployment and no screenshots, the link to the repository. Hiding
+          the shell would hide those with it. The decorative parts carry
+          aria-hidden individually instead, and everything a screen reader
+          needs to operate the thing is in the chooser above. */}
       <div className={`sc-stage${isOpen ? " open" : ""}`}>
         <div className="sc-laptop" data-open={isOpen}>
-          {/* The deck is the lid's positioning context as well as the surface
-              it shuts onto, so it wraps the lid rather than sitting beside
-              it. It cannot be aria-hidden for that reason — the screen it
-              contains holds the link to the repository. Its own furniture is
-              hidden instead. */}
-          <div className="sc-deck">
-            <span className="sc-hinge" aria-hidden="true" />
-            <span className="sc-keys" aria-hidden="true" />
-            <span className="sc-notch" aria-hidden="true" />
+          <div className="sc-rig">
           <div className="sc-lid">
             <div className="sc-bezel">
               <div
@@ -330,6 +325,10 @@ export function Showcase({
             <div className="sc-lid-back" aria-hidden="true">
               <span className="sc-mark">&lt;/&gt;</span>
             </div>
+          </div>
+          <div className="sc-base" aria-hidden="true">
+            <span className="sc-hinge" />
+            <span className="sc-notch" />
           </div>
           </div>
         </div>
