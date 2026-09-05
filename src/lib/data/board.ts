@@ -203,8 +203,19 @@ export async function removeCard(id: string): Promise<void> {
 }
 
 /**
- * Put a card at `index` within `columnId`, counting the column as it will be
- * once the card has left wherever it was.
+ * Put a card immediately before `beforeCardId`, or at the end when it is null.
+ *
+ * Anchored to a neighbour rather than to an index, because an index is
+ * ambiguous the moment the caller is looking at a filtered board: the client
+ * knows which card it wants to land above, and that card's identity survives
+ * filtering, another person's concurrent move, and the difference between the
+ * list-with-the-dragged-card-still-in-it that the browser draws and the
+ * list-without-it that this function places into. The first version took an
+ * index and got all three of those wrong.
+ *
+ * An anchor that is no longer in the column — someone else moved or deleted it
+ * while the drag was in the air — falls back to the end, which is where a
+ * dropped card goes when its target has gone.
  *
  * When the midpoints run out, the column is renumbered on `STEP` boundaries
  * and the move is placed again. That is the only multi-row write here, and it
@@ -214,7 +225,7 @@ export async function removeCard(id: string): Promise<void> {
 export async function moveCard(
   id: string,
   columnId: string,
-  index: number,
+  beforeCardId: string | null,
 ): Promise<void> {
   const client = await sessionClient();
 
@@ -228,7 +239,10 @@ export async function moveCard(
   const others = (data as { id: string; position: number }[]).filter(
     (r) => r.id !== id,
   );
-  const at = Math.max(0, Math.min(index, others.length));
+  const anchor = beforeCardId
+    ? others.findIndex((r) => r.id === beforeCardId)
+    : -1;
+  const at = anchor === -1 ? others.length : anchor;
   const before = at > 0 ? others[at - 1].position : null;
   const after = at < others.length ? others[at].position : null;
 
@@ -283,31 +297,33 @@ export async function renameColumn(id: string, title: string): Promise<void> {
 }
 
 /**
- * Refuses while the column still holds cards.
+ * Deletes the column, or reports how many cards stopped it.
+ *
+ * Returns null on success and the blocking count otherwise, rather than
+ * throwing: the count becomes a sentence for a person to read, and a thrown
+ * message would be redacted before it got to them in a production build.
  *
  * The foreign key cascades, so the database would take the cards with it
  * without complaint. That is the right backstop and the wrong default: one
  * mis-click should not be able to delete a fortnight of notes, and the
- * cascade cannot ask.
+ * cascade cannot ask. The count is the real one, not the filtered one — the
+ * client's search box must not be able to make a column look empty.
  */
-export async function removeColumn(id: string): Promise<void> {
+export async function removeColumn(id: string): Promise<number | null> {
   const client = await sessionClient();
   const { count, error } = await client
     .from("board_cards")
     .select("id", { count: "exact", head: true })
     .eq("column_id", id);
   if (error) throw new Error(error.message);
-  if (count && count > 0) {
-    throw new Error(
-      `That column still has ${count} card${count === 1 ? "" : "s"} in it. Move them first.`,
-    );
-  }
+  if (count && count > 0) return count;
 
   const { error: removed } = await client
     .from("board_columns")
     .delete()
     .eq("id", id);
   if (removed) throw new Error(removed.message);
+  return null;
 }
 
 /** Put a column at `index`, counting the board without it. */
@@ -347,14 +363,27 @@ export async function moveColumn(id: string, index: number): Promise<void> {
   if (moved) throw new Error(moved.message);
 }
 
-/** Open requests, for the card's "linked request" picker. */
+/**
+ * Requests offered in a card's "linked request" picker.
+ *
+ * Capped at the sixty newest, which is a list length decision and nearly
+ * became a data-loss one: the edit form submits every field every time, so a
+ * card linked to the sixty-first request would find no matching option, submit
+ * an empty value and quietly unlink itself the next time anyone touched it.
+ * The client puts the card's own request back into the list when it is missing
+ * from this one — see the picker in Board.tsx.
+ *
+ * Only the reference and the name, never the address or the brief. The same
+ * rule the triage list follows, and for the same reason: this is a surface
+ * left open on a screen.
+ */
 export async function linkableRequests(): Promise<
   { id: string; ticketId: string; name: string }[]
 > {
   const client = await sessionClient();
   const { data, error } = await client
     .from("requests")
-    .select("id, ticket_id, name, status")
+    .select("id, ticket_id, name")
     .order("created_at", { ascending: false })
     .limit(60);
   if (error) throw new Error(error.message);

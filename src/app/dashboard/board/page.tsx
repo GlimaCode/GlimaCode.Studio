@@ -95,11 +95,20 @@ export default async function BoardPage() {
           <Board initial={board} me={member.userId} requests={requests} />
         ) : (
           <div className="dash-banner dash-banner-warn">
-            <p>
-              The board tables are not in this database yet. Run{" "}
-              <code>db/migrations/012_board.sql</code> in the SQL editor, then
-              reload this page.
-            </p>
+            {/* Two different failures, and telling them apart matters: one is
+                a migration nobody has run, the other is a database that is
+                down or a policy that changed. Saying "run the migration" to
+                someone whose tables exist sends them the wrong way. */}
+            {/relation .* does not exist|schema cache|PGRST205/i.test(missing ?? "") ? (
+              <p>
+                The board tables are not in this database yet. Run{" "}
+                <code>db/migrations/012_board.sql</code> in the SQL editor, then
+                reload this page.
+              </p>
+            ) : (
+              <p>The board could not be read. The tables exist, so this is not
+                the migration.</p>
+            )}
             <p className="kb-detail">{missing}</p>
           </div>
         )}

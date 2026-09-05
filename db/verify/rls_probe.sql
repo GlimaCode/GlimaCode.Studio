@@ -43,6 +43,7 @@ declare
   v_column     uuid;
   v_card       uuid;
   v_has_board  boolean;
+  v_other      text;
   v_member     constant uuid := '00000000-0000-0000-0000-0000000000aa';
 begin
   create temporary table if not exists rls_probe_results (
@@ -91,8 +92,8 @@ begin
     values ('zz-rls-probe column', 999999)
     returning id into v_column;
 
-    insert into public.board_cards (column_id, title, created_by)
-    values (v_column, 'zz-rls-probe card', v_member)
+    insert into public.board_cards (column_id, title, created_by, position)
+    values (v_column, 'zz-rls-probe card', v_member, 1000)
     returning id into v_card;
   end if;
 
@@ -401,19 +402,30 @@ begin
             else v_count || ' rows' end,
        case when v_refused or v_count = 0 then 'PASS' else 'FAIL' end);
 
+    -- Only a refusal counts. An earlier version caught `when others` too,
+    -- which meant a not-null violation in the probe's own fixture reported
+    -- PASS for a policy that had never been consulted — a check passing
+    -- because it broke. Every column is supplied here for the same reason:
+    -- the write has to reach the policy to prove anything about it.
     v_refused := false;
+    v_other := null;
     begin
       execute 'set local role authenticated';
-      insert into public.board_cards (column_id, title)
-      values (v_column, 'zz-rls-probe stranger card');
+      insert into public.board_cards (column_id, title, position)
+      values (v_column, 'zz-rls-probe stranger card', 2000);
       execute 'reset role';
     exception
-      when insufficient_privilege then execute 'reset role'; v_refused := true;
-      when others then execute 'reset role'; v_refused := true;
+      when insufficient_privilege then
+        execute 'reset role'; v_refused := true;
+      when others then
+        execute 'reset role'; v_other := sqlerrm;
     end;
     insert into rls_probe_results values
-      (22, 'authenticated, off-roster', 'write a board card', 'refused',
-       case when v_refused then 'refused' else 'WROTE A ROW' end,
+      (22, 'authenticated, off-roster', 'write a board card',
+       'refused by policy, not by anything else',
+       case when v_refused then 'refused'
+            when v_other is not null then 'INCONCLUSIVE: ' || v_other
+            else 'WROTE A ROW' end,
        case when v_refused then 'PASS' else 'FAIL' end);
 
     execute format(

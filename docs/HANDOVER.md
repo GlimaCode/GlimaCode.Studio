@@ -420,6 +420,44 @@ out by element name, which is how the dashboard once grew a 297px blurred
 bar. Third time that guard has earned itself. Columns are
 `<div role="group">` now.
 
+**Moves are anchored, and the first version was not.** A move says "put this
+card above that one", never "put it at slot 3". Three lists are in play — what
+the browser draws, which still contains the card being dragged; what the
+filter leaves visible; and what the column actually holds — and an index means
+a different thing in each. Indexed, every downward drag inside a column landed
+one slot below the line it had just drawn, and any drag with a search active
+landed somewhere else entirely. A neighbour's identity survives all three
+lists, another person's concurrent move, and the drag being in the air when
+the anchor disappears (it falls back to the end).
+
+**The optimistic move needed a sort to be visible at all.** It computed the
+right new position and pushed the card onto the end of the array, and nothing
+sorted by position — so the card stayed where it was for the whole round trip
+and then jumped. `ordered` sorts; without it the optimism was invisible and
+the code that produced it was dead.
+
+**Server actions return a result; they do not throw at people.** Next.js
+redacts errors thrown out of a server action in production, so every message
+written here for someone to read — "That column still has 3 cards in it" —
+reached nobody outside development. Expected failures are values now.
+Unexpected ones still throw, are still redacted, and go to the log, which is
+right: a database error is not something to put on a card.
+
+**The echo window is a timestamp, not a flag.** Postgres replays our own
+writes back over the same channel and the replay lands *after* the action has
+resolved, so a boolean cleared in a `finally` was always already false: every
+local change cost a second full read and announced "Board updated." to the
+person who had just made it. A remote change that arrives inside the window is
+retried, not dropped — it belongs to the other person and losing it is the
+failure the window exists to avoid.
+
+**Everything above was found by a six-lens adversarial review, not by using
+the board.** Nineteen confirmed findings on a feature that had passed nine
+guards, types, lint and a build. None of them were reachable by reading the
+diff once; all of them were reachable by reading it adversarially with a
+specific question in hand. The board still had not been used by anyone at the
+point they were fixed.
+
 ### `html[lang]` redefines the font variables — delete this one day
 
 `src/app/globals.css`, near the bottom.
@@ -671,6 +709,22 @@ never by reading it:
   A synthetic event tests the handler; only a real one tests the wiring. It
   was found by an adversarial review that moved the mouse instead, and
   measured 942 off-grid pixels still displaced afterwards.
+- **A focus ring that could not be seen.** `--focus-ring` is a 14% wash,
+  about 1.25:1. It existed for one purpose — a soft `box-shadow` halo behind
+  another cue — and had exactly one use. The board gave it four more as
+  `outline: 2px solid`, making it the entire focus indicator on every control
+  a keyboard user needs, including all four move buttons. The rest of the site
+  outlines in `--cobalt`. `verify:contrast` now refuses the token as an
+  outline colour, so it is a rule instead of a habit.
+- **A probe that could not run, and a check inside it that passed because it
+  broke.** The board fixtures in `rls_probe.sql` omitted `position`, which is
+  NOT NULL with no default — so the whole DO block aborted before its first
+  assertion, on any database that actually has the board. Worse, the
+  off-roster write check caught `when others` as well as
+  `insufficient_privilege`, so the same missing column would have reported
+  PASS for a policy that was never consulted. Both fixed; the handler now
+  reports anything that is not a refusal as INCONCLUSIVE rather than as a
+  pass.
 - **A guard that claimed a script neither font has.** `verify-greeting-fonts`
   listed Greek as covered, on the assumption that IBM Plex covers it. The
   family that does is IBM Plex *Sans*; the eyebrow's stack is Plex *Mono* and

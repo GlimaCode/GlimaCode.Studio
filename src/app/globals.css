@@ -1138,7 +1138,7 @@ html[lang]{
 }
 .kb-textarea{resize:vertical;line-height:1.5}
 .kb-input:focus-visible,.kb-select:focus-visible,.kb-textarea:focus-visible{
-  outline:2px solid var(--focus-ring);outline-offset:1px;border-color:var(--cobalt);
+  outline:2px solid var(--cobalt);outline-offset:1px;
 }
 .kb-state{display:flex;align-items:center;gap:10px;min-height:22px}
 .kb-notice{font-size:12.5px;color:var(--slate)}
@@ -1182,8 +1182,11 @@ html[lang]{
   background:var(--card);border:1px solid var(--line);border-radius:20px;
   padding:1px 7px;
 }
-.kb-col-tools{display:flex;gap:2px;opacity:.55;transition:opacity var(--fast) ease}
-.kb-col:hover .kb-col-tools,.kb-col:focus-within .kb-col-tools{opacity:1}
+.kb-col-tools{display:flex;gap:2px}
+@media (hover:hover) and (pointer:fine){
+  .kb-col-tools{opacity:.6;transition:opacity var(--fast) ease}
+  .kb-col:hover .kb-col-tools,.kb-col:focus-within .kb-col-tools{opacity:1}
+}
 .kb-rename{display:flex;gap:6px;align-items:center;width:100%}
 
 /* --- the small square buttons ---------------------------------------------
@@ -1199,7 +1202,7 @@ html[lang]{
   transition:color var(--fast) ease, border-color var(--fast) ease;
 }
 .kb-icon:hover:not(:disabled){color:var(--ink);border-color:var(--cobalt)}
-.kb-icon:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.kb-icon:focus-visible{outline:2px solid var(--cobalt);outline-offset:1px}
 .kb-icon:disabled{opacity:.35;cursor:default}
 .kb-icon-danger:hover:not(:disabled){color:var(--red-text);border-color:var(--red-text)}
 
@@ -1225,7 +1228,7 @@ html[lang]{
   background:none;border:0;padding:0;cursor:pointer;
 }
 .kb-card-title:hover{color:var(--cobalt)}
-.kb-card-title:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;border-radius:4px}
+.kb-card-title:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px;border-radius:4px}
 .kb-card-notes{
   font-size:12.5px;line-height:1.5;color:var(--slate);margin:0;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
@@ -1256,8 +1259,14 @@ html[lang]{
 .kb-due-soon{color:var(--badge-review-fg);border-color:var(--badge-review-bd)}
 .kb-due-later{color:var(--slate)}
 
-.kb-moves{display:flex;gap:3px;opacity:.5;transition:opacity var(--fast) ease}
-.kb-card:hover .kb-moves,.kb-card:focus-within .kb-moves{opacity:1}
+/* Dimmed until wanted, but only where there is a pointer to want them with.
+   On a touch screen these are the only way to move a card, and there is no
+   hover to bring them back. */
+.kb-moves{display:flex;gap:3px}
+@media (hover:hover) and (pointer:fine){
+  .kb-moves{opacity:.55;transition:opacity var(--fast) ease}
+  .kb-card:hover .kb-moves,.kb-card:focus-within .kb-moves{opacity:1}
+}
 
 /* The line that shows where a dragged card would land. */
 .kb-drop{height:3px;border-radius:3px;background:var(--cobalt);margin:3px 0}
@@ -1270,14 +1279,15 @@ html[lang]{
   transition:color var(--fast) ease, border-color var(--fast) ease;
 }
 .kb-add:hover{color:var(--cobalt);border-color:var(--cobalt)}
-.kb-add:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.kb-add:focus-visible{outline:2px solid var(--cobalt);outline-offset:1px}
 .kb-compose{display:flex;flex-direction:column;gap:7px}
 .kb-edit{display:flex;flex-direction:column;gap:9px;margin-top:3px;
   border-top:1px solid var(--line);padding-top:9px}
 .kb-edit-row{display:flex;gap:8px;flex-wrap:wrap}
 .kb-edit-row .kb-field{flex:1 1 90px}
 .kb-edit-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.kb-delete{margin-inline-start:auto;color:var(--red-text)}
+.kb-confirm{margin-inline-start:auto;font-size:12.5px;color:var(--red-text)}
+.kb-delete{color:var(--red-text)}
 .kb-delete:hover{border-color:var(--red-text)}
 
 /* --- narrow screens -------------------------------------------------------
@@ -1287,8 +1297,6 @@ html[lang]{
 @media(max-width:760px){
   .kb-cols{display:block;overflow-x:visible}
   .kb-col{width:100%;margin-bottom:12px}
-  .kb-moves{opacity:1}
-  .kb-col-tools{opacity:1}
 }
 
 @media (prefers-reduced-motion:reduce){

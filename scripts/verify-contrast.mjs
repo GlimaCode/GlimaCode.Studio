@@ -229,6 +229,34 @@ if (addedFrom === -1) {
   });
 }
 
+/* --focus-ring is a glow, not an indicator.
+   -------------------------------------------------------------------------
+   It is rgba(37,71,244,.14) in light and rgba(110,139,255,.22) in dark: about
+   1.25:1 against a card. It exists to sit *behind* another cue as a soft
+   halo — `box-shadow: 0 0 0 3px` — and for a long time that was its only use.
+
+   Used as `outline: … solid var(--focus-ring)` it becomes the entire visible
+   focus indicator, and a 1.25:1 indicator is invisible. WCAG 2.4.11 wants 3:1
+   against what is next to it. The board shipped with four controls like that,
+   including every one of the move buttons a keyboard user has to operate.
+
+   The rest of the site outlines in --cobalt. This makes that a rule rather
+   than a habit. If a genuinely softer ring is ever wanted, add a token that
+   passes 3:1 and use that; do not reach for this one. */
+{
+  const RING_OUTLINE = /outline\s*:[^;]*var\(--focus-ring\)/;
+  src.split("\n").forEach((line, i) => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("*") || trimmed.startsWith("/*") || trimmed.startsWith("//")) return;
+    if (!RING_OUTLINE.test(line)) return;
+    failures.push(
+      `${CSS}:${i + 1}  --focus-ring used as an outline colour. It is a 1.25:1 ` +
+        `glow meant to sit behind another cue, so on its own the focus ring is ` +
+        `invisible. Outline in --cobalt, as the rest of the site does.\n      ${trimmed.slice(0, 90)}`,
+    );
+  });
+}
+
 /* The two remap blocks must carry the same token set, or a theme silently
    loses a colour on whichever path the visitor arrives by. */
 const mediaAt = src.indexOf("prefers-color-scheme:dark");
