@@ -66,30 +66,60 @@ const channel = client
     (payload) => heard.push({ table: "board_columns", event: payload.eventType, payload }),
   );
 
-// Two separate facts, because conflating them made the first run of this
-// script report a pass for the wrong reason. `status` is whatever the channel
-// last said, and the last thing it says is always CLOSED — because the line
-// below tears it down. Reading the refusal off that would announce "not even
+// Three separate facts, because conflating the first two made an early run of
+// this script report a pass for the wrong reason. `status` is whatever the
+// channel last said, and the last thing it says is always CLOSED — the line
+// below tears it down. Reading a refusal off that would announce "not even
 // allowed to subscribe" about a client that had subscribed perfectly well.
+//
+// The third fact is coverage. A five-minute run printed SUBSCRIBED twice,
+// which means the socket dropped and rejoined; a change made during that gap
+// would have gone unheard for a reason that has nothing to do with row-level
+// security. Silence is only evidence for the time actually spent listening,
+// so that time is measured and reported rather than assumed to be all of it.
 let status = "never reported";
 let everSubscribed = false;
+let subscribedSince = 0;
+let listeningMs = 0;
+const transitions = [];
+const started = Date.now();
+
+function closeWindow() {
+  if (subscribedSince) {
+    listeningMs += Date.now() - subscribedSince;
+    subscribedSince = 0;
+  }
+}
+
 channel.subscribe((state, error) => {
   status = error ? `${state}: ${error.message ?? error}` : state;
+  transitions.push(`${((Date.now() - started) / 1000).toFixed(1)}s ${status}`);
   if (state === "SUBSCRIBED") {
+    if (everSubscribed) {
+      console.log("\n  (reconnected — the socket had dropped)\n");
+    } else {
+      console.log("\n  The anonymous listener is connected and subscribed.");
+      console.log("  Now change something on the board: move a card, add one,");
+      console.log("  edit one. Several changes spread out is better than one.\n");
+    }
     everSubscribed = true;
-    console.log("\n  The anonymous listener is connected and subscribed.");
-    console.log("  Now sign in as a team member and move a card on the board.\n");
+    if (!subscribedSince) subscribedSince = Date.now();
+  } else {
+    closeWindow();
   }
 });
 
 console.log(`Listening as an anonymous client for ${seconds}s...`);
 await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+closeWindow();
 
 // Whatever the channel says after this is the teardown talking.
 await client.removeChannel(channel);
 
+const coverage = Math.round((listeningMs / (seconds * 1000)) * 100);
 console.log(`\n  reached SUBSCRIBED : ${everSubscribed ? "yes" : "no"}`);
-console.log(`  last channel state : ${status} (CLOSED here is this script hanging up)`);
+console.log(`  actually listening : ${(listeningMs / 1000).toFixed(0)}s of ${seconds}s (${coverage}%)`);
+console.log(`  channel timeline   : ${transitions.join("  ->  ")}`);
 console.log(`  events heard       : ${heard.length}`);
 
 if (heard.length) {
@@ -112,8 +142,10 @@ if (!everSubscribed) {
 } else {
   console.log(
     "\nThe anonymous client DID subscribe, and heard nothing.\n\n" +
-      "That is a pass only if something actually changed while it was listening.\n" +
-      "If nobody moved a card during the window, this run proves nothing at all —\n" +
-      "run it again and move one.\n",
+      `It was genuinely listening for ${coverage}% of the window; anything that\n` +
+      "happened in the remaining time would have been missed for a reason that\n" +
+      "has nothing to do with row-level security.\n\n" +
+      "And silence is only evidence if there was something to hear. If nobody\n" +
+      "changed the board during the window, this run proves nothing at all.\n",
   );
 }

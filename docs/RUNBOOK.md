@@ -313,7 +313,43 @@ placed again. That is the only multi-row write on the board.
 **If the board looks stale**, the realtime socket has dropped: reload. Writes
 are never lost by that — they go through server actions and are committed
 before anything is drawn — it is only the other person's changes that stop
-arriving.
+arriving. The board also re-reads whenever the tab becomes visible again,
+which covers most of it.
+
+### Proving the board is private, both ways in
+
+Realtime is a **second door** into the same rows. The tables are in the
+`supabase_realtime` publication and replicate their full old row on delete, so
+a delete event carries the card's title and notes. Whether row-level security
+is applied to that stream is a different mechanism from the one PostgREST
+uses, and it needs its own evidence. Two probes, and neither is in CI because
+both touch the live database.
+
+```
+node scripts/verify-public-access.mjs      # the HTTP door
+node scripts/probe-board-realtime.mjs 300  # the socket door
+```
+
+The second one cannot run unattended: it listens as an anonymous visitor,
+using nothing but the public key that already ships in the site's JavaScript,
+and somebody has to change the board while it listens. Make **several**
+changes spread across the window rather than one — the socket can drop and
+rejoin, and one short gap could swallow a single change and look like silence.
+The script reports its own coverage for exactly that reason; a run at less
+than about 95% proves less than it appears to.
+
+**Measured on 5 September 2026, after 012 was applied to production:**
+
+| Door | Result |
+|---|---|
+| HTTP read, either table | `401` — refused at the privilege layer, not filtered |
+| HTTP insert, either table | `401` |
+| Realtime, 299s of 300s listening, several cards moved | `0` events |
+
+Refused rather than filtered is the stronger of the two possible passes: the
+role holds no privilege at all, so Postgres declines before any policy is
+consulted. Re-run both after anything that touches the board's grants,
+policies or the publication.
 
 ## Contacts
 
