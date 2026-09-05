@@ -42,6 +42,14 @@ export type ShowcaseProject = {
   liveUrl: string | null;
   /** Last resort: the repository, shown as a card you can click through. */
   repoUrl: string | null;
+  /**
+   * Work we can name but not demonstrate. Checked before all three tiers: a
+   * restricted project never attempts a live embed, and if its repository is
+   * private then repoUrl is null and there is nothing to fall back to either.
+   * Saying so is the point — the alternative was GitHub's 404 card, which is
+   * a worse advertisement than an honest sentence.
+   */
+  restricted: boolean;
 };
 
 /**
@@ -247,7 +255,27 @@ export function Showcase({
                 aria-live="polite"
                 ref={screenRef}
               >
-                {active?.liveUrl ? (
+                {active?.restricted ? (
+                  /* Nothing to embed, and saying so. Not an error state and
+                     not an empty one: this is work we did, named, with the
+                     reason it cannot be opened from here. */
+                  <div className="sc-screen-note">
+                    <span className="sc-note-mark" aria-hidden="true">
+                      —
+                    </span>
+                    <p className="sc-note-text">{t.showcase.restricted}</p>
+                    {active.repoUrl ? (
+                      <a
+                        className="sc-note-link"
+                        href={active.repoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t.showcase.openRepo}
+                      </a>
+                    ) : null}
+                  </div>
+                ) : active?.liveUrl ? (
                   /* The real page. sandbox without allow-top-navigation, so an
                      embedded site cannot move the window it is sitting in;
                      no-referrer so we do not announce every visitor to it. */
@@ -333,7 +361,7 @@ export function Showcase({
           </div>
         </div>
 
-        {active?.liveUrl || (!shots.length && active?.repoUrl)
+        {active?.restricted || active?.liveUrl || (!shots.length && active?.repoUrl)
           ? null
           : shots.length > 1 ? (
           <div className="sc-shots">
@@ -366,7 +394,9 @@ export function Showcase({
             <p className="sc-meta-title">
               <span className="sc-meta-eyebrow">
                 {t.showcase.nowShowing}
-                {active.liveUrl ? (
+                {active.restricted ? (
+                  <span className="sc-repo-badge">{t.showcase.restrictedBadge}</span>
+                ) : active.liveUrl ? (
                   <span className="sc-live-badge">{t.showcase.liveBadge}</span>
                 ) : !shots.length && active.repoUrl ? (
                   <span className="sc-repo-badge">{t.showcase.repoBadge}</span>

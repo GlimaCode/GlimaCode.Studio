@@ -68,10 +68,18 @@ async function post(path, payload, prefer) {
 
 // ------------------------------------------------------------------ portfolio
 {
+  // At least one, not exactly three. The count used to be hardcoded, and
+  // publishing a fourth project turned a security probe red for a reason that
+  // had nothing to do with security. A check that fails when content changes
+  // is a check somebody will start ignoring, and this one is worth reading.
+  //
+  // What it actually proves is the pair: an anonymous caller CAN read
+  // published rows, and (the next check) CANNOT read unpublished ones. The
+  // number of published rows is content, not a security property.
   const { status, body } = await get("portfolio_projects?select=slug&published=eq.true");
   const count = Array.isArray(body) ? body.length : -1;
-  record("portfolio", "read published projects", "3 rows, HTTP 200",
-    `${count} rows, HTTP ${status}`, status === 200 && count === 3);
+  record("portfolio", "read published projects", "at least 1 row, HTTP 200",
+    `${count} rows, HTTP ${status}`, status === 200 && count >= 1);
 }
 {
   // Asking explicitly for unpublished rows. The client is free to ask; the

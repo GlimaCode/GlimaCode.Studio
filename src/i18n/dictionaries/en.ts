@@ -252,6 +252,9 @@ export const en = {
     liveBadge: "Live",
     repoOf: "Repository card for",
     repoBadge: "Source",
+    restrictedBadge: "Not public",
+    restricted:
+      "We built this one and it is not something we can open on a public page — it holds data we are not willing to put in a demo. Happy to walk you through it on a call.",
     openRepo: "Open the repository",
     shotCount: "Screen",
     prev: "Previous screen",

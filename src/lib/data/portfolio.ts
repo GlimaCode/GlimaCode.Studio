@@ -42,6 +42,13 @@ export type PortfolioProject = {
   gallery: string[];
   status: PortfolioStatus;
   sortOrder: number;
+  /**
+   * True when the work cannot be shown live or in screenshots — it holds data
+   * we will not put on a demo page. The showcase says so in a sentence rather
+   * than attempting an embed. A public repository is still shown if there is
+   * one; see migration 013.
+   */
+  restricted: boolean;
   /** True when the visitor is reading English because Persian is missing. */
   usesFallbackCopy: boolean;
 };
@@ -56,6 +63,7 @@ type ProjectRow = {
   gallery_urls: string[] | null;
   status: PortfolioStatus;
   sort_order: number;
+  restricted: boolean | null;
   title_en: string;
   title_fa: string | null;
   summary_en: string;
@@ -74,6 +82,7 @@ type ProjectRow = {
 
 const PROJECT_COLUMNS = `
   slug, tech, repo_url, live_url, cover_url, gallery_urls, status, sort_order,
+  restricted,
   title_en, title_fa, summary_en, summary_fa,
   problem_en, problem_fa, description_en, description_fa,
   portfolio_categories ( slug, label_en, label_fa, sort_order )
@@ -128,6 +137,9 @@ function toProject(row: ProjectRow, locale: Locale): PortfolioProject {
     gallery: row.gallery_urls ?? [],
     status: row.status,
     sortOrder: row.sort_order,
+    // Null only on a database that has not had 013 applied, where nothing is
+    // restricted yet and false is the truthful answer.
+    restricted: row.restricted ?? false,
     usesFallbackCopy: missingPersian,
   };
 }

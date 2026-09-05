@@ -2055,6 +2055,34 @@ nav{background:var(--chrome-bg)}
   display:flex;align-items:center;justify-content:center;
 }
 .sc-shot{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+/* The fourth tier: work we can name but not demonstrate.
+   On the screen rather than beside it, because the screen is where the
+   visitor is looking and an empty laptop with a note underneath reads as a
+   failure. Colours are --emph-fg on --emph-bg and --slate, all three already
+   checked in both themes by verify:contrast. */
+.sc-screen-note{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:8% 12%;height:100%;text-align:center;
+  background:var(--emph-bg);
+}
+.sc-note-mark{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:20px;color:var(--emph-muted);line-height:1;
+}
+.sc-note-text{
+  margin:0;font-size:14px;line-height:1.6;color:var(--emph-fg);max-width:46ch;
+}
+.sc-note-link{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--emph-fg);text-decoration:underline;text-underline-offset:4px;
+}
+.sc-note-link:focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+@media(max-width:900px){
+  .sc-note-text{font-size:13px}
+  .sc-screen-note{padding:10% 8%}
+}
+
 .sc-screen-empty{
   color:var(--slate);font-size:13px;padding:20px;text-align:center;
 }

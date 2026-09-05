@@ -63,17 +63,21 @@ export default async function ShowcasePage({ params }: PageParams) {
       const shots = [project.coverUrl, ...project.gallery].filter(
         (url): url is string => typeof url === "string" && url.length > 0,
       );
-      const check = project.liveUrl
-        ? await checkEmbeddable(project.liveUrl, siteConfig.url)
-        : null;
+      // A restricted project is never probed: there is no live page to frame,
+      // and asking would spend a request to learn what the flag already says.
+      const check =
+        project.liveUrl && !project.restricted
+          ? await checkEmbeddable(project.liveUrl, siteConfig.url)
+          : null;
       return {
         slug: project.slug,
         title: project.title,
         summary: project.summary,
         categoryLabel: project.categoryLabel,
-        shots,
+        shots: project.restricted ? [] : shots,
         liveUrl: check?.embeddable ? project.liveUrl : null,
         repoUrl: project.repoUrl,
+        restricted: project.restricted,
         // Kept so a blank frame is diagnosable from the served HTML rather
         // than by guessing. Rendered nowhere.
         liveReason: check?.reason ?? null,
@@ -86,9 +90,15 @@ export default async function ShowcasePage({ params }: PageParams) {
    * page, then screenshots of it, then the repository. Only a project with
    * none of the three is left out — and a published project with no live URL,
    * no image and no repository has nothing to show anywhere on the site.
+   *
+   * Restricted projects are the exception and come first in the test. They
+   * have nothing to embed by definition, and leaving them out would hide work
+   * we did; what they show instead is a sentence saying why there is nothing
+   * to click. See migration 013.
    */
   const showable: ShowcaseProject[] = resolved.filter(
     (project) =>
+      project.restricted ||
       project.liveUrl !== null ||
       project.shots.length > 0 ||
       project.repoUrl !== null,
