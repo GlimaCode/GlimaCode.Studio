@@ -119,6 +119,9 @@ export default async function DashboardPage() {
             <Link className="tab" href="/dashboard/portfolio">
               Portfolio
             </Link>
+            <Link className="tab" href="/dashboard/board">
+              Board
+            </Link>
           </div>
           {/* The dashboard interface is English by decision, so these
               labels are literal rather than dictionary lookups. */}

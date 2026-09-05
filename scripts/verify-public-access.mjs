@@ -101,6 +101,47 @@ async function post(path, payload, prefer) {
     count === 0 || status >= 400);
 }
 
+// ---------------------------------------------------------------------- board
+// The board is the only pair of tables in the schema that anonymous callers
+// have no privilege on at all — not select, not insert. Requests must accept
+// anonymous writes and the portfolio must serve anonymous reads; the board
+// must do neither, because it is two people's working notes to each other.
+//
+// A table that does not exist yet counts as a pass: there is nothing to leak
+// from a table Postgres has never heard of, and migration 012 is applied by
+// hand. What cannot pass is the table existing and answering with rows.
+for (const table of ["board_columns", "board_cards"]) {
+  const { status, body } = await get(`${table}?select=id`);
+  const rows = Array.isArray(body) ? body.length : -1;
+  const absent = status === 404 || (body && body.code === "42P01");
+  record(
+    "board",
+    `read ${table}`,
+    "no rows: refused, empty, or not yet created",
+    absent
+      ? `not created yet, HTTP ${status}`
+      : Array.isArray(body)
+        ? `${rows} rows, HTTP ${status}`
+        : `HTTP ${status}`,
+    absent || status >= 400 || rows === 0,
+  );
+}
+{
+  const { status } = await post("board_columns", {
+    title: "zz-anon-write-probe",
+    position: 999999,
+  });
+  record("board", "insert a column", "refused, HTTP 4xx", `HTTP ${status}`, status >= 400);
+}
+{
+  const { status } = await post("board_cards", {
+    title: "zz-anon-write-probe",
+    position: 999999,
+    column_id: "00000000-0000-0000-0000-000000000000",
+  });
+  record("board", "insert a card", "refused, HTTP 4xx", `HTTP ${status}`, status >= 400);
+}
+
 // ------------------------------------------------------------------- requests
 // After 008 the public role has no rights on the table at all. The only way
 // in is submit_request, whose signature is the security boundary.

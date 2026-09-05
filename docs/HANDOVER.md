@@ -383,6 +383,43 @@ swings in from the side the eye is travelling away from.
 Which project is open lives in the URL hash rather than in component state, so
 the open lid is shareable and the back button works.
 
+### The board writes through the server and reads on a socket
+
+`/dashboard/board`. Worth knowing why it is built the way it is, because the
+obvious alternative looks cheaper and is not.
+
+Every write is a server action that returns the whole board it produced. The
+realtime subscription carries no data into the state at all — it is used only
+to learn that *somebody else* wrote something, at which point the client asks
+for the board again. Applying the replayed row payloads directly would save a
+round trip and would mean two clients merging partial rows out of order,
+which is a class of bug that takes a week to find and cannot be reproduced on
+demand. The board is two people's task list; it is not a document editor and
+does not need to behave like one.
+
+The client suppresses the echo of its own writes with a ref, so a change made
+here costs one read rather than two.
+
+**Dragging is not the only way to move a card, and that is not politeness.**
+HTML5 drag events do not fire on touch at all, so on a phone the four move
+buttons on each card are the only mechanism; they are also what a keyboard
+reaches and what a screen reader reads, and their labels name the card and
+the destination because an arrow glyph says nothing out loud. They are 24px,
+which is the WCAG 2.2 target minimum, not a pixel under.
+
+**Every colour is a token that already existed.** The priority chips reuse
+the request badges, the due dates reuse the error and muted text colours.
+Nothing new was introduced, so `verify:contrast` did not need a new pair — a
+new pair here would be one the guard does not know about, and the point of
+that guard is that it knows about all of them.
+
+**The dashboard shell caught me again.** The first draft of the board used
+`<section>` for a column and `<header>` for its title row, and
+`verify:dashboard-shell` failed the build: the ported stylesheet lays those
+out by element name, which is how the dashboard once grew a 297px blurred
+bar. Third time that guard has earned itself. Columns are
+`<div role="group">` now.
+
 ### `html[lang]` redefines the font variables — delete this one day
 
 `src/app/globals.css`, near the bottom.

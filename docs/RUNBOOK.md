@@ -280,6 +280,41 @@ The frame crops from the top, so put the important part at the top.
 `showcase: false` in `src/config/site.ts` hides the route, its metadata and
 the link from `/work` together. There is nothing else to switch.
 
+## The board
+
+`/dashboard/board`. Two tables, `board_columns` and `board_cards`, created by
+`db/migrations/012_board.sql`. It is behind the same two gates as the rest of
+the dashboard — a session, then a row in `team_members` — and behind policies
+that give `anon` no privilege at all, not even select. `scripts/verify-public-access.mjs`
+proves that from outside the database with nothing but the public key, and
+will keep proving it.
+
+**Turning it on.** The migration is applied by hand, like every other. Until
+it is, the page says which file to run rather than throwing. Realtime is part
+of the same file: it adds both tables to the `supabase_realtime` publication
+and sets `replica identity full`, so a deletion arrives at the other person's
+screen carrying enough of the old row to know where it was.
+
+**Adding a person.** Same as everything else here: a row in `team_members`,
+in SQL. There is no invite flow and no self-service, on purpose. Someone with
+a session but no roster row gets a page saying so.
+
+**Columns.** Data, not an enum, so the shape can change without a migration.
+The interface refuses to delete a column that still has cards in it; the
+foreign key would cascade and take them, which is the right backstop and the
+wrong default.
+
+**Positions** are fractional doubles. Moving a card writes one number, the
+midpoint of its new neighbours, so two people dragging at once never have to
+agree about anything. When the midpoints run out of room — about fifty drops
+into the same gap — the column renumbers itself on 1000s and the move is
+placed again. That is the only multi-row write on the board.
+
+**If the board looks stale**, the realtime socket has dropped: reload. Writes
+are never lost by that — they go through server actions and are committed
+before anything is drawn — it is only the other person's changes that stop
+arriving.
+
 ## Contacts
 
 Studio address: `hello@glimacode.com`, on Zoho — MX, SPF and DKIM verified,

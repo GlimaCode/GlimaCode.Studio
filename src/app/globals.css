@@ -1104,6 +1104,197 @@ html[lang]{
 /* Each dashboard route had a title bar but no heading and no <main>, so
    every page announced itself as an unstructured pile of divs. The bar is a
    brand strip shared by all three routes; the heading names the route. */
+/* ===========================================================================
+   The team board
+   ---------------------------------------------------------------------------
+   Every colour here is a token that already exists and is already checked by
+   scripts/verify-contrast.mjs in both themes. Nothing new is introduced: the
+   priority chips reuse the request badges, the due dates reuse the error and
+   muted text colours, and the rest is card, line, ink and slate. A board is
+   not the place to invent a palette, and a new pair here would be a pair the
+   guard does not know about.
+   =========================================================================== */
+
+.dash-body-wide{max-width:min(1800px, 96vw)}
+
+.kb{margin-top:6px}
+
+/* --- the bar over the columns --------------------------------------------- */
+.kb-bar{
+  display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.kb-filters{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;flex:1 1 auto}
+.kb-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.kb-field-grow{flex:1 1 240px;max-width:380px}
+.kb-label{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);
+}
+.kb-input,.kb-select,.kb-textarea{
+  font-family:inherit;font-size:13.5px;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  padding:7px 10px;width:100%;
+}
+.kb-textarea{resize:vertical;line-height:1.5}
+.kb-input:focus-visible,.kb-select:focus-visible,.kb-textarea:focus-visible{
+  outline:2px solid var(--focus-ring);outline-offset:1px;border-color:var(--cobalt);
+}
+.kb-state{display:flex;align-items:center;gap:10px;min-height:22px}
+.kb-notice{font-size:12.5px;color:var(--slate)}
+.kb-spinner{
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid var(--line);border-top-color:var(--cobalt);
+  animation:kb-spin .7s linear infinite;
+}
+@keyframes kb-spin{to{transform:rotate(360deg)}}
+.kb-filtering{font-size:12.5px;color:var(--slate);margin:0 0 12px}
+.kb-detail{font-size:12px;color:var(--slate);word-break:break-word;margin-top:6px}
+
+/* --- columns --------------------------------------------------------------
+   A horizontal scroller rather than a grid that squeezes: five columns on a
+   laptop is four narrow ones and a squashed fifth, and a board you cannot
+   read is worse than a board you have to scroll. */
+.kb-cols{
+  display:flex;gap:14px;align-items:flex-start;
+  overflow-x:auto;padding-bottom:14px;
+  scroll-snap-type:x proximity;
+}
+.kb-col{
+  flex:0 0 300px;display:flex;flex-direction:column;gap:8px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:10px;scroll-snap-align:start;
+  transition:border-color var(--fast) ease, background var(--fast) ease;
+}
+.kb-col-over{border-color:var(--cobalt)}
+.kb-col-new{background:transparent;border-style:dashed}
+.kb-col-head{display:flex;align-items:center;gap:6px;min-height:30px}
+.kb-col-title{
+  font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
+  /* letter-spacing restated because the ported bare h2 rule sets -.015em,
+     which is right for a 38px display heading and wrong for a 14px label. */
+  font-size:14px;font-weight:600;letter-spacing:normal;color:var(--ink);
+  margin:0;display:flex;align-items:center;gap:7px;flex:1 1 auto;min-width:0;
+}
+.kb-count{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:11px;font-weight:400;color:var(--slate);
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:1px 7px;
+}
+.kb-col-tools{display:flex;gap:2px;opacity:.55;transition:opacity var(--fast) ease}
+.kb-col:hover .kb-col-tools,.kb-col:focus-within .kb-col-tools{opacity:1}
+.kb-rename{display:flex;gap:6px;align-items:center;width:100%}
+
+/* --- the small square buttons ---------------------------------------------
+   24px is the WCAG 2.2 target minimum and these are exactly that, not less.
+   They carry aria-labels naming the card and the destination, because "→" on
+   its own tells a screen reader nothing. */
+.kb-icon{
+  width:24px;height:24px;flex:0 0 24px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:inherit;font-size:13px;line-height:1;
+  color:var(--slate);background:var(--card);
+  border:1px solid var(--line);border-radius:6px;cursor:pointer;
+  transition:color var(--fast) ease, border-color var(--fast) ease;
+}
+.kb-icon:hover:not(:disabled){color:var(--ink);border-color:var(--cobalt)}
+.kb-icon:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.kb-icon:disabled{opacity:.35;cursor:default}
+.kb-icon-danger:hover:not(:disabled){color:var(--red-text);border-color:var(--red-text)}
+
+/* --- cards ---------------------------------------------------------------- */
+.kb-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0;padding:0}
+.kb-card{
+  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 10px;display:flex;flex-direction:column;gap:7px;
+  border-left:3px solid var(--line);
+  transition:border-color var(--fast) ease, box-shadow var(--fast) ease;
+}
+.kb-card:hover{box-shadow:var(--shadow-1)}
+.kb-card:focus-within{border-color:var(--cobalt)}
+.kb-card-dragging{opacity:.4}
+.kb-card.p-high{border-left-color:var(--badge-review-fg)}
+.kb-card.p-normal{border-left-color:var(--badge-new-fg)}
+.kb-card.p-low{border-left-color:var(--line)}
+
+.kb-card-top{display:flex;align-items:flex-start;gap:8px}
+.kb-card-title{
+  flex:1 1 auto;text-align:start;min-width:0;
+  font-family:inherit;font-size:13.5px;line-height:1.45;color:var(--ink);
+  background:none;border:0;padding:0;cursor:pointer;
+}
+.kb-card-title:hover{color:var(--cobalt)}
+.kb-card-title:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;border-radius:4px}
+.kb-card-notes{
+  font-size:12.5px;line-height:1.5;color:var(--slate);margin:0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+.kb-pri{
+  flex:0 0 auto;font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  border-radius:20px;padding:2px 7px;border:1px solid transparent;
+}
+.kb-pri-high{background:var(--badge-review-bg);border-color:var(--badge-review-bd);color:var(--badge-review-fg)}
+.kb-pri-normal{background:var(--badge-new-bg);border-color:var(--badge-new-bd);color:var(--badge-new-fg)}
+.kb-pri-low{background:var(--badge-lost-bg);border-color:var(--badge-lost-bd);color:var(--badge-lost-fg)}
+
+.kb-card-meta{display:flex;flex-wrap:wrap;gap:5px}
+.kb-chip{
+  font-size:11.5px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:20px;
+  padding:2px 8px;
+}
+.kb-chip-muted{color:var(--slate)}
+.kb-chip-link{
+  font-family:var(--font-plex-mono),var(--font-vazirmatn),monospace;
+  color:var(--cobalt);text-decoration:none;
+}
+.kb-chip-link:hover{border-color:var(--cobalt)}
+.kb-due-past{color:var(--red-text);border-color:var(--red-text)}
+.kb-due-soon{color:var(--badge-review-fg);border-color:var(--badge-review-bd)}
+.kb-due-later{color:var(--slate)}
+
+.kb-moves{display:flex;gap:3px;opacity:.5;transition:opacity var(--fast) ease}
+.kb-card:hover .kb-moves,.kb-card:focus-within .kb-moves{opacity:1}
+
+/* The line that shows where a dragged card would land. */
+.kb-drop{height:3px;border-radius:3px;background:var(--cobalt);margin:3px 0}
+
+/* --- composing and editing ------------------------------------------------ */
+.kb-add{
+  font-family:inherit;font-size:13px;color:var(--slate);text-align:start;
+  background:none;border:1px dashed var(--line);border-radius:8px;
+  padding:7px 10px;cursor:pointer;width:100%;
+  transition:color var(--fast) ease, border-color var(--fast) ease;
+}
+.kb-add:hover{color:var(--cobalt);border-color:var(--cobalt)}
+.kb-add:focus-visible{outline:2px solid var(--focus-ring);outline-offset:1px}
+.kb-compose{display:flex;flex-direction:column;gap:7px}
+.kb-edit{display:flex;flex-direction:column;gap:9px;margin-top:3px;
+  border-top:1px solid var(--line);padding-top:9px}
+.kb-edit-row{display:flex;gap:8px;flex-wrap:wrap}
+.kb-edit-row .kb-field{flex:1 1 90px}
+.kb-edit-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.kb-delete{margin-inline-start:auto;color:var(--red-text)}
+.kb-delete:hover{border-color:var(--red-text)}
+
+/* --- narrow screens -------------------------------------------------------
+   The columns stop being a row and become a stack: a 300px column in a 360px
+   viewport is a horizontal scroller inside a vertical one, which is the worst
+   of both. Stacked, each column is a section you scroll past. */
+@media(max-width:760px){
+  .kb-cols{display:block;overflow-x:visible}
+  .kb-col{width:100%;margin-bottom:12px}
+  .kb-moves{opacity:1}
+  .kb-col-tools{opacity:1}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .kb-spinner{animation:none}
+}
+
 .dash-h1{
   font-family:var(--font-sora),var(--font-vazirmatn),sans-serif;
   font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1.4;

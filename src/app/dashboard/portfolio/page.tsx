@@ -37,6 +37,9 @@ export default async function PortfolioAdminPage() {
             <span className="tab active" aria-current="page">
               Portfolio
             </span>
+            <Link className="tab" href="/dashboard/board">
+              Board
+            </Link>
           </div>
           {/* The dashboard interface is English by decision, so these
               labels are literal rather than dictionary lookups. */}

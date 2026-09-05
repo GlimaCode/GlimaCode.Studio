@@ -40,6 +40,9 @@ declare
   v_category   uuid;
   v_request    uuid;
   v_stranger   constant uuid := '00000000-0000-0000-0000-0000000000ff';
+  v_column     uuid;
+  v_card       uuid;
+  v_has_board  boolean;
   v_member     constant uuid := '00000000-0000-0000-0000-0000000000aa';
 begin
   create temporary table if not exists rls_probe_results (
@@ -78,6 +81,20 @@ begin
 
   insert into public.notification_attempts (request_id, delivered, provider, error)
   values (v_request, false, 'probe', 'fixture');
+
+  -- The board, if 012 has been applied. Skipped rather than fatal when it has
+  -- not: this probe has to stay runnable against a database that is one
+  -- migration behind, or it stops being run at all.
+  v_has_board := to_regclass('public.board_cards') is not null;
+  if v_has_board then
+    insert into public.board_columns (title, position)
+    values ('zz-rls-probe column', 999999)
+    returning id into v_column;
+
+    insert into public.board_cards (column_id, title, created_by)
+    values (v_column, 'zz-rls-probe card', v_member)
+    returning id into v_card;
+  end if;
 
   ---------------------------------------------------------------- portfolio
   execute 'set local role anon';
@@ -323,9 +340,104 @@ begin
     (18, 'authenticated, on-roster', 'read the delivery log', '1 row',
      v_count || ' rows', case when v_count = 1 then 'PASS' else 'FAIL' end);
 
+  ------------------------------------------------------------------ board
+  -- The board is the strictest pair in the schema: anon holds no privilege
+  -- on it at all, so both anonymous reads below should be refused at the
+  -- door rather than filtered to nothing. The off-roster caller is the one
+  -- that matters — a real session with no team_members row is exactly what a
+  -- loosely written policy lets through, and it is the case the HTTP probe
+  -- cannot reach because it has no way to hold a session.
+  if not v_has_board then
+    insert into rls_probe_results values
+      (19, 'all', 'board', 'checked', 'skipped: migration 012 not applied', 'SKIP');
+  else
+    v_refused := false;
+    begin
+      execute 'set local role anon';
+      select count(*) into v_count from public.board_cards;
+      execute 'reset role';
+    exception when insufficient_privilege then
+      execute 'reset role';
+      v_refused := true;
+    end;
+    insert into rls_probe_results values
+      (19, 'anon', 'read board cards', 'no rows: refused or filtered',
+       case when v_refused then 'refused at the privilege layer'
+            else v_count || ' rows' end,
+       case when v_refused or v_count = 0 then 'PASS' else 'FAIL' end);
+
+    v_refused := false;
+    begin
+      execute 'set local role anon';
+      select count(*) into v_count from public.board_columns;
+      execute 'reset role';
+    exception when insufficient_privilege then
+      execute 'reset role';
+      v_refused := true;
+    end;
+    insert into rls_probe_results values
+      (20, 'anon', 'read board columns', 'no rows: refused or filtered',
+       case when v_refused then 'refused at the privilege layer'
+            else v_count || ' rows' end,
+       case when v_refused or v_count = 0 then 'PASS' else 'FAIL' end);
+
+    execute format(
+      'set local request.jwt.claims to %L',
+      json_build_object('sub', v_stranger, 'role', 'authenticated')::text
+    );
+
+    v_refused := false;
+    begin
+      execute 'set local role authenticated';
+      select count(*) into v_count from public.board_cards;
+      execute 'reset role';
+    exception when insufficient_privilege then
+      execute 'reset role';
+      v_refused := true;
+    end;
+    insert into rls_probe_results values
+      (21, 'authenticated, off-roster', 'read board cards', 'no rows',
+       case when v_refused then 'refused at the privilege layer'
+            else v_count || ' rows' end,
+       case when v_refused or v_count = 0 then 'PASS' else 'FAIL' end);
+
+    v_refused := false;
+    begin
+      execute 'set local role authenticated';
+      insert into public.board_cards (column_id, title)
+      values (v_column, 'zz-rls-probe stranger card');
+      execute 'reset role';
+    exception
+      when insufficient_privilege then execute 'reset role'; v_refused := true;
+      when others then execute 'reset role'; v_refused := true;
+    end;
+    insert into rls_probe_results values
+      (22, 'authenticated, off-roster', 'write a board card', 'refused',
+       case when v_refused then 'refused' else 'WROTE A ROW' end,
+       case when v_refused then 'PASS' else 'FAIL' end);
+
+    execute format(
+      'set local request.jwt.claims to %L',
+      json_build_object('sub', v_member, 'role', 'authenticated')::text
+    );
+
+    execute 'set local role authenticated';
+    select count(*) into v_count from public.board_cards where id = v_card;
+    execute 'reset role';
+    insert into rls_probe_results values
+      (23, 'authenticated, on-roster', 'read the board card', '1 row',
+       v_count || ' rows', case when v_count = 1 then 'PASS' else 'FAIL' end);
+  end if;
+
   -------------------------------------------------------------- clean up
   delete from public.notification_attempts where request_id = v_request;
   delete from public.requests where id = v_request;
+  if v_has_board then
+    -- Cards first, though the cascade would do it: the probe should not rely
+    -- on a behaviour it is not testing.
+    delete from public.board_cards where title like 'zz-rls-probe%';
+    delete from public.board_columns where title like 'zz-rls-probe%';
+  end if;
   delete from public.portfolio_projects where slug like 'zz-rls-%';
   delete from public.team_members where user_id = v_member;
 end
