@@ -122,10 +122,22 @@ export default async function LocaleLayout({
   const typedLocale: Locale = locale;
 
   return (
+    /* suppressHydrationWarning is on this element, not only on the body,
+       because this is the element the theme script writes to: it stamps
+       data-theme on <html> before React hydrates, so the server sends an
+       element without the attribute and the client finds one with it. That is
+       the entire point of running the script inline, and React reports it as
+       a mismatch on every single page load — which drowns the real ones.
+
+       It does not cascade. The body carries its own for its own reason (the
+       reveal script's `ready` class), and having it there did nothing for the
+       attribute up here. Only this element's own attributes are exempted, not
+       its children's. */
     <html
       lang={bcp47(typedLocale)}
       dir={directionOf(typedLocale)}
       className={fontVariables}
+      suppressHydrationWarning
     >
       <head>
         {/* Stamps data-theme before the first paint. Inline and synchronous

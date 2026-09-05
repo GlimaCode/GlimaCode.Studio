@@ -26,7 +26,10 @@ export default function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" dir="ltr" className={fontVariables}>
+    /* Same reason as the public layout: the theme script below stamps
+       data-theme on this element before hydration, so React finds an
+       attribute the server never sent. See src/app/[locale]/layout.tsx. */
+    <html lang="en" dir="ltr" className={fontVariables} suppressHydrationWarning>
       <head>
         {/* The same pre-paint stamp as the public layout. The dashboard is
             its own root, so it needs its own copy — and it is the surface

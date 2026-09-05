@@ -16,7 +16,8 @@
     "verify:offscreen": "node scripts/verify-offscreen.mjs",
     "verify:copy-sync": "node scripts/verify-copy-sync.mjs",
     "verify:contrast": "node scripts/verify-contrast.mjs",
-    "verify:greeting-fonts": "node scripts/verify-greeting-fonts.mjs"
+    "verify:greeting-fonts": "node scripts/verify-greeting-fonts.mjs",
+    "verify:theme-stamp": "node scripts/verify-theme-stamp.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
