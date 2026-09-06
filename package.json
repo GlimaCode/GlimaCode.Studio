@@ -18,6 +18,7 @@
     "verify:copy-sync": "node scripts/verify-copy-sync.mjs",
     "verify:contrast": "node scripts/verify-contrast.mjs",
     "verify:greeting-fonts": "node scripts/verify-greeting-fonts.mjs",
+    "verify:bidi-fallback": "node scripts/verify-bidi-fallback.mjs",
     "verify:theme-stamp": "node scripts/verify-theme-stamp.mjs"
   },
   "dependencies": {

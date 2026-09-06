@@ -87,6 +87,7 @@ jobs:
       - run: npm run verify:offscreen
       - run: npm run verify:contrast
       - run: npm run verify:greeting-fonts
+      - run: npm run verify:bidi-fallback
       - run: npm run verify:theme-stamp
       - run: npm run i18n:pending
 

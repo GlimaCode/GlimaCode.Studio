@@ -1,6 +1,7 @@
 import { publicClient } from "@/lib/db/client";
 import { hasDatabaseConfig } from "@/lib/env";
 import type { Locale } from "@/i18n/config";
+import { pending } from "@/i18n/pending";
 
 /**
  * Portfolio reads.
@@ -88,18 +89,56 @@ const PROJECT_COLUMNS = `
   portfolio_categories ( slug, label_en, label_fa, sort_order )
 `;
 
-/** English is the source of truth; Persian overrides it when present. */
+/**
+ * English is the source of truth; Persian overrides it when present.
+ *
+ * For NAMES — a product title, a category label. Not for sentences: see
+ * pickProse below for why those need one more thing.
+ */
 function pick(en: string, fa: string | null, locale: Locale): string {
   return locale === "fa" && fa ? fa : en;
 }
 
-function pickNullable(
+/**
+ * The same choice, for PROSE, with the English fallback bidi-isolated.
+ *
+ * An English sentence dropped into a right-to-left page has its trailing
+ * punctuation reordered by the bidirectional algorithm: the sentence renders
+ * with its full stop against the LEFT margin, detached from the words it
+ * belongs to. Not a font problem and not a CSS one — the paragraph direction
+ * is RTL, the run is LTR, and a neutral character at the boundary belongs to
+ * the paragraph rather than the run.
+ *
+ * i18n/pending.ts already solved this for copy that lives in the dictionary,
+ * and its own comment says it is doing what "the portfolio uses for missing
+ * translations" — which the portfolio was not in fact doing. Database prose
+ * took a different path here and arrived bare. Same fix, same helper, so
+ * there is one definition of the isolate characters and stripIsolates keeps
+ * knowing about all of them.
+ *
+ * Only on the fallback. Real Persian prose is RTL inside an RTL page and
+ * needs nothing, and wrapping it would put invisible characters into copy for
+ * no reason.
+ *
+ * NAMES ARE DELIBERATELY EXCLUDED. A title is a Latin product name with no
+ * trailing neutral to strand, it is already marked `lang="en" dir="ltr"`
+ * where it is rendered, and it flows unstripped into <title>, meta
+ * descriptions and the OpenGraph image — where an isolate is not invisible,
+ * it is a character satori has to draw.
+ */
+function pickProse(en: string, fa: string | null, locale: Locale): string {
+  if (locale === "fa" && fa) return fa;
+  return locale === "fa" ? pending(en) : en;
+}
+
+function pickProseNullable(
   en: string | null,
   fa: string | null,
   locale: Locale,
 ): string | null {
   if (locale === "fa" && fa) return fa;
-  return en;
+  if (en === null) return null;
+  return locale === "fa" ? pending(en) : en;
 }
 
 function toProject(row: ProjectRow, locale: Locale): PortfolioProject {
@@ -127,9 +166,9 @@ function toProject(row: ProjectRow, locale: Locale): PortfolioProject {
       : "",
     categorySortOrder: category?.sort_order ?? 0,
     title: pick(row.title_en, row.title_fa, locale),
-    summary: pick(row.summary_en, row.summary_fa, locale),
-    problem: pickNullable(row.problem_en, row.problem_fa, locale),
-    description: pickNullable(row.description_en, row.description_fa, locale),
+    summary: pickProse(row.summary_en, row.summary_fa, locale),
+    problem: pickProseNullable(row.problem_en, row.problem_fa, locale),
+    description: pickProseNullable(row.description_en, row.description_fa, locale),
     tech: row.tech ?? [],
     repoUrl: row.repo_url,
     liveUrl: row.live_url,
