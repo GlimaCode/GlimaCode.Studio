@@ -289,30 +289,46 @@ Light measures 1.21:1 against its page. The dark value was chosen at 1.23 to
 match that, rather than at whatever an inversion produced — a naive flip gives
 bright lines on dark, which is louder than the original ever was on light.
 
-### /showcase falls back three deep, and that is why it is on
+### /showcase falls back four deep, and that is why it is on
 
 `siteConfig.features.showcase`. The laptop shows, in order of how much it
 proves:
 
 1. **The running page**, in an iframe, if the project is deployed and permits
-   framing.
-2. **Screenshots**, from `cover_url` and `gallery_urls`.
+   framing. FocusBoard reached this on 6 Sep 2026, the first to do so.
+2. **Screenshots**, from `cover_url` and `gallery_urls`. Empty in production —
+   no project has a cover yet, so in practice the chain skips this rung.
 3. **The repository**, as GitHub's own social card, with the whole screen
    linking to it.
+4. **A sentence saying why there is nothing to click**, for a project marked
+   `restricted`. CorpOS is the only one; see migration 013.
 
 The third tier is what let the page go live. It was gated while it could only
 show screenshots and there were none; a device opening onto nothing tells a
-prospect we build things we cannot show. Every published project has a
-`repo_url`, so the laptop now always opens onto something real.
+prospect we build things we cannot show.
 
 **"Show the GitHub page" cannot mean an iframe of it.** github.com sends both
 `X-Frame-Options: deny` and `frame-ancestors 'none'` — it will never render in
 a frame, anywhere. What is shown instead is the PNG GitHub generates for link
 previews, carrying the repository name, description, language and star count.
-It rate-limits: one of three repositories answered 429 during testing, so an
-`onError` falls back to a plain card of our own. An image reports its own
-failure; an iframe does not, which is the whole reason tier 1 is decided on
-the server.
+It rate-limits: repositories answered 429 during testing, so an `onError`
+falls back to a plain card of our own.
+
+**But `onError` is not the guard it looks like, and this is the trap.** It
+catches a card that fails to load. It cannot catch a card that loads and is
+wrong. Measured 6 Sep 2026, `opengraph.githubassets.com` answers **200** with
+the same 506,737-byte generic placeholder for a repository that is PRIVATE and
+for one that DOES NOT EXIST — against 42,219 bytes for a real one. So the image
+loads, `onError` never fires, the laptop shows a GitHub logo, and the click
+lands on a 404. `src/lib/data/link.ts` asks the repository page itself, on the
+server, before the card is offered; `npm run verify:repo-links` says so out
+loud, because the visible symptom otherwise is a project quietly absent from
+the chooser.
+
+Note what tier 3 depends on: with tier 2 empty, most of `/showcase` rests on
+github.com answering. That is why `link.ts` treats **only a 404** as "gone" and
+keeps the project through a timeout, a 5xx or a 429 — a tier-3 project has no
+rung below it, so a wrong "no" deletes work from the site.
 
 The card is `object-fit: contain`, not `cover`. GitHub's card is 2:1 and the
 screen is 16:10, and the sides that `cover` crops are where the repository
