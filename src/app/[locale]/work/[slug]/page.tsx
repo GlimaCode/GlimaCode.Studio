@@ -6,6 +6,7 @@ import { stripIsolates } from "@/i18n/pending";
 import { siteConfig } from "@/config/site";
 import { localeAlternates } from "@/lib/seo/alternates";
 import { getPublishedProject } from "@/lib/data/portfolio";
+import { checkLinkOpenable } from "@/lib/data/link";
 import { Nav } from "@/components/site/Nav";
 import { Start } from "@/components/site/Start";
 import { Footer } from "@/components/site/Footer";
@@ -46,6 +47,30 @@ export default async function ProjectPage({ params }: PageParams) {
   const t = getDictionary(locale);
   const project = await getPublishedProject(slug, locale);
   if (!project) notFound();
+
+  /**
+   * Same rule as the showcase: a repository the visitor cannot open is worse
+   * than no button at all. Asked here too because this page links straight out
+   * rather than through a card, so there is not even a broken image to notice.
+   * See lib/data/link.ts — a 404 is the only status that counts as a no.
+   *
+   * BOTH outbound buttons, not just the repository. They sit in the same
+   * aside and make the same promise to the visitor; checking one and not the
+   * other would be an inconsistency with no reason behind it.
+   *
+   * UNLIKE the showcase, this is NOT a build-time cost. /work/[slug] is server
+   * rendered on demand, so on a Data Cache miss — the first request after a
+   * deploy, or after the hourly window — this await sits in front of the
+   * render, and the four-second timeout is the worst case a visitor can wait.
+   * That is the price of not showing them a link into a 404, and it is paid by
+   * one visitor an hour rather than by all of them.
+   */
+  const [repoCheck, liveCheck] = await Promise.all([
+    project.repoUrl ? checkLinkOpenable(project.repoUrl) : null,
+    project.liveUrl ? checkLinkOpenable(project.liveUrl) : null,
+  ]);
+  const repoUrl = repoCheck === null || repoCheck.openable ? project.repoUrl : null;
+  const liveUrl = liveCheck === null || liveCheck.openable ? project.liveUrl : null;
 
   /**
    * The request form is rendered on this page rather than back on the home
@@ -121,20 +146,20 @@ export default async function ProjectPage({ params }: PageParams) {
                 </a>
                 <p className="pf-request-note">{t.portfolio.requestSimilarNote}</p>
 
-                {project.repoUrl ? (
+                {repoUrl ? (
                   <a
                     className="btn btn-ghost btn-sm"
-                    href={project.repoUrl}
+                    href={repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     {t.portfolio.viewRepo}
                   </a>
                 ) : null}
-                {project.liveUrl ? (
+                {liveUrl ? (
                   <a
                     className="btn btn-ghost btn-sm"
-                    href={project.liveUrl}
+                    href={liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

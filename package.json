@@ -11,6 +11,7 @@
     "i18n:inventory": "node scripts/i18n-inventory.mjs",
     "verify:fonts": "node scripts/verify-fonts.mjs",
     "verify:list-privacy": "node scripts/verify-list-privacy.mjs",
+    "verify:repo-links": "node scripts/verify-repo-links.mjs",
     "verify:seo": "node scripts/verify-seo.mjs",
     "verify:dashboard-shell": "node scripts/verify-dashboard-shell.mjs",
     "verify:offscreen": "node scripts/verify-offscreen.mjs",

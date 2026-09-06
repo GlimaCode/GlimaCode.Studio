@@ -103,4 +103,8 @@ export const PROJECT_TYPE_FOR_CATEGORY: Record<string, ProjectTypeKey> = {
   "admin-dashboard": "dashboard",
   "web-app": "mvp",
   "data-tool": "other",
+  // A library is nobody's project type: a visitor arriving from it wants
+  // something built, not a package. "other" is the honest default rather than
+  // a guess that pre-fills the form with the wrong thing.
+  library: "other",
 };

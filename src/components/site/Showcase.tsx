@@ -40,7 +40,14 @@ export type ShowcaseProject = {
    * cannot be asked. Null means fall back to the screenshots.
    */
   liveUrl: string | null;
-  /** Last resort: the repository, shown as a card you can click through. */
+  /**
+   * Last resort: the repository, shown as a card you can click through.
+   *
+   * Already checked for reachability on the server. Null means either there is
+   * no repository or GitHub answered 404 for it — private, renamed away or
+   * deleted — because a card that renders and then 404s on click is worse than
+   * no card. See lib/data/link.ts.
+   */
   repoUrl: string | null;
   /**
    * Work we can name but not demonstrate. Checked before all three tiers: a
@@ -50,6 +57,17 @@ export type ShowcaseProject = {
    * a worse advertisement than an honest sentence.
    */
   restricted: boolean;
+  /**
+   * Why the live embed or the repository was refused, when either was.
+   *
+   * Rendered nowhere. They exist so a blank laptop or a project missing from
+   * the chooser is diagnosable from the served HTML rather than by guessing,
+   * and they are declared here rather than only produced by the page because
+   * a field that reaches the browser by structural typing alone is a field the
+   * next refactor deletes without noticing.
+   */
+  liveReason?: string | null;
+  repoReason?: string | null;
 };
 
 /**

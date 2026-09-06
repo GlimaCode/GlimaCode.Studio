@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { localeAlternates } from "@/lib/seo/alternates";
 import { listPublishedProjects } from "@/lib/data/portfolio";
 import { checkEmbeddable } from "@/lib/data/embed";
+import { checkLinkOpenable } from "@/lib/data/link";
 import { Nav } from "@/components/site/Nav";
 import { Footer } from "@/components/site/Footer";
 import { SiteMotion } from "@/components/site/SiteMotion";
@@ -63,12 +64,21 @@ export default async function ShowcasePage({ params }: PageParams) {
       const shots = [project.coverUrl, ...project.gallery].filter(
         (url): url is string => typeof url === "string" && url.length > 0,
       );
-      // A restricted project is never probed: there is no live page to frame,
-      // and asking would spend a request to learn what the flag already says.
-      const check =
+      // Two independent probes, together rather than in sequence: neither
+      // needs the other's answer, and a project with both would otherwise wait
+      // out two four-second budgets instead of one.
+      const [check, repo] = await Promise.all([
+        // A restricted project's live URL is never probed: there is nothing to
+        // frame, and asking spends a request to learn what the flag says.
         project.liveUrl && !project.restricted
-          ? await checkEmbeddable(project.liveUrl, siteConfig.url)
-          : null;
+          ? checkEmbeddable(project.liveUrl, siteConfig.url)
+          : null,
+        // Its repository IS probed, though. If a restricted project has a
+        // public repository, that is the only thing about it a visitor can
+        // open, and offering one that 404s is the failure this whole check
+        // exists to prevent.
+        project.repoUrl ? checkLinkOpenable(project.repoUrl) : null,
+      ]);
       return {
         slug: project.slug,
         title: project.title,
@@ -76,11 +86,16 @@ export default async function ShowcasePage({ params }: PageParams) {
         categoryLabel: project.categoryLabel,
         shots: project.restricted ? [] : shots,
         liveUrl: check?.embeddable ? project.liveUrl : null,
-        repoUrl: project.repoUrl,
+        // A repository the visitor cannot open is worse than none: the GitHub
+        // card renders anyway — private and missing repositories both answer
+        // 200 with a generic placeholder, so the image's onError never fires —
+        // and the click lands on a 404. See lib/data/link.ts.
+        repoUrl: repo === null || repo.openable ? project.repoUrl : null,
         restricted: project.restricted,
         // Kept so a blank frame is diagnosable from the served HTML rather
         // than by guessing. Rendered nowhere.
         liveReason: check?.reason ?? null,
+        repoReason: repo?.reason ?? null,
       };
     }),
   );
